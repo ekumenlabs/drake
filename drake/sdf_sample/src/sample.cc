@@ -7,6 +7,7 @@
 #include "drake/common/drake_copyable.h"
 #include "drake/common/drake_throw.h"
 #include "drake/common/text_logging.h"
+#include "drake/common/eigen_types.h"
 
 #include "drake/lcm/drake_lcm.h"
 
@@ -56,12 +57,24 @@ void LoadSDFSample(const std::string &sdfFilePath) {
           CreateSystem<double>(sdfFilePath));
   
   const RigidBodyTree<double> &tree = rigidBodyPlant->get_rigid_body_tree();
+
+  
+  // Set a constant and null force to the box
+  Vector1d input;
+  input << 0.0;  // Force in [N]
+  const auto source =
+    builder.template AddSystem<systems::ConstantVectorSource<double>>(
+      input);
+  builder.Connect(source->get_output_port(), rigidBodyPlant->get_input_port(0));
   
   drake::lcm::DrakeLcm lcm;
 
   const auto viz_publisher =
     builder.template AddSystem<systems::DrakeVisualizer>(
       rigidBodyPlant->get_rigid_body_tree(), &lcm);
+  builder.Connect(rigidBodyPlant->get_output_port(0),
+                  viz_publisher->get_input_port(0));
+  builder.ExportOutput(rigidBodyPlant->get_output_port(0));
 
   std::unique_ptr<systems::Diagram<double>> diagram = builder.Build();
   systems::Simulator<double> simulator(*diagram);
@@ -69,7 +82,7 @@ void LoadSDFSample(const std::string &sdfFilePath) {
   std::cout << "Before simulator.Initialize()" << std::endl;
   simulator.Initialize();
   std::cout << "After simulator.Initialize()" << std::endl;
-  simulator.StepTo(0.1);
+  simulator.StepTo(std::numeric_limits<double>::infinity());
   std::cout << "After simulator.Initialize()" << std::endl;
 }
 
@@ -78,7 +91,7 @@ void LoadSDFSample(const std::string &sdfFilePath) {
 
 int main (int argc, char **argv) {
   std::cout << "[sdf_sample]: Program started" << std::endl;
-  std::string sdfFilePath(drake::GetDrakePath() + "/sdf_sample/models/box.sdf");
+  std::string sdfFilePath(drake::GetDrakePath() + /*"/sdf_sample/models/box.sdf"*/"/examples/schunk_wsg/models/schunk_wsg_50.sdf");
   std::cout << "[sdf_sample]: SDF file path: " << sdfFilePath << std::endl;
   // Load the sdf file into memory
   drake::sdf_sample::LoadSDFSample(sdfFilePath);
