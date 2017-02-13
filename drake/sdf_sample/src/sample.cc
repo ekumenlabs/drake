@@ -41,10 +41,20 @@ namespace sdf_sample {
 template<typename T>
 std::unique_ptr<drake::systems::RigidBodyPlant<T>>
 CreateSystem(const std::string &sdfFilePath) {
+  /*
+  // This code will generate a segmentation fault due to kFixed
   auto rigid_body_tree = std::make_unique<RigidBodyTree<T>>();
   drake::parsers::sdf::AddModelInstancesFromSdfFile(sdfFilePath,
       multibody::joints::kFixed,
-      nullptr /* weld to frame */,
+      nullptr, //weld to frame
+      rigid_body_tree.get());
+  return std::make_unique<drake::systems::RigidBodyPlant<T>>(
+      std::move(rigid_body_tree));
+  */
+  auto rigid_body_tree = std::make_unique<RigidBodyTree<T>>();
+  drake::parsers::sdf::AddModelInstancesFromSdfFile(sdfFilePath,
+      multibody::joints::kQuaternion,
+      nullptr, //weld to frame
       rigid_body_tree.get());
   return std::make_unique<drake::systems::RigidBodyPlant<T>>(
       std::move(rigid_body_tree));
@@ -57,15 +67,6 @@ void LoadSDFSample(const std::string &sdfFilePath) {
           CreateSystem<double>(sdfFilePath));
   
   const RigidBodyTree<double> &tree = rigidBodyPlant->get_rigid_body_tree();
-
-  
-  /*// Set a constant and null force to the box
-  Vector1d input;
-  input << 0.0;  // Force in [N]
-  const auto source =
-    builder.template AddSystem<systems::ConstantVectorSource<double>>(
-      input);
-  builder.Connect(source->get_output_port(), rigidBodyPlant->get_input_port(0));*/
   
   drake::lcm::DrakeLcm lcm;
 
@@ -76,19 +77,13 @@ void LoadSDFSample(const std::string &sdfFilePath) {
                   viz_publisher->get_input_port(0));
   builder.ExportOutput(rigidBodyPlant->get_output_port(0));
 
-
-
   std::unique_ptr<systems::Diagram<double>> diagram = builder.Build();
-  //systems::Simulator<double> simulator(*diagram);
   std::unique_ptr<systems::Context<double>> context = diagram->AllocateContext();
   diagram->SetDefaultState(*context, context->get_mutable_state());
   systems::Simulator<double> simulator(*diagram, std::move(context));
 
-  std::cout << "Before simulator.Initialize()" << std::endl;
   simulator.Initialize();
-  std::cout << "After simulator.Initialize()" << std::endl;
   simulator.StepTo(0.1);
-  std::cout << "After simulator.Initialize()" << std::endl;
 }
 
 }
@@ -96,7 +91,7 @@ void LoadSDFSample(const std::string &sdfFilePath) {
 
 int main (int argc, char **argv) {
   std::cout << "[sdf_sample]: Program started" << std::endl;
-  std::string sdfFilePath(drake::GetDrakePath() + "/sdf_sample/models/box.sdf"/*"/examples/schunk_wsg/models/schunk_wsg_50.sdf"*/);
+  std::string sdfFilePath(drake::GetDrakePath() + "/sdf_sample/models/box.sdf");
   std::cout << "[sdf_sample]: SDF file path: " << sdfFilePath << std::endl;
   // Load the sdf file into memory
   drake::sdf_sample::LoadSDFSample(sdfFilePath);
