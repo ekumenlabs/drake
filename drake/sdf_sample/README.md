@@ -8,5 +8,5 @@ To run and see it on the visualizer:
 
 ```
 build/install/bin/drake-visualizer &
-./bazel-bin/drake/sdf_sample/sample <path_to_sdf>
+./bazel-bin/drake/sdf_sample/sample
 ```

@@ -66,8 +66,11 @@ void LoadSDFSample(const std::string &sdfFilePath) {
   std::unique_ptr<systems::Diagram<double>> diagram = builder.Build();
   systems::Simulator<double> simulator(*diagram);
 
+  std::cout << "Before simulator.Initialize()" << std::endl;
   simulator.Initialize();
+  std::cout << "After simulator.Initialize()" << std::endl;
   simulator.StepTo(0.1);
+  std::cout << "After simulator.Initialize()" << std::endl;
 }
 
 }
