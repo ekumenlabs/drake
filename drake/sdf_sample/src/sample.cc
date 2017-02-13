@@ -59,13 +59,13 @@ void LoadSDFSample(const std::string &sdfFilePath) {
   const RigidBodyTree<double> &tree = rigidBodyPlant->get_rigid_body_tree();
 
   
-  // Set a constant and null force to the box
+  /*// Set a constant and null force to the box
   Vector1d input;
   input << 0.0;  // Force in [N]
   const auto source =
     builder.template AddSystem<systems::ConstantVectorSource<double>>(
       input);
-  builder.Connect(source->get_output_port(), rigidBodyPlant->get_input_port(0));
+  builder.Connect(source->get_output_port(), rigidBodyPlant->get_input_port(0));*/
   
   drake::lcm::DrakeLcm lcm;
 
@@ -91,7 +91,7 @@ void LoadSDFSample(const std::string &sdfFilePath) {
 
 int main (int argc, char **argv) {
   std::cout << "[sdf_sample]: Program started" << std::endl;
-  std::string sdfFilePath(drake::GetDrakePath() + /*"/sdf_sample/models/box.sdf"*/"/examples/schunk_wsg/models/schunk_wsg_50.sdf");
+  std::string sdfFilePath(drake::GetDrakePath() + "/sdf_sample/models/box.sdf"/*"/examples/schunk_wsg/models/schunk_wsg_50.sdf"*/);
   std::cout << "[sdf_sample]: SDF file path: " << sdfFilePath << std::endl;
   // Load the sdf file into memory
   drake::sdf_sample::LoadSDFSample(sdfFilePath);
