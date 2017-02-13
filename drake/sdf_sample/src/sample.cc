@@ -76,13 +76,18 @@ void LoadSDFSample(const std::string &sdfFilePath) {
                   viz_publisher->get_input_port(0));
   builder.ExportOutput(rigidBodyPlant->get_output_port(0));
 
+
+
   std::unique_ptr<systems::Diagram<double>> diagram = builder.Build();
-  systems::Simulator<double> simulator(*diagram);
+  //systems::Simulator<double> simulator(*diagram);
+  std::unique_ptr<systems::Context<double>> context = diagram->AllocateContext();
+  diagram->SetDefaultState(*context, context->get_mutable_state());
+  systems::Simulator<double> simulator(*diagram, std::move(context));
 
   std::cout << "Before simulator.Initialize()" << std::endl;
   simulator.Initialize();
   std::cout << "After simulator.Initialize()" << std::endl;
-  simulator.StepTo(std::numeric_limits<double>::infinity());
+  simulator.StepTo(0.1);
   std::cout << "After simulator.Initialize()" << std::endl;
 }
 
