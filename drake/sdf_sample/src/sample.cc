@@ -91,7 +91,7 @@ void LoadSDFSample(const std::string &sdfFilePath) {
 
 int main (int argc, char **argv) {
   std::cout << "[sdf_sample]: Program started" << std::endl;
-  std::string sdfFilePath(drake::GetDrakePath() + "/sdf_sample/models/box.sdf");
+  std::string sdfFilePath(drake::GetDrakePath() + "/sdf_sample/models/box_with_mesh.sdf"/*"/sdf_sample/models/box.sdf"*/);
   std::cout << "[sdf_sample]: SDF file path: " << sdfFilePath << std::endl;
   // Load the sdf file into memory
   drake::sdf_sample::LoadSDFSample(sdfFilePath);
