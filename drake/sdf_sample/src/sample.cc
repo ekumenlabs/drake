@@ -76,7 +76,7 @@ void LoadSDFSample(const std::string &filePath) {
   simulator.Initialize();
   simulator.StepTo(0.1);
 }
-
+/*
 template<typename T>
 std::unique_ptr<drake::systems::RigidBodyPlant<T>>
 CreateURDFSystem(const std::string &filePath) {
@@ -114,9 +114,10 @@ void LoadURDFSample(const std::string &filePath) {
   simulator.Initialize();
   simulator.StepTo(0.1);
 }
+*/
 }
 }
-
+/*
 bool endsWith(const std::string &suffix, const std::string &str) {
   return std::mismatch(suffix.rbegin(), suffix.rend(), str.rbegin()).first != suffix.rend();
 }
@@ -130,7 +131,7 @@ bool isSDFFile(const std::string &filePath) {
 bool isURDFFile(const std::string &filePath) {
   std::string suffix = ".urdf";
   return endsWith(suffix, filePath);
-}
+}*/
 
 
 int main (int argc, char **argv) {
@@ -138,24 +139,24 @@ int main (int argc, char **argv) {
 
   std::string filePath(drake::GetDrakePath());
 
-  if (argc == 1) {
+  //if (argc == 1) {
     filePath += "/sdf_sample/models/box_with_mesh.sdf";
-  }
+  /*}
   else {
     filePath = std::string(argv[1]);
-  }
+  }*/
   std::cout << "[sdf_sample]: SDF file path: " << filePath << std::endl;
 
   // Load the sdf file into memory
-  if (isSDFFile(filePath))
+  //if (isSDFFile(filePath))
     drake::sdf_sample::LoadSDFSample(filePath);
-  else if (isURDFFile(filePath))
+  /*else if (isURDFFile(filePath))
     drake::sdf_sample::LoadURDFSample(filePath);
   else
   {
     std::cerr << "[sdf_sample]: File path provided [" << filePath << "] is not supported." << std::endl;
     return -1;
-  }
+  }*/
 
   return 0;
 }

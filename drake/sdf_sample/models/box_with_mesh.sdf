@@ -16,9 +16,10 @@
       </inertial>
       <collision name='collision'>
         <geometry>
-          <box>
-            <size>1 1 1</size>
-          </box>
+          <mesh>
+            <uri>meshes/darpa.obj</uri>
+            <!-- <uri>meshes/darpa.dae</uri>--> 
+          </mesh>
         </geometry>
         <max_contacts>10</max_contacts>
         <surface>
@@ -37,8 +38,8 @@
       <visual name='visual'>
         <geometry>
           <mesh>
-            <!-- <uri>meshes/darpa.obj</uri> -->
-            <uri>meshes/darpa.dae</uri>
+            <uri>meshes/darpa.obj</uri>
+            <!-- <uri>meshes/darpa.dae</uri>-->
           </mesh>
         </geometry>
       </visual>
