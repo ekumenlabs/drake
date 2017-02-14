@@ -37,7 +37,8 @@
       <visual name='visual'>
         <geometry>
           <mesh>
-            <uri>darpa.obj</uri>
+            <!-- <uri>meshes/darpa.obj</uri> -->
+            <uri>meshes/darpa.dae</uri>
           </mesh>
         </geometry>
       </visual>
