@@ -18,8 +18,7 @@
         <visual name='road_visual'>
           <geometry>
             <mesh>
-              <uri>meshes/darpa_bad.obj</uri>
-              <!-- <uri>meshes/darpa.dae</uri>-->
+              <uri>meshes/darpa.obj</uri>
             </mesh>
           </geometry>
         </visual>
