@@ -1,5 +1,5 @@
 #include <iostream>
-#include <string> 
+#include <string>
 #include <memory>
 #include <limits>
 #include <stdexcept>
@@ -56,9 +56,9 @@ void LoadSDFSample(const std::string &filePath) {
   const systems::RigidBodyPlant<double>* rigidBodyPlant =
       builder.AddSystem<systems::RigidBodyPlant<double>>(
           CreateSDFSystem<double>(filePath));
-  
+
   const RigidBodyTree<double> &tree = rigidBodyPlant->get_rigid_body_tree();
-  
+
   drake::lcm::DrakeLcm lcm;
 
   const auto viz_publisher =
@@ -94,9 +94,9 @@ void LoadURDFSample(const std::string &filePath) {
   const systems::RigidBodyPlant<double>* rigidBodyPlant =
       builder.AddSystem<systems::RigidBodyPlant<double>>(
           CreateURDFSystem<double>(filePath));
-  
+
   const RigidBodyTree<double> &tree = rigidBodyPlant->get_rigid_body_tree();
-  
+
   drake::lcm::DrakeLcm lcm;
 
   const auto viz_publisher =
@@ -139,12 +139,12 @@ int main (int argc, char **argv) {
 
   std::string filePath(drake::GetDrakePath());
 
-  //if (argc == 1) {
+  if (argc == 1) {
     filePath += "/sdf_sample/models/box_with_mesh.sdf";
-  /*}
+  }
   else {
     filePath = std::string(argv[1]);
-  }*/
+  }
   std::cout << "[sdf_sample]: SDF file path: " << filePath << std::endl;
 
   // Load the sdf file into memory

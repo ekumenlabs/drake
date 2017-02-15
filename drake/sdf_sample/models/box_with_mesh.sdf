@@ -17,8 +17,8 @@
       <collision name='collision'>
         <geometry>
           <mesh>
-            <uri>meshes/darpa.obj</uri>
-            <!-- <uri>meshes/darpa.dae</uri>--> 
+            <uri>meshes/darpa_bad.obj</uri>
+            <!-- <uri>meshes/darpa.dae</uri>-->
           </mesh>
         </geometry>
         <max_contacts>10</max_contacts>
@@ -38,7 +38,7 @@
       <visual name='visual'>
         <geometry>
           <mesh>
-            <uri>meshes/darpa.obj</uri>
+            <uri>meshes/darpa_bad.obj</uri>
             <!-- <uri>meshes/darpa.dae</uri>-->
           </mesh>
         </geometry>

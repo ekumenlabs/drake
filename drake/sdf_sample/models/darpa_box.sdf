@@ -1,825 +1,33 @@
 <sdf version='1.6'>
   <!-- This world file imports darpa.rndf file file sample into a world with some mock buildings made of static boxes. -->
   <world name='darpa_boxes'>
-    <model name='ground_plane'>
-      <static>1</static>
-      <link name='link'>
-        <collision name='collision'>
+    <model name='road'>
+      <pose frame=''>0.0 0.0 0.0 0 -0 0</pose>
+      <link name='road_link'>
+        <inertial>
+          <mass>1</mass>
+          <inertia>
+            <ixx>0.166667</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>0.166667</iyy>
+            <iyz>0</iyz>
+            <izz>0.166667</izz>
+          </inertia>
+        </inertial>
+        <visual name='road_visual'>
           <geometry>
-            <plane>
-              <normal>0 0 1</normal>
-              <size>2000 2000</size>
-            </plane>
+            <mesh>
+              <uri>meshes/darpa_bad.obj</uri>
+              <!-- <uri>meshes/darpa.dae</uri>-->
+            </mesh>
           </geometry>
-          <surface>
-            <contact>
-              <collide_bitmask>65535</collide_bitmask>
-              <ode/>
-            </contact>
-            <friction>
-              <ode>
-                <mu>100</mu>
-                <mu2>50</mu2>
-              </ode>
-              <torsional>
-                <ode/>
-              </torsional>
-            </friction>
-            <bounce/>
-          </surface>
-          <max_contacts>10</max_contacts>
-        </collision>
-        <visual name='visual'>
-          <cast_shadows>0</cast_shadows>
-          <geometry>
-            <plane>
-              <normal>0 0 1</normal>
-              <size>2000 2000</size>
-            </plane>
-          </geometry>
-          <material>
-            <script>
-              <uri>file://media/materials/scripts/gazebo.material</uri>
-              <name>Gazebo/Grey</name>
-            </script>
-          </material>
         </visual>
         <self_collide>0</self_collide>
-        <enable_wind>0</enable_wind>
         <kinematic>0</kinematic>
       </link>
     </model>
-    <light name='sun' type='directional'>
-      <cast_shadows>1</cast_shadows>
-      <pose frame=''>0 0 10 0 -0 0</pose>
-      <diffuse>0.8 0.8 0.8 1</diffuse>
-      <specular>0.2 0.2 0.2 1</specular>
-      <attenuation>
-        <range>1000</range>
-        <constant>0.9</constant>
-        <linear>0.01</linear>
-        <quadratic>0.001</quadratic>
-      </attenuation>
-      <direction>-0.5 0.1 -0.9</direction>
-    </light>
-    <gravity>0 0 -9.8</gravity>
-    <magnetic_field>6e-06 2.3e-05 -4.2e-05</magnetic_field>
-    <atmosphere type='adiabatic'/>
-    <physics name='default_physics' default='0' type='ode'>
-      <max_step_size>0.001</max_step_size>
-      <real_time_factor>1</real_time_factor>
-      <real_time_update_rate>1000</real_time_update_rate>
-    </physics>
-    <scene>
-      <ambient>0.4 0.4 0.4 1</ambient>
-      <background>0.7 0.7 0.7 1</background>
-      <shadows>1</shadows>
-    </scene>
-    <wind/>
-    <spherical_coordinates>
-      <surface_model>EARTH_WGS84</surface_model>
-      <latitude_deg>0</latitude_deg>
-      <longitude_deg>0</longitude_deg>
-      <elevation>0</elevation>
-      <heading_deg>0</heading_deg>
-    </spherical_coordinates>
-    <gui fullscreen='0'>
-      <camera name='user_camera'>
-        <pose frame=''>346.849 -88.0784 808.126 0 1.2258 3.12319</pose>
-        <view_controller>orbit</view_controller>
-        <projection_type>perspective</projection_type>
-      </camera>
-    </gui>
-    <state world_name='darpa_boxes'>
-      <sim_time>37 771000000</sim_time>
-      <real_time>21 121846426</real_time>
-      <wall_time>1485434916 607405094</wall_time>
-      <iterations>20359</iterations>
-      <model name='ground_plane'>
-        <pose frame=''>0 0 0 0 -0 0</pose>
-        <scale>1 1 1</scale>
-        <link name='link'>
-          <pose frame=''>0 0 0 0 -0 0</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
-        </link>
-      </model>
-      <model name='long_box'>
-        <pose frame=''>1.32402 -27.3069 -0.049551 0.005043 -0.00022 0.043493</pose>
-        <scale>1 1 1</scale>
-        <link name='link'>
-          <pose frame=''>1.32402 -27.3069 -0.049551 0.005043 -0.00022 0.043493</pose>
-          <velocity>-0.000967 0.864813 -0.688006 0.071099 -2e-05 -9.8e-05</velocity>
-          <acceleration>0.001895 -9.8 1e-06 -2.24087 0.257386 0.000188</acceleration>
-          <wrench>0.001895 -9.8 1e-06 0 -0 0</wrench>
-        </link>
-      </model>
-      <model name='long_box_clone'>
-        <pose frame=''>2.2166 -52.9463 -0.049551 0.005047 -0.000114 0.022472</pose>
-        <scale>1 1 1</scale>
-        <link name='link'>
-          <pose frame=''>2.2166 -52.9463 -0.049551 0.005047 -0.000114 0.022472</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
-        </link>
-      </model>
-      <model name='long_box_clone_clone'>
-        <pose frame=''>2.59574 -78.262 -0.049551 0.005047 -0.000114 0.022472</pose>
-        <scale>1 1 1</scale>
-        <link name='link'>
-          <pose frame=''>2.59574 -78.262 -0.049551 0.005047 -0.000114 0.022472</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
-        </link>
-      </model>
-      <model name='long_box_clone_clone_0'>
-        <pose frame=''>2.95301 -102.999 -0.049551 0.005047 -0.000114 0.022472</pose>
-        <scale>1 1 1</scale>
-        <link name='link'>
-          <pose frame=''>2.95301 -102.999 -0.049551 0.005047 -0.000114 0.022472</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
-        </link>
-      </model>
-      <model name='long_box_clone_clone_1'>
-        <pose frame=''>3.43621 -126.848 -0.049551 0.005047 -0.000114 0.022472</pose>
-        <scale>1 1 1</scale>
-        <link name='link'>
-          <pose frame=''>3.43621 -126.848 -0.049551 0.005047 -0.000114 0.022472</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
-        </link>
-      </model>
-      <model name='long_box_clone_clone_10'>
-        <pose frame=''>7.48707 -349.113 -0.049551 0.005047 -0.000114 0.022472</pose>
-        <scale>1 1 1</scale>
-        <link name='link'>
-          <pose frame=''>7.48707 -349.113 -0.049551 0.005047 -0.000114 0.022472</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
-        </link>
-      </model>
-      <model name='long_box_clone_clone_11'>
-        <pose frame=''>7.93072 -373.289 -0.049551 0.005047 -0.000114 0.022472</pose>
-        <scale>1 1 1</scale>
-        <link name='link'>
-          <pose frame=''>7.93072 -373.289 -0.049551 0.005047 -0.000114 0.022472</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
-        </link>
-      </model>
-      <model name='long_box_clone_clone_12'>
-        <pose frame=''>8.01915 -396.284 -0.049551 0.005047 -0.000114 0.022472</pose>
-        <scale>1 1 1</scale>
-        <link name='link'>
-          <pose frame=''>8.01915 -396.284 -0.049551 0.005047 -0.000114 0.022472</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
-        </link>
-      </model>
-      <model name='long_box_clone_clone_13'>
-        <pose frame=''>22.0679 -395.71 -0.049551 0.005047 -0.000114 0.022472</pose>
-        <scale>1 1 1</scale>
-        <link name='link'>
-          <pose frame=''>22.0679 -395.71 -0.049551 0.005047 -0.000114 0.022472</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
-        </link>
-      </model>
-      <model name='long_box_clone_clone_14'>
-        <pose frame=''>22.0165 -373.029 -0.049551 0.005047 -0.000114 0.022472</pose>
-        <scale>1 1 1</scale>
-        <link name='link'>
-          <pose frame=''>22.0165 -373.029 -0.049551 0.005047 -0.000114 0.022472</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
-        </link>
-      </model>
-      <model name='long_box_clone_clone_15'>
-        <pose frame=''>21.2901 -348.884 -0.049551 0.005047 -0.000114 0.022472</pose>
-        <scale>1 1 1</scale>
-        <link name='link'>
-          <pose frame=''>21.2901 -348.884 -0.049551 0.005047 -0.000114 0.022472</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
-        </link>
-      </model>
-      <model name='long_box_clone_clone_16'>
-        <pose frame=''>20.8426 -324.277 -0.049551 0.005047 -0.000114 0.022472</pose>
-        <scale>1 1 1</scale>
-        <link name='link'>
-          <pose frame=''>20.8426 -324.277 -0.049551 0.005047 -0.000114 0.022472</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
-        </link>
-      </model>
-      <model name='long_box_clone_clone_17'>
-        <pose frame=''>20.3309 -299.386 -0.049551 0.005047 -0.000114 0.022472</pose>
-        <scale>1 1 1</scale>
-        <link name='link'>
-          <pose frame=''>20.3309 -299.386 -0.049551 0.005047 -0.000114 0.022472</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
-        </link>
-      </model>
-      <model name='long_box_clone_clone_18'>
-        <pose frame=''>20.4301 -274.151 -0.049551 0.005047 -0.000114 0.022472</pose>
-        <scale>1 1 1</scale>
-        <link name='link'>
-          <pose frame=''>20.4301 -274.151 -0.049551 0.005047 -0.000114 0.022472</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
-        </link>
-      </model>
-      <model name='long_box_clone_clone_19'>
-        <pose frame=''>19.6822 -250.445 -0.049551 0.005047 -0.000114 0.022472</pose>
-        <scale>1 1 1</scale>
-        <link name='link'>
-          <pose frame=''>19.6822 -250.445 -0.049551 0.005047 -0.000114 0.022472</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
-        </link>
-      </model>
-      <model name='long_box_clone_clone_2'>
-        <pose frame=''>3.68929 -151.222 -0.049551 0.005047 -0.000114 0.022472</pose>
-        <scale>1 1 1</scale>
-        <link name='link'>
-          <pose frame=''>3.68929 -151.222 -0.049551 0.005047 -0.000114 0.022472</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
-        </link>
-      </model>
-      <model name='long_box_clone_clone_20'>
-        <pose frame=''>19.2326 -227.915 -0.049551 0.005047 -0.000114 0.022472</pose>
-        <scale>1 1 1</scale>
-        <link name='link'>
-          <pose frame=''>19.2326 -227.915 -0.049551 0.005047 -0.000114 0.022472</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
-        </link>
-      </model>
-      <model name='long_box_clone_clone_21'>
-        <pose frame=''>18.4209 -175.838 -0.049551 0.005047 -0.000114 0.022472</pose>
-        <scale>1 1 1</scale>
-        <link name='link'>
-          <pose frame=''>18.4209 -175.838 -0.049551 0.005047 -0.000114 0.022472</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
-        </link>
-      </model>
-      <model name='long_box_clone_clone_22'>
-        <pose frame=''>17.8317 -151.144 -0.049551 0.005047 -0.000114 0.022472</pose>
-        <scale>1 1 1</scale>
-        <link name='link'>
-          <pose frame=''>17.8317 -151.144 -0.049551 0.005047 -0.000114 0.022472</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
-        </link>
-      </model>
-      <model name='long_box_clone_clone_23'>
-        <pose frame=''>17.0274 -127.223 -0.049551 0.005047 -0.000114 0.022472</pose>
-        <scale>1 1 1</scale>
-        <link name='link'>
-          <pose frame=''>17.0274 -127.223 -0.049551 0.005047 -0.000114 0.022472</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
-        </link>
-      </model>
-      <model name='long_box_clone_clone_24'>
-        <pose frame=''>16.8933 -102.381 -0.049551 0.005047 -0.000114 0.022472</pose>
-        <scale>1 1 1</scale>
-        <link name='link'>
-          <pose frame=''>16.8933 -102.381 -0.049551 0.005047 -0.000114 0.022472</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
-        </link>
-      </model>
-      <model name='long_box_clone_clone_25'>
-        <pose frame=''>16.538 -77.9247 -0.049551 0.005047 -0.000114 0.022472</pose>
-        <scale>1 1 1</scale>
-        <link name='link'>
-          <pose frame=''>16.538 -77.9247 -0.049551 0.005047 -0.000114 0.022472</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
-        </link>
-      </model>
-      <model name='long_box_clone_clone_26'>
-        <pose frame=''>16.0227 -53.7626 -0.049551 0.005047 -0.000114 0.022472</pose>
-        <scale>1 1 1</scale>
-        <link name='link'>
-          <pose frame=''>16.0227 -53.7626 -0.049551 0.005047 -0.000114 0.022472</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
-        </link>
-      </model>
-      <model name='long_box_clone_clone_27'>
-        <pose frame=''>15.5474 -28.1082 -0.049551 0.005047 -0.000114 0.022472</pose>
-        <scale>1 1 1</scale>
-        <link name='link'>
-          <pose frame=''>15.5474 -28.1082 -0.049551 0.005047 -0.000114 0.022472</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
-        </link>
-      </model>
-      <model name='long_box_clone_clone_28'>
-        <pose frame=''>3.82121 -421.368 -0.049551 0.004812 0.001527 -0.307324</pose>
-        <scale>1 1 1</scale>
-        <link name='link'>
-          <pose frame=''>3.82121 -421.368 -0.049551 0.004812 0.001527 -0.307324</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
-        </link>
-      </model>
-      <model name='long_box_clone_clone_28_clone'>
-        <pose frame=''>19.3219 -428.984 -0.049551 0.004812 0.001527 -0.307324</pose>
-        <scale>1 1 1</scale>
-        <link name='link'>
-          <pose frame=''>19.3219 -428.984 -0.049551 0.004812 0.001527 -0.307324</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
-        </link>
-      </model>
-      <model name='long_box_clone_clone_29'>
-        <pose frame=''>-9.11291 -442.425 -0.049551 0.003421 0.003712 -0.826352</pose>
-        <scale>1 1 1</scale>
-        <link name='link'>
-          <pose frame=''>-9.11291 -442.425 -0.049551 0.003421 0.003712 -0.826352</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
-        </link>
-      </model>
-      <model name='long_box_clone_clone_29_clone'>
-        <pose frame=''>0.847183 -455.911 -0.049551 0.003421 0.003712 -0.826352</pose>
-        <scale>1 1 1</scale>
-        <link name='link'>
-          <pose frame=''>0.847183 -455.911 -0.049551 0.003421 0.003712 -0.826352</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
-        </link>
-      </model>
-      <model name='long_box_clone_clone_29_clone_0'>
-        <pose frame=''>-37.6116 -452.622 -0.049551 -0.000368 0.005035 -1.64399</pose>
-        <scale>1 1 1</scale>
-        <link name='link'>
-          <pose frame=''>-37.6116 -452.622 -0.049551 -0.000368 0.005035 -1.64399</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
-        </link>
-      </model>
-      <model name='long_box_clone_clone_29_clone_1'>
-        <pose frame=''>-63.8159 -444.64 -0.049551 -0.003175 0.003924 -2.25121</pose>
-        <scale>1 1 1</scale>
-        <link name='link'>
-          <pose frame=''>-63.8159 -444.64 -0.049551 -0.003175 0.003924 -2.25121</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
-        </link>
-      </model>
-      <model name='long_box_clone_clone_29_clone_2'>
-        <pose frame=''>-81.4706 -426.179 -0.049551 0.004549 -0.002188 0.448228</pose>
-        <scale>1 1 1</scale>
-        <link name='link'>
-          <pose frame=''>-81.4706 -426.179 -0.049551 0.004549 -0.002188 0.448228</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
-        </link>
-      </model>
-      <model name='long_box_clone_clone_29_clone_3'>
-        <pose frame=''>-86.2114 -399.978 -0.049551 0.005046 -0.000145 0.028592</pose>
-        <scale>1 1 1</scale>
-        <link name='link'>
-          <pose frame=''>-86.2114 -399.978 -0.049551 0.005046 -0.000145 0.028592</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
-        </link>
-      </model>
-      <model name='long_box_clone_clone_29_clone_3_clone'>
-        <pose frame=''>-86.7029 -375.076 -0.049551 0.005046 -0.000145 0.028592</pose>
-        <scale>1 1 1</scale>
-        <link name='link'>
-          <pose frame=''>-86.7029 -375.076 -0.049551 0.005046 -0.000145 0.028592</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
-        </link>
-      </model>
-      <model name='long_box_clone_clone_29_clone_3_clone_clone'>
-        <pose frame=''>-86.9494 -350.761 -0.049551 0.005046 -0.000145 0.028592</pose>
-        <scale>1 1 1</scale>
-        <link name='link'>
-          <pose frame=''>-86.9494 -350.761 -0.049551 0.005046 -0.000145 0.028592</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
-        </link>
-      </model>
-      <model name='long_box_clone_clone_29_clone_3_clone_clone_0'>
-        <pose frame=''>-87.7148 -326.153 -0.049551 0.005046 -0.000145 0.028592</pose>
-        <scale>1 1 1</scale>
-        <link name='link'>
-          <pose frame=''>-87.7148 -326.153 -0.049551 0.005046 -0.000145 0.028592</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
-        </link>
-      </model>
-      <model name='long_box_clone_clone_29_clone_3_clone_clone_1'>
-        <pose frame=''>-88.2973 -301.075 -0.049551 0.005046 -0.000145 0.028592</pose>
-        <scale>1 1 1</scale>
-        <link name='link'>
-          <pose frame=''>-88.2973 -301.075 -0.049551 0.005046 -0.000145 0.028592</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
-        </link>
-      </model>
-      <model name='long_box_clone_clone_29_clone_3_clone_clone_10'>
-        <pose frame=''>-91.9292 -78.3869 -0.049551 0.005046 -0.000145 0.028592</pose>
-        <scale>1 1 1</scale>
-        <link name='link'>
-          <pose frame=''>-91.9292 -78.3869 -0.049551 0.005046 -0.000145 0.028592</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
-        </link>
-      </model>
-      <model name='long_box_clone_clone_29_clone_3_clone_clone_11'>
-        <pose frame=''>-92.4086 -53.548 -0.049551 0.005046 -0.000145 0.028592</pose>
-        <scale>1 1 1</scale>
-        <link name='link'>
-          <pose frame=''>-92.4086 -53.548 -0.049551 0.005046 -0.000145 0.028592</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
-        </link>
-      </model>
-      <model name='long_box_clone_clone_29_clone_3_clone_clone_12'>
-        <pose frame=''>-92.8158 -28.7118 -0.049551 0.005046 -0.000145 0.028592</pose>
-        <scale>1 1 1</scale>
-        <link name='link'>
-          <pose frame=''>-92.8158 -28.7118 -0.049551 0.005046 -0.000145 0.028592</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
-        </link>
-      </model>
-      <model name='long_box_clone_clone_29_clone_3_clone_clone_13'>
-        <pose frame=''>-91.7222 -2.66594 -0.049551 0.004945 0.001016 -0.202774</pose>
-        <scale>1 1 1</scale>
-        <link name='link'>
-          <pose frame=''>-91.7222 -2.66594 -0.049551 0.004945 0.001016 -0.202774</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
-        </link>
-      </model>
-      <model name='long_box_clone_clone_29_clone_3_clone_clone_14'>
-        <pose frame=''>-78.5615 17.9495 -0.049551 0.003235 0.003875 -0.875398</pose>
-        <scale>1 1 1</scale>
-        <link name='link'>
-          <pose frame=''>-78.5615 17.9495 -0.049551 0.003235 0.003875 -0.875398</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
-        </link>
-      </model>
-      <model name='long_box_clone_clone_29_clone_3_clone_clone_14_clone'>
-        <pose frame=''>-53.1656 28.2391 -0.049551 0.001197 0.004904 -1.33154</pose>
-        <scale>1 1 1</scale>
-        <link name='link'>
-          <pose frame=''>-53.1656 28.2391 -0.049551 0.001197 0.004904 -1.33154</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
-        </link>
-      </model>
-      <model name='long_box_clone_clone_29_clone_3_clone_clone_14_clone_clone'>
-        <pose frame=''>-27.9685 26.4333 -0.049551 -0.00176 0.004731 -1.92704</pose>
-        <scale>1 1 1</scale>
-        <link name='link'>
-          <pose frame=''>-27.9685 26.4333 -0.049551 -0.00176 0.004731 -1.92704</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
-        </link>
-      </model>
-      <model name='long_box_clone_clone_29_clone_3_clone_clone_14_clone_clone_0'>
-        <pose frame=''>-5.72018 5.11615 -0.049551 -0.004407 0.002461 -2.6324</pose>
-        <scale>1 1 1</scale>
-        <link name='link'>
-          <pose frame=''>-5.72018 5.11615 -0.049551 -0.004407 0.002461 -2.6324</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
-        </link>
-      </model>
-      <model name='long_box_clone_clone_29_clone_3_clone_clone_14_clone_clone_0_clone'>
-        <pose frame=''>10.7917 11.6253 -0.049551 -0.004407 0.002461 -2.6324</pose>
-        <scale>1 1 1</scale>
-        <link name='link'>
-          <pose frame=''>10.7917 11.6253 -0.049551 -0.004407 0.002461 -2.6324</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
-        </link>
-      </model>
-      <model name='long_box_clone_clone_29_clone_3_clone_clone_14_clone_clone_0_clone_0'>
-        <pose frame=''>39.2384 -207.739 -0.049551 8.7e-05 0.005047 -1.55363</pose>
-        <scale>1 1 1</scale>
-        <link name='link'>
-          <pose frame=''>39.2384 -207.739 -0.049551 8.7e-05 0.005047 -1.55363</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
-        </link>
-      </model>
-      <model name='long_box_clone_clone_29_clone_3_clone_clone_14_clone_clone_0_clone_0_clone'>
-        <pose frame=''>37.9257 -188.214 -0.049551 8.7e-05 0.005047 -1.55363</pose>
-        <scale>1 1 1</scale>
-        <link name='link'>
-          <pose frame=''>37.9257 -188.214 -0.049551 8.7e-05 0.005047 -1.55363</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
-        </link>
-      </model>
-      <model name='long_box_clone_clone_29_clone_3_clone_clone_14_clone_clone_0_clone_0_clone_0'>
-        <pose frame=''>64.7514 -188.681 -0.049551 8.7e-05 0.005047 -1.55363</pose>
-        <scale>1 1 1</scale>
-        <link name='link'>
-          <pose frame=''>64.7514 -188.681 -0.049551 8.7e-05 0.005047 -1.55363</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
-        </link>
-      </model>
-      <model name='long_box_clone_clone_29_clone_3_clone_clone_14_clone_clone_0_clone_0_clone_1'>
-        <pose frame=''>93.1371 -188.198 -0.049551 8.7e-05 0.005047 -1.55363</pose>
-        <scale>1 1 1</scale>
-        <link name='link'>
-          <pose frame=''>93.1371 -188.198 -0.049551 8.7e-05 0.005047 -1.55363</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
-        </link>
-      </model>
-      <model name='long_box_clone_clone_29_clone_3_clone_clone_14_clone_clone_0_clone_0_clone_2'>
-        <pose frame=''>-179.036 -209.121 -0.049551 8.7e-05 0.005047 -1.55363</pose>
-        <scale>1 1 1</scale>
-        <link name='link'>
-          <pose frame=''>-179.036 -209.121 -0.049551 8.7e-05 0.005047 -1.55363</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
-        </link>
-      </model>
-      <model name='long_box_clone_clone_29_clone_3_clone_clone_14_clone_clone_0_clone_0_clone_3'>
-        <pose frame=''>-153.509 -209.322 -0.049551 8.7e-05 0.005047 -1.55363</pose>
-        <scale>1 1 1</scale>
-        <link name='link'>
-          <pose frame=''>-153.509 -209.322 -0.049551 8.7e-05 0.005047 -1.55363</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
-        </link>
-      </model>
-      <model name='long_box_clone_clone_29_clone_3_clone_clone_14_clone_clone_0_clone_0_clone_4'>
-        <pose frame=''>-128.882 -209.402 -0.049551 8.7e-05 0.005047 -1.55363</pose>
-        <scale>1 1 1</scale>
-        <link name='link'>
-          <pose frame=''>-128.882 -209.402 -0.049551 8.7e-05 0.005047 -1.55363</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
-        </link>
-      </model>
-      <model name='long_box_clone_clone_29_clone_3_clone_clone_14_clone_clone_0_clone_0_clone_5'>
-        <pose frame=''>-18.7874 91.7171 -0.049551 0.005048 4.6e-05 -0.00917</pose>
-        <scale>1 1 1</scale>
-        <link name='link'>
-          <pose frame=''>-18.7874 91.7171 -0.049551 0.005048 4.6e-05 -0.00917</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
-        </link>
-      </model>
-      <model name='long_box_clone_clone_29_clone_3_clone_clone_14_clone_clone_0_clone_0_clone_6'>
-        <pose frame=''>-16.6939 64.2354 -0.049551 0.005007 -0.000638 0.126704</pose>
-        <scale>1 1 1</scale>
-        <link name='link'>
-          <pose frame=''>-16.6939 64.2354 -0.049551 0.005007 -0.000638 0.126704</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
-        </link>
-      </model>
-      <model name='long_box_clone_clone_29_clone_3_clone_clone_14_clone_clone_0_clone_1'>
-        <pose frame=''>65.6405 -207.247 -0.049551 2.9e-05 0.005048 -1.56506</pose>
-        <scale>1 1 1</scale>
-        <link name='link'>
-          <pose frame=''>65.6405 -207.247 -0.049551 2.9e-05 0.005048 -1.56506</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
-        </link>
-      </model>
-      <model name='long_box_clone_clone_29_clone_3_clone_clone_14_clone_clone_0_clone_2'>
-        <pose frame=''>94.4079 -207.323 -0.049551 1e-05 0.005048 -1.56897</pose>
-        <scale>1 1 1</scale>
-        <link name='link'>
-          <pose frame=''>94.4079 -207.323 -0.049551 1e-05 0.005048 -1.56897</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
-        </link>
-      </model>
-      <model name='long_box_clone_clone_29_clone_3_clone_clone_2'>
-        <pose frame=''>-88.6464 -276.704 -0.049551 0.005046 -0.000145 0.028592</pose>
-        <scale>1 1 1</scale>
-        <link name='link'>
-          <pose frame=''>-88.6464 -276.704 -0.049551 0.005046 -0.000145 0.028592</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
-        </link>
-      </model>
-      <model name='long_box_clone_clone_29_clone_3_clone_clone_3'>
-        <pose frame=''>-89.2435 -252.007 -0.049551 0.005046 -0.000145 0.028592</pose>
-        <scale>1 1 1</scale>
-        <link name='link'>
-          <pose frame=''>-89.2435 -252.007 -0.049551 0.005046 -0.000145 0.028592</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
-        </link>
-      </model>
-      <model name='long_box_clone_clone_29_clone_3_clone_clone_4'>
-        <pose frame=''>-89.8164 -227.586 -0.049551 0.005046 -0.000145 0.028592</pose>
-        <scale>1 1 1</scale>
-        <link name='link'>
-          <pose frame=''>-89.8164 -227.586 -0.049551 0.005046 -0.000145 0.028592</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
-        </link>
-      </model>
-      <model name='long_box_clone_clone_29_clone_3_clone_clone_5'>
-        <pose frame=''>-90.0613 -201.445 -0.049551 0.005046 -0.000145 0.028592</pose>
-        <scale>1 1 1</scale>
-        <link name='link'>
-          <pose frame=''>-90.0613 -201.445 -0.049551 0.005046 -0.000145 0.028592</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
-        </link>
-      </model>
-      <model name='long_box_clone_clone_29_clone_3_clone_clone_6'>
-        <pose frame=''>-90.425 -176.407 -0.049551 0.005046 -0.000145 0.028592</pose>
-        <scale>1 1 1</scale>
-        <link name='link'>
-          <pose frame=''>-90.425 -176.407 -0.049551 0.005046 -0.000145 0.028592</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
-        </link>
-      </model>
-      <model name='long_box_clone_clone_29_clone_3_clone_clone_7'>
-        <pose frame=''>-90.8552 -151.555 -0.049551 0.005046 -0.000145 0.028592</pose>
-        <scale>1 1 1</scale>
-        <link name='link'>
-          <pose frame=''>-90.8552 -151.555 -0.049551 0.005046 -0.000145 0.028592</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
-        </link>
-      </model>
-      <model name='long_box_clone_clone_29_clone_3_clone_clone_8'>
-        <pose frame=''>-91.455 -127.41 -0.049551 0.005046 -0.000145 0.028592</pose>
-        <scale>1 1 1</scale>
-        <link name='link'>
-          <pose frame=''>-91.455 -127.41 -0.049551 0.005046 -0.000145 0.028592</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
-        </link>
-      </model>
-      <model name='long_box_clone_clone_29_clone_3_clone_clone_9'>
-        <pose frame=''>-92.0981 -103.287 -0.049551 0.005046 -0.000145 0.028592</pose>
-        <scale>1 1 1</scale>
-        <link name='link'>
-          <pose frame=''>-92.0981 -103.287 -0.049551 0.005046 -0.000145 0.028592</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
-        </link>
-      </model>
-      <model name='long_box_clone_clone_3'>
-        <pose frame=''>4.1621 -176.965 -0.049551 0.005047 -0.000114 0.022472</pose>
-        <scale>1 1 1</scale>
-        <link name='link'>
-          <pose frame=''>4.1621 -176.965 -0.049551 0.005047 -0.000114 0.022472</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
-        </link>
-      </model>
-      <model name='long_box_clone_clone_4'>
-        <pose frame=''>4.69386 -201.317 -0.049551 0.005047 -0.000114 0.022472</pose>
-        <scale>1 1 1</scale>
-        <link name='link'>
-          <pose frame=''>4.69386 -201.317 -0.049551 0.005047 -0.000114 0.022472</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
-        </link>
-      </model>
-      <model name='long_box_clone_clone_5'>
-        <pose frame=''>4.85871 -226.99 -0.049551 0.005047 -0.000114 0.022472</pose>
-        <scale>1 1 1</scale>
-        <link name='link'>
-          <pose frame=''>4.85871 -226.99 -0.049551 0.005047 -0.000114 0.022472</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
-        </link>
-      </model>
-      <model name='long_box_clone_clone_6'>
-        <pose frame=''>5.67981 -250.633 -0.049551 0.005047 -0.000114 0.022472</pose>
-        <scale>1 1 1</scale>
-        <link name='link'>
-          <pose frame=''>5.67981 -250.633 -0.049551 0.005047 -0.000114 0.022472</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
-        </link>
-      </model>
-      <model name='long_box_clone_clone_7'>
-        <pose frame=''>6.45947 -274.93 -0.049551 0.005047 -0.000114 0.022472</pose>
-        <scale>1 1 1</scale>
-        <link name='link'>
-          <pose frame=''>6.45947 -274.93 -0.049551 0.005047 -0.000114 0.022472</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
-        </link>
-      </model>
-      <model name='long_box_clone_clone_8'>
-        <pose frame=''>6.96106 -299.323 -0.049551 0.005047 -0.000114 0.022472</pose>
-        <scale>1 1 1</scale>
-        <link name='link'>
-          <pose frame=''>6.96106 -299.323 -0.049551 0.005047 -0.000114 0.022472</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
-        </link>
-      </model>
-      <model name='long_box_clone_clone_9'>
-        <pose frame=''>7.18976 -324.823 -0.049551 0.005047 -0.000114 0.022472</pose>
-        <scale>1 1 1</scale>
-        <link name='link'>
-          <pose frame=''>7.18976 -324.823 -0.049551 0.005047 -0.000114 0.022472</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
-        </link>
-      </model>
-      <light name='sun'>
-        <pose frame=''>0 0 10 0 -0 0</pose>
-      </light>
-    </state>
-    <model name='long_box'>
+    <model name='box_71'>
       <link name='link'>
         <inertial>
           <mass>1</mass>
@@ -850,7 +58,7 @@
               <uri>file://media/materials/scripts/gazebo.material</uri>
             </script>
             <shader type='vertex'>
-              <normal_map>__default__</normal_map>
+              <normal_map>_default_</normal_map>
             </shader>
             <ambient>0.3 0.3 0.3 1</ambient>
             <diffuse>0.7 0.7 0.7 1</diffuse>
@@ -921,7 +129,7 @@
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>2.62805 -13.5402 0.5 0 -0 0</pose>
     </model>
-    <model name='long_box_clone'>
+    <model name='box_70'>
       <link name='link'>
         <inertial>
           <mass>1</mass>
@@ -952,7 +160,7 @@
               <uri>file://media/materials/scripts/gazebo.material</uri>
             </script>
             <shader type='vertex'>
-              <normal_map>__default__</normal_map>
+              <normal_map>_default_</normal_map>
             </shader>
             <ambient>0.3 0.3 0.3 1</ambient>
             <diffuse>0.7 0.7 0.7 1</diffuse>
@@ -1023,7 +231,7 @@
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>2.2166 -52.9463 -0.049551 0.005043 -0.00022 0.043493</pose>
     </model>
-    <model name='long_box_clone_clone'>
+    <model name='box_69'>
       <link name='link'>
         <inertial>
           <mass>1</mass>
@@ -1054,7 +262,7 @@
               <uri>file://media/materials/scripts/gazebo.material</uri>
             </script>
             <shader type='vertex'>
-              <normal_map>__default__</normal_map>
+              <normal_map>_default_</normal_map>
             </shader>
             <ambient>0.3 0.3 0.3 1</ambient>
             <diffuse>0.7 0.7 0.7 1</diffuse>
@@ -1125,7 +333,7 @@
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>2.59574 -78.262 -0.049551 0.005047 -0.000114 0.022472</pose>
     </model>
-    <model name='long_box_clone_clone_0'>
+    <model name='box_68'>
       <link name='link'>
         <inertial>
           <mass>1</mass>
@@ -1156,7 +364,7 @@
               <uri>file://media/materials/scripts/gazebo.material</uri>
             </script>
             <shader type='vertex'>
-              <normal_map>__default__</normal_map>
+              <normal_map>_default_</normal_map>
             </shader>
             <ambient>0.3 0.3 0.3 1</ambient>
             <diffuse>0.7 0.7 0.7 1</diffuse>
@@ -1227,7 +435,7 @@
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>2.95301 -102.999 -0.049551 0.005047 -0.000114 0.022472</pose>
     </model>
-    <model name='long_box_clone_clone_1'>
+    <model name='box_1'>
       <link name='link'>
         <inertial>
           <mass>1</mass>
@@ -1258,7 +466,7 @@
               <uri>file://media/materials/scripts/gazebo.material</uri>
             </script>
             <shader type='vertex'>
-              <normal_map>__default__</normal_map>
+              <normal_map>_default_</normal_map>
             </shader>
             <ambient>0.3 0.3 0.3 1</ambient>
             <diffuse>0.7 0.7 0.7 1</diffuse>
@@ -1329,7 +537,7 @@
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>3.43621 -126.848 -0.049551 0.005047 -0.000114 0.022472</pose>
     </model>
-    <model name='long_box_clone_clone_2'>
+    <model name='box_2'>
       <link name='link'>
         <inertial>
           <mass>1</mass>
@@ -1360,7 +568,7 @@
               <uri>file://media/materials/scripts/gazebo.material</uri>
             </script>
             <shader type='vertex'>
-              <normal_map>__default__</normal_map>
+              <normal_map>_default_</normal_map>
             </shader>
             <ambient>0.3 0.3 0.3 1</ambient>
             <diffuse>0.7 0.7 0.7 1</diffuse>
@@ -1431,7 +639,7 @@
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>3.68929 -151.222 -0.049551 0.005047 -0.000114 0.022472</pose>
     </model>
-    <model name='long_box_clone_clone_3'>
+    <model name='box_3'>
       <link name='link'>
         <inertial>
           <mass>1</mass>
@@ -1462,7 +670,7 @@
               <uri>file://media/materials/scripts/gazebo.material</uri>
             </script>
             <shader type='vertex'>
-              <normal_map>__default__</normal_map>
+              <normal_map>_default_</normal_map>
             </shader>
             <ambient>0.3 0.3 0.3 1</ambient>
             <diffuse>0.7 0.7 0.7 1</diffuse>
@@ -1533,7 +741,7 @@
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>4.1621 -176.965 -0.049551 0.005047 -0.000114 0.022472</pose>
     </model>
-    <model name='long_box_clone_clone_4'>
+    <model name='box_4'>
       <link name='link'>
         <inertial>
           <mass>1</mass>
@@ -1564,7 +772,7 @@
               <uri>file://media/materials/scripts/gazebo.material</uri>
             </script>
             <shader type='vertex'>
-              <normal_map>__default__</normal_map>
+              <normal_map>_default_</normal_map>
             </shader>
             <ambient>0.3 0.3 0.3 1</ambient>
             <diffuse>0.7 0.7 0.7 1</diffuse>
@@ -1635,7 +843,7 @@
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>4.69386 -201.317 -0.049551 0.005047 -0.000114 0.022472</pose>
     </model>
-    <model name='long_box_clone_clone_5'>
+    <model name='box_5'>
       <link name='link'>
         <inertial>
           <mass>1</mass>
@@ -1666,7 +874,7 @@
               <uri>file://media/materials/scripts/gazebo.material</uri>
             </script>
             <shader type='vertex'>
-              <normal_map>__default__</normal_map>
+              <normal_map>_default_</normal_map>
             </shader>
             <ambient>0.3 0.3 0.3 1</ambient>
             <diffuse>0.7 0.7 0.7 1</diffuse>
@@ -1737,7 +945,7 @@
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>4.85871 -226.99 -0.049551 0.005047 -0.000114 0.022472</pose>
     </model>
-    <model name='long_box_clone_clone_6'>
+    <model name='box_6'>
       <link name='link'>
         <inertial>
           <mass>1</mass>
@@ -1768,7 +976,7 @@
               <uri>file://media/materials/scripts/gazebo.material</uri>
             </script>
             <shader type='vertex'>
-              <normal_map>__default__</normal_map>
+              <normal_map>_default_</normal_map>
             </shader>
             <ambient>0.3 0.3 0.3 1</ambient>
             <diffuse>0.7 0.7 0.7 1</diffuse>
@@ -1839,7 +1047,7 @@
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>5.67981 -250.633 -0.049551 0.005047 -0.000114 0.022472</pose>
     </model>
-    <model name='long_box_clone_clone_7'>
+    <model name='box_7'>
       <link name='link'>
         <inertial>
           <mass>1</mass>
@@ -1870,7 +1078,7 @@
               <uri>file://media/materials/scripts/gazebo.material</uri>
             </script>
             <shader type='vertex'>
-              <normal_map>__default__</normal_map>
+              <normal_map>_default_</normal_map>
             </shader>
             <ambient>0.3 0.3 0.3 1</ambient>
             <diffuse>0.7 0.7 0.7 1</diffuse>
@@ -1941,7 +1149,7 @@
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>6.45947 -274.93 -0.049551 0.005047 -0.000114 0.022472</pose>
     </model>
-    <model name='long_box_clone_clone_8'>
+    <model name='box_8'>
       <link name='link'>
         <inertial>
           <mass>1</mass>
@@ -1972,7 +1180,7 @@
               <uri>file://media/materials/scripts/gazebo.material</uri>
             </script>
             <shader type='vertex'>
-              <normal_map>__default__</normal_map>
+              <normal_map>_default_</normal_map>
             </shader>
             <ambient>0.3 0.3 0.3 1</ambient>
             <diffuse>0.7 0.7 0.7 1</diffuse>
@@ -2043,7 +1251,7 @@
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>6.96106 -299.323 -0.049551 0.005047 -0.000114 0.022472</pose>
     </model>
-    <model name='long_box_clone_clone_9'>
+    <model name='box_9'>
       <link name='link'>
         <inertial>
           <mass>1</mass>
@@ -2074,7 +1282,7 @@
               <uri>file://media/materials/scripts/gazebo.material</uri>
             </script>
             <shader type='vertex'>
-              <normal_map>__default__</normal_map>
+              <normal_map>_default_</normal_map>
             </shader>
             <ambient>0.3 0.3 0.3 1</ambient>
             <diffuse>0.7 0.7 0.7 1</diffuse>
@@ -2145,7 +1353,7 @@
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>7.18976 -324.823 -0.049551 0.005047 -0.000114 0.022472</pose>
     </model>
-    <model name='long_box_clone_clone_10'>
+    <model name='box_10'>
       <link name='link'>
         <inertial>
           <mass>1</mass>
@@ -2176,7 +1384,7 @@
               <uri>file://media/materials/scripts/gazebo.material</uri>
             </script>
             <shader type='vertex'>
-              <normal_map>__default__</normal_map>
+              <normal_map>_default_</normal_map>
             </shader>
             <ambient>0.3 0.3 0.3 1</ambient>
             <diffuse>0.7 0.7 0.7 1</diffuse>
@@ -2247,7 +1455,7 @@
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>7.48707 -349.113 -0.049551 0.005047 -0.000114 0.022472</pose>
     </model>
-    <model name='long_box_clone_clone_11'>
+    <model name='box_11'>
       <link name='link'>
         <inertial>
           <mass>1</mass>
@@ -2278,7 +1486,7 @@
               <uri>file://media/materials/scripts/gazebo.material</uri>
             </script>
             <shader type='vertex'>
-              <normal_map>__default__</normal_map>
+              <normal_map>_default_</normal_map>
             </shader>
             <ambient>0.3 0.3 0.3 1</ambient>
             <diffuse>0.7 0.7 0.7 1</diffuse>
@@ -2349,7 +1557,7 @@
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>7.93072 -373.289 -0.049551 0.005047 -0.000114 0.022472</pose>
     </model>
-    <model name='long_box_clone_clone_12'>
+    <model name='box_12'>
       <link name='link'>
         <inertial>
           <mass>1</mass>
@@ -2380,7 +1588,7 @@
               <uri>file://media/materials/scripts/gazebo.material</uri>
             </script>
             <shader type='vertex'>
-              <normal_map>__default__</normal_map>
+              <normal_map>_default_</normal_map>
             </shader>
             <ambient>0.3 0.3 0.3 1</ambient>
             <diffuse>0.7 0.7 0.7 1</diffuse>
@@ -2451,7 +1659,7 @@
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>8.01915 -396.284 -0.049551 0.005047 -0.000114 0.022472</pose>
     </model>
-    <model name='long_box_clone_clone_13'>
+    <model name='box_13'>
       <link name='link'>
         <inertial>
           <mass>1</mass>
@@ -2482,7 +1690,7 @@
               <uri>file://media/materials/scripts/gazebo.material</uri>
             </script>
             <shader type='vertex'>
-              <normal_map>__default__</normal_map>
+              <normal_map>_default_</normal_map>
             </shader>
             <ambient>0.3 0.3 0.3 1</ambient>
             <diffuse>0.7 0.7 0.7 1</diffuse>
@@ -2553,7 +1761,7 @@
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>22.0679 -395.71 -0.049551 0.005047 -0.000114 0.022472</pose>
     </model>
-    <model name='long_box_clone_clone_14'>
+    <model name='box_14'>
       <link name='link'>
         <inertial>
           <mass>1</mass>
@@ -2584,7 +1792,7 @@
               <uri>file://media/materials/scripts/gazebo.material</uri>
             </script>
             <shader type='vertex'>
-              <normal_map>__default__</normal_map>
+              <normal_map>_default_</normal_map>
             </shader>
             <ambient>0.3 0.3 0.3 1</ambient>
             <diffuse>0.7 0.7 0.7 1</diffuse>
@@ -2655,7 +1863,7 @@
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>22.0165 -373.029 -0.049551 0.005047 -0.000114 0.022472</pose>
     </model>
-    <model name='long_box_clone_clone_15'>
+    <model name='box_15'>
       <link name='link'>
         <inertial>
           <mass>1</mass>
@@ -2686,7 +1894,7 @@
               <uri>file://media/materials/scripts/gazebo.material</uri>
             </script>
             <shader type='vertex'>
-              <normal_map>__default__</normal_map>
+              <normal_map>_default_</normal_map>
             </shader>
             <ambient>0.3 0.3 0.3 1</ambient>
             <diffuse>0.7 0.7 0.7 1</diffuse>
@@ -2757,7 +1965,7 @@
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>21.2901 -348.884 -0.049551 0.005047 -0.000114 0.022472</pose>
     </model>
-    <model name='long_box_clone_clone_16'>
+    <model name='box_16'>
       <link name='link'>
         <inertial>
           <mass>1</mass>
@@ -2788,7 +1996,7 @@
               <uri>file://media/materials/scripts/gazebo.material</uri>
             </script>
             <shader type='vertex'>
-              <normal_map>__default__</normal_map>
+              <normal_map>_default_</normal_map>
             </shader>
             <ambient>0.3 0.3 0.3 1</ambient>
             <diffuse>0.7 0.7 0.7 1</diffuse>
@@ -2859,7 +2067,7 @@
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>20.8426 -324.277 -0.049551 0.005047 -0.000114 0.022472</pose>
     </model>
-    <model name='long_box_clone_clone_17'>
+    <model name='box_17'>
       <link name='link'>
         <inertial>
           <mass>1</mass>
@@ -2890,7 +2098,7 @@
               <uri>file://media/materials/scripts/gazebo.material</uri>
             </script>
             <shader type='vertex'>
-              <normal_map>__default__</normal_map>
+              <normal_map>_default_</normal_map>
             </shader>
             <ambient>0.3 0.3 0.3 1</ambient>
             <diffuse>0.7 0.7 0.7 1</diffuse>
@@ -2961,7 +2169,7 @@
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>20.3309 -299.386 -0.049551 0.005047 -0.000114 0.022472</pose>
     </model>
-    <model name='long_box_clone_clone_18'>
+    <model name='box_18'>
       <link name='link'>
         <inertial>
           <mass>1</mass>
@@ -2992,7 +2200,7 @@
               <uri>file://media/materials/scripts/gazebo.material</uri>
             </script>
             <shader type='vertex'>
-              <normal_map>__default__</normal_map>
+              <normal_map>_default_</normal_map>
             </shader>
             <ambient>0.3 0.3 0.3 1</ambient>
             <diffuse>0.7 0.7 0.7 1</diffuse>
@@ -3063,7 +2271,7 @@
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>20.4301 -274.151 -0.049551 0.005047 -0.000114 0.022472</pose>
     </model>
-    <model name='long_box_clone_clone_19'>
+    <model name='box_19'>
       <link name='link'>
         <inertial>
           <mass>1</mass>
@@ -3094,7 +2302,7 @@
               <uri>file://media/materials/scripts/gazebo.material</uri>
             </script>
             <shader type='vertex'>
-              <normal_map>__default__</normal_map>
+              <normal_map>_default_</normal_map>
             </shader>
             <ambient>0.3 0.3 0.3 1</ambient>
             <diffuse>0.7 0.7 0.7 1</diffuse>
@@ -3165,7 +2373,7 @@
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>19.6822 -250.445 -0.049551 0.005047 -0.000114 0.022472</pose>
     </model>
-    <model name='long_box_clone_clone_20'>
+    <model name='box_20'>
       <link name='link'>
         <inertial>
           <mass>1</mass>
@@ -3196,7 +2404,7 @@
               <uri>file://media/materials/scripts/gazebo.material</uri>
             </script>
             <shader type='vertex'>
-              <normal_map>__default__</normal_map>
+              <normal_map>_default_</normal_map>
             </shader>
             <ambient>0.3 0.3 0.3 1</ambient>
             <diffuse>0.7 0.7 0.7 1</diffuse>
@@ -3267,7 +2475,7 @@
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>19.2326 -227.915 -0.049551 0.005047 -0.000114 0.022472</pose>
     </model>
-    <model name='long_box_clone_clone_21'>
+    <model name='box_21'>
       <link name='link'>
         <inertial>
           <mass>1</mass>
@@ -3298,7 +2506,7 @@
               <uri>file://media/materials/scripts/gazebo.material</uri>
             </script>
             <shader type='vertex'>
-              <normal_map>__default__</normal_map>
+              <normal_map>_default_</normal_map>
             </shader>
             <ambient>0.3 0.3 0.3 1</ambient>
             <diffuse>0.7 0.7 0.7 1</diffuse>
@@ -3369,7 +2577,7 @@
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>18.4209 -175.838 -0.049551 0.005047 -0.000114 0.022472</pose>
     </model>
-    <model name='long_box_clone_clone_22'>
+    <model name='box_22'>
       <link name='link'>
         <inertial>
           <mass>1</mass>
@@ -3400,7 +2608,7 @@
               <uri>file://media/materials/scripts/gazebo.material</uri>
             </script>
             <shader type='vertex'>
-              <normal_map>__default__</normal_map>
+              <normal_map>_default_</normal_map>
             </shader>
             <ambient>0.3 0.3 0.3 1</ambient>
             <diffuse>0.7 0.7 0.7 1</diffuse>
@@ -3471,7 +2679,7 @@
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>17.8317 -151.144 -0.049551 0.005047 -0.000114 0.022472</pose>
     </model>
-    <model name='long_box_clone_clone_23'>
+    <model name='box_23'>
       <link name='link'>
         <inertial>
           <mass>1</mass>
@@ -3502,7 +2710,7 @@
               <uri>file://media/materials/scripts/gazebo.material</uri>
             </script>
             <shader type='vertex'>
-              <normal_map>__default__</normal_map>
+              <normal_map>_default_</normal_map>
             </shader>
             <ambient>0.3 0.3 0.3 1</ambient>
             <diffuse>0.7 0.7 0.7 1</diffuse>
@@ -3573,7 +2781,7 @@
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>17.0274 -127.223 -0.049551 0.005047 -0.000114 0.022472</pose>
     </model>
-    <model name='long_box_clone_clone_24'>
+    <model name='box_24'>
       <link name='link'>
         <inertial>
           <mass>1</mass>
@@ -3604,7 +2812,7 @@
               <uri>file://media/materials/scripts/gazebo.material</uri>
             </script>
             <shader type='vertex'>
-              <normal_map>__default__</normal_map>
+              <normal_map>_default_</normal_map>
             </shader>
             <ambient>0.3 0.3 0.3 1</ambient>
             <diffuse>0.7 0.7 0.7 1</diffuse>
@@ -3675,7 +2883,7 @@
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>16.8933 -102.381 -0.049551 0.005047 -0.000114 0.022472</pose>
     </model>
-    <model name='long_box_clone_clone_25'>
+    <model name='box_25'>
       <link name='link'>
         <inertial>
           <mass>1</mass>
@@ -3706,7 +2914,7 @@
               <uri>file://media/materials/scripts/gazebo.material</uri>
             </script>
             <shader type='vertex'>
-              <normal_map>__default__</normal_map>
+              <normal_map>_default_</normal_map>
             </shader>
             <ambient>0.3 0.3 0.3 1</ambient>
             <diffuse>0.7 0.7 0.7 1</diffuse>
@@ -3777,7 +2985,7 @@
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>16.538 -77.9247 -0.049551 0.005047 -0.000114 0.022472</pose>
     </model>
-    <model name='long_box_clone_clone_26'>
+    <model name='box_26'>
       <link name='link'>
         <inertial>
           <mass>1</mass>
@@ -3808,7 +3016,7 @@
               <uri>file://media/materials/scripts/gazebo.material</uri>
             </script>
             <shader type='vertex'>
-              <normal_map>__default__</normal_map>
+              <normal_map>_default_</normal_map>
             </shader>
             <ambient>0.3 0.3 0.3 1</ambient>
             <diffuse>0.7 0.7 0.7 1</diffuse>
@@ -3879,7 +3087,7 @@
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>16.0227 -53.7626 -0.049551 0.005047 -0.000114 0.022472</pose>
     </model>
-    <model name='long_box_clone_clone_27'>
+    <model name='box_27'>
       <link name='link'>
         <inertial>
           <mass>1</mass>
@@ -3910,7 +3118,7 @@
               <uri>file://media/materials/scripts/gazebo.material</uri>
             </script>
             <shader type='vertex'>
-              <normal_map>__default__</normal_map>
+              <normal_map>_default_</normal_map>
             </shader>
             <ambient>0.3 0.3 0.3 1</ambient>
             <diffuse>0.7 0.7 0.7 1</diffuse>
@@ -3981,7 +3189,7 @@
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>15.5474 -28.1082 -0.049551 0.005047 -0.000114 0.022472</pose>
     </model>
-    <model name='long_box_clone_clone_28'>
+    <model name='box_28'>
       <link name='link'>
         <inertial>
           <mass>1</mass>
@@ -4012,7 +3220,7 @@
               <uri>file://media/materials/scripts/gazebo.material</uri>
             </script>
             <shader type='vertex'>
-              <normal_map>__default__</normal_map>
+              <normal_map>_default_</normal_map>
             </shader>
             <ambient>0.3 0.3 0.3 1</ambient>
             <diffuse>0.7 0.7 0.7 1</diffuse>
@@ -4083,7 +3291,7 @@
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>3.82121 -421.368 -0.049551 0.005047 -0.000114 0.022472</pose>
     </model>
-    <model name='long_box_clone_clone_29'>
+    <model name='box_29'>
       <link name='link'>
         <inertial>
           <mass>1</mass>
@@ -4114,7 +3322,7 @@
               <uri>file://media/materials/scripts/gazebo.material</uri>
             </script>
             <shader type='vertex'>
-              <normal_map>__default__</normal_map>
+              <normal_map>_default_</normal_map>
             </shader>
             <ambient>0.3 0.3 0.3 1</ambient>
             <diffuse>0.7 0.7 0.7 1</diffuse>
@@ -4185,7 +3393,7 @@
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>-12.4365 -440.481 -0.049551 0.005047 -0.000114 0.022472</pose>
     </model>
-    <model name='long_box_clone_clone_28_clone'>
+    <model name='box_30'>
       <link name='link'>
         <inertial>
           <mass>1</mass>
@@ -4216,7 +3424,7 @@
               <uri>file://media/materials/scripts/gazebo.material</uri>
             </script>
             <shader type='vertex'>
-              <normal_map>__default__</normal_map>
+              <normal_map>_default_</normal_map>
             </shader>
             <ambient>0.3 0.3 0.3 1</ambient>
             <diffuse>0.7 0.7 0.7 1</diffuse>
@@ -4287,7 +3495,7 @@
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>19.3219 -428.984 -0.049551 0.004812 0.001527 -0.307324</pose>
     </model>
-    <model name='long_box_clone_clone_29_clone'>
+    <model name='box_31'>
       <link name='link'>
         <inertial>
           <mass>1</mass>
@@ -4318,7 +3526,7 @@
               <uri>file://media/materials/scripts/gazebo.material</uri>
             </script>
             <shader type='vertex'>
-              <normal_map>__default__</normal_map>
+              <normal_map>_default_</normal_map>
             </shader>
             <ambient>0.3 0.3 0.3 1</ambient>
             <diffuse>0.7 0.7 0.7 1</diffuse>
@@ -4389,7 +3597,7 @@
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>0.847183 -455.911 -0.049551 0.003421 0.003712 -0.826352</pose>
     </model>
-    <model name='long_box_clone_clone_29_clone_0'>
+    <model name='box_32'>
       <link name='link'>
         <inertial>
           <mass>1</mass>
@@ -4420,7 +3628,7 @@
               <uri>file://media/materials/scripts/gazebo.material</uri>
             </script>
             <shader type='vertex'>
-              <normal_map>__default__</normal_map>
+              <normal_map>_default_</normal_map>
             </shader>
             <ambient>0.3 0.3 0.3 1</ambient>
             <diffuse>0.7 0.7 0.7 1</diffuse>
@@ -4491,7 +3699,7 @@
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>-41.2116 -448.443 -0.049551 0.003421 0.003712 -0.826352</pose>
     </model>
-    <model name='long_box_clone_clone_29_clone_1'>
+    <model name='box_33'>
       <link name='link'>
         <inertial>
           <mass>1</mass>
@@ -4522,7 +3730,7 @@
               <uri>file://media/materials/scripts/gazebo.material</uri>
             </script>
             <shader type='vertex'>
-              <normal_map>__default__</normal_map>
+              <normal_map>_default_</normal_map>
             </shader>
             <ambient>0.3 0.3 0.3 1</ambient>
             <diffuse>0.7 0.7 0.7 1</diffuse>
@@ -4593,7 +3801,7 @@
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>-61.1932 -438.844 -0.049551 0.003421 0.003712 -0.826352</pose>
     </model>
-    <model name='long_box_clone_clone_29_clone_2'>
+    <model name='box_67'>
       <link name='link'>
         <inertial>
           <mass>1</mass>
@@ -4624,7 +3832,7 @@
               <uri>file://media/materials/scripts/gazebo.material</uri>
             </script>
             <shader type='vertex'>
-              <normal_map>__default__</normal_map>
+              <normal_map>_default_</normal_map>
             </shader>
             <ambient>0.3 0.3 0.3 1</ambient>
             <diffuse>0.7 0.7 0.7 1</diffuse>
@@ -4695,7 +3903,7 @@
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>-73.383 -427.245 -0.049551 0.003421 0.003712 -0.826352</pose>
     </model>
-    <model name='long_box_clone_clone_29_clone_3'>
+    <model name='box_34'>
       <link name='link'>
         <inertial>
           <mass>1</mass>
@@ -4726,7 +3934,7 @@
               <uri>file://media/materials/scripts/gazebo.material</uri>
             </script>
             <shader type='vertex'>
-              <normal_map>__default__</normal_map>
+              <normal_map>_default_</normal_map>
             </shader>
             <ambient>0.3 0.3 0.3 1</ambient>
             <diffuse>0.7 0.7 0.7 1</diffuse>
@@ -4797,7 +4005,7 @@
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>-79.7195 -402.821 -0.049551 0.003421 0.003712 -0.826352</pose>
     </model>
-    <model name='long_box_clone_clone_29_clone_3_clone'>
+    <model name='box_35'>
       <link name='link'>
         <inertial>
           <mass>1</mass>
@@ -4828,7 +4036,7 @@
               <uri>file://media/materials/scripts/gazebo.material</uri>
             </script>
             <shader type='vertex'>
-              <normal_map>__default__</normal_map>
+              <normal_map>_default_</normal_map>
             </shader>
             <ambient>0.3 0.3 0.3 1</ambient>
             <diffuse>0.7 0.7 0.7 1</diffuse>
@@ -4899,7 +4107,7 @@
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>-86.7029 -375.076 -0.049551 0.005046 -0.000145 0.028592</pose>
     </model>
-    <model name='long_box_clone_clone_29_clone_3_clone_clone'>
+    <model name='box_36'>
       <link name='link'>
         <inertial>
           <mass>1</mass>
@@ -4930,7 +4138,7 @@
               <uri>file://media/materials/scripts/gazebo.material</uri>
             </script>
             <shader type='vertex'>
-              <normal_map>__default__</normal_map>
+              <normal_map>_default_</normal_map>
             </shader>
             <ambient>0.3 0.3 0.3 1</ambient>
             <diffuse>0.7 0.7 0.7 1</diffuse>
@@ -5001,7 +4209,7 @@
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>-86.9494 -350.761 -0.049551 0.005046 -0.000145 0.028592</pose>
     </model>
-    <model name='long_box_clone_clone_29_clone_3_clone_clone_0'>
+    <model name='box_37'>
       <link name='link'>
         <inertial>
           <mass>1</mass>
@@ -5032,7 +4240,7 @@
               <uri>file://media/materials/scripts/gazebo.material</uri>
             </script>
             <shader type='vertex'>
-              <normal_map>__default__</normal_map>
+              <normal_map>_default_</normal_map>
             </shader>
             <ambient>0.3 0.3 0.3 1</ambient>
             <diffuse>0.7 0.7 0.7 1</diffuse>
@@ -5103,7 +4311,7 @@
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>-87.7148 -326.153 -0.049551 0.005046 -0.000145 0.028592</pose>
     </model>
-    <model name='long_box_clone_clone_29_clone_3_clone_clone_1'>
+    <model name='box_38'>
       <link name='link'>
         <inertial>
           <mass>1</mass>
@@ -5134,7 +4342,7 @@
               <uri>file://media/materials/scripts/gazebo.material</uri>
             </script>
             <shader type='vertex'>
-              <normal_map>__default__</normal_map>
+              <normal_map>_default_</normal_map>
             </shader>
             <ambient>0.3 0.3 0.3 1</ambient>
             <diffuse>0.7 0.7 0.7 1</diffuse>
@@ -5205,7 +4413,7 @@
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>-88.2973 -301.075 -0.049551 0.005046 -0.000145 0.028592</pose>
     </model>
-    <model name='long_box_clone_clone_29_clone_3_clone_clone_2'>
+    <model name='box_39'>
       <link name='link'>
         <inertial>
           <mass>1</mass>
@@ -5236,7 +4444,7 @@
               <uri>file://media/materials/scripts/gazebo.material</uri>
             </script>
             <shader type='vertex'>
-              <normal_map>__default__</normal_map>
+              <normal_map>_default_</normal_map>
             </shader>
             <ambient>0.3 0.3 0.3 1</ambient>
             <diffuse>0.7 0.7 0.7 1</diffuse>
@@ -5307,7 +4515,7 @@
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>-88.6464 -276.704 -0.049551 0.005046 -0.000145 0.028592</pose>
     </model>
-    <model name='long_box_clone_clone_29_clone_3_clone_clone_3'>
+    <model name='box_40'>
       <link name='link'>
         <inertial>
           <mass>1</mass>
@@ -5338,7 +4546,7 @@
               <uri>file://media/materials/scripts/gazebo.material</uri>
             </script>
             <shader type='vertex'>
-              <normal_map>__default__</normal_map>
+              <normal_map>_default_</normal_map>
             </shader>
             <ambient>0.3 0.3 0.3 1</ambient>
             <diffuse>0.7 0.7 0.7 1</diffuse>
@@ -5409,7 +4617,7 @@
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>-89.2435 -252.007 -0.049551 0.005046 -0.000145 0.028592</pose>
     </model>
-    <model name='long_box_clone_clone_29_clone_3_clone_clone_4'>
+    <model name='box_41'>
       <link name='link'>
         <inertial>
           <mass>1</mass>
@@ -5440,7 +4648,7 @@
               <uri>file://media/materials/scripts/gazebo.material</uri>
             </script>
             <shader type='vertex'>
-              <normal_map>__default__</normal_map>
+              <normal_map>_default_</normal_map>
             </shader>
             <ambient>0.3 0.3 0.3 1</ambient>
             <diffuse>0.7 0.7 0.7 1</diffuse>
@@ -5511,7 +4719,7 @@
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>-89.8164 -227.586 -0.049551 0.005046 -0.000145 0.028592</pose>
     </model>
-    <model name='long_box_clone_clone_29_clone_3_clone_clone_5'>
+    <model name='box_42'>
       <link name='link'>
         <inertial>
           <mass>1</mass>
@@ -5542,7 +4750,7 @@
               <uri>file://media/materials/scripts/gazebo.material</uri>
             </script>
             <shader type='vertex'>
-              <normal_map>__default__</normal_map>
+              <normal_map>_default_</normal_map>
             </shader>
             <ambient>0.3 0.3 0.3 1</ambient>
             <diffuse>0.7 0.7 0.7 1</diffuse>
@@ -5613,7 +4821,7 @@
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>-90.0613 -201.445 -0.049551 0.005046 -0.000145 0.028592</pose>
     </model>
-    <model name='long_box_clone_clone_29_clone_3_clone_clone_6'>
+    <model name='box_43'>
       <link name='link'>
         <inertial>
           <mass>1</mass>
@@ -5644,7 +4852,7 @@
               <uri>file://media/materials/scripts/gazebo.material</uri>
             </script>
             <shader type='vertex'>
-              <normal_map>__default__</normal_map>
+              <normal_map>_default_</normal_map>
             </shader>
             <ambient>0.3 0.3 0.3 1</ambient>
             <diffuse>0.7 0.7 0.7 1</diffuse>
@@ -5715,7 +4923,7 @@
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>-90.425 -176.407 -0.049551 0.005046 -0.000145 0.028592</pose>
     </model>
-    <model name='long_box_clone_clone_29_clone_3_clone_clone_7'>
+    <model name='box_44'>
       <link name='link'>
         <inertial>
           <mass>1</mass>
@@ -5746,7 +4954,7 @@
               <uri>file://media/materials/scripts/gazebo.material</uri>
             </script>
             <shader type='vertex'>
-              <normal_map>__default__</normal_map>
+              <normal_map>_default_</normal_map>
             </shader>
             <ambient>0.3 0.3 0.3 1</ambient>
             <diffuse>0.7 0.7 0.7 1</diffuse>
@@ -5817,7 +5025,7 @@
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>-90.8552 -151.555 -0.049551 0.005046 -0.000145 0.028592</pose>
     </model>
-    <model name='long_box_clone_clone_29_clone_3_clone_clone_8'>
+    <model name='box_45'>
       <link name='link'>
         <inertial>
           <mass>1</mass>
@@ -5848,7 +5056,7 @@
               <uri>file://media/materials/scripts/gazebo.material</uri>
             </script>
             <shader type='vertex'>
-              <normal_map>__default__</normal_map>
+              <normal_map>_default_</normal_map>
             </shader>
             <ambient>0.3 0.3 0.3 1</ambient>
             <diffuse>0.7 0.7 0.7 1</diffuse>
@@ -5919,7 +5127,7 @@
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>-91.455 -127.41 -0.049551 0.005046 -0.000145 0.028592</pose>
     </model>
-    <model name='long_box_clone_clone_29_clone_3_clone_clone_9'>
+    <model name='box_46'>
       <link name='link'>
         <inertial>
           <mass>1</mass>
@@ -5950,7 +5158,7 @@
               <uri>file://media/materials/scripts/gazebo.material</uri>
             </script>
             <shader type='vertex'>
-              <normal_map>__default__</normal_map>
+              <normal_map>_default_</normal_map>
             </shader>
             <ambient>0.3 0.3 0.3 1</ambient>
             <diffuse>0.7 0.7 0.7 1</diffuse>
@@ -6021,7 +5229,7 @@
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>-92.0981 -103.287 -0.049551 0.005046 -0.000145 0.028592</pose>
     </model>
-    <model name='long_box_clone_clone_29_clone_3_clone_clone_10'>
+    <model name='box_47'>
       <link name='link'>
         <inertial>
           <mass>1</mass>
@@ -6052,7 +5260,7 @@
               <uri>file://media/materials/scripts/gazebo.material</uri>
             </script>
             <shader type='vertex'>
-              <normal_map>__default__</normal_map>
+              <normal_map>_default_</normal_map>
             </shader>
             <ambient>0.3 0.3 0.3 1</ambient>
             <diffuse>0.7 0.7 0.7 1</diffuse>
@@ -6123,7 +5331,7 @@
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>-91.9292 -78.3869 -0.049551 0.005046 -0.000145 0.028592</pose>
     </model>
-    <model name='long_box_clone_clone_29_clone_3_clone_clone_11'>
+    <model name='box_48'>
       <link name='link'>
         <inertial>
           <mass>1</mass>
@@ -6154,7 +5362,7 @@
               <uri>file://media/materials/scripts/gazebo.material</uri>
             </script>
             <shader type='vertex'>
-              <normal_map>__default__</normal_map>
+              <normal_map>_default_</normal_map>
             </shader>
             <ambient>0.3 0.3 0.3 1</ambient>
             <diffuse>0.7 0.7 0.7 1</diffuse>
@@ -6225,7 +5433,7 @@
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>-92.4086 -53.548 -0.049551 0.005046 -0.000145 0.028592</pose>
     </model>
-    <model name='long_box_clone_clone_29_clone_3_clone_clone_12'>
+    <model name='box_49'>
       <link name='link'>
         <inertial>
           <mass>1</mass>
@@ -6256,7 +5464,7 @@
               <uri>file://media/materials/scripts/gazebo.material</uri>
             </script>
             <shader type='vertex'>
-              <normal_map>__default__</normal_map>
+              <normal_map>_default_</normal_map>
             </shader>
             <ambient>0.3 0.3 0.3 1</ambient>
             <diffuse>0.7 0.7 0.7 1</diffuse>
@@ -6327,7 +5535,7 @@
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>-92.8158 -28.7118 -0.049551 0.005046 -0.000145 0.028592</pose>
     </model>
-    <model name='long_box_clone_clone_29_clone_3_clone_clone_13'>
+    <model name='box_50'>
       <link name='link'>
         <inertial>
           <mass>1</mass>
@@ -6358,7 +5566,7 @@
               <uri>file://media/materials/scripts/gazebo.material</uri>
             </script>
             <shader type='vertex'>
-              <normal_map>__default__</normal_map>
+              <normal_map>_default_</normal_map>
             </shader>
             <ambient>0.3 0.3 0.3 1</ambient>
             <diffuse>0.7 0.7 0.7 1</diffuse>
@@ -6429,7 +5637,7 @@
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>-91.7222 -2.66594 -0.049551 0.005046 -0.000145 0.028592</pose>
     </model>
-    <model name='long_box_clone_clone_29_clone_3_clone_clone_14'>
+    <model name='box_51'>
       <link name='link'>
         <inertial>
           <mass>1</mass>
@@ -6460,7 +5668,7 @@
               <uri>file://media/materials/scripts/gazebo.material</uri>
             </script>
             <shader type='vertex'>
-              <normal_map>__default__</normal_map>
+              <normal_map>_default_</normal_map>
             </shader>
             <ambient>0.3 0.3 0.3 1</ambient>
             <diffuse>0.7 0.7 0.7 1</diffuse>
@@ -6531,7 +5739,7 @@
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>-73.5192 16.9039 -0.049551 0.005046 -0.000145 0.028592</pose>
     </model>
-    <model name='long_box_clone_clone_29_clone_3_clone_clone_14_clone'>
+    <model name='box_52'>
       <link name='link'>
         <inertial>
           <mass>1</mass>
@@ -6562,7 +5770,7 @@
               <uri>file://media/materials/scripts/gazebo.material</uri>
             </script>
             <shader type='vertex'>
-              <normal_map>__default__</normal_map>
+              <normal_map>_default_</normal_map>
             </shader>
             <ambient>0.3 0.3 0.3 1</ambient>
             <diffuse>0.7 0.7 0.7 1</diffuse>
@@ -6633,7 +5841,7 @@
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>-51.3617 25.8306 -0.049551 0.003235 0.003875 -0.875398</pose>
     </model>
-    <model name='long_box_clone_clone_29_clone_3_clone_clone_14_clone_clone'>
+    <model name='box_53'>
       <link name='link'>
         <inertial>
           <mass>1</mass>
@@ -6664,7 +5872,7 @@
               <uri>file://media/materials/scripts/gazebo.material</uri>
             </script>
             <shader type='vertex'>
-              <normal_map>__default__</normal_map>
+              <normal_map>_default_</normal_map>
             </shader>
             <ambient>0.3 0.3 0.3 1</ambient>
             <diffuse>0.7 0.7 0.7 1</diffuse>
@@ -6735,7 +5943,7 @@
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>-27.7101 20.405 -0.049551 0.001197 0.004904 -1.33154</pose>
     </model>
-    <model name='long_box_clone_clone_29_clone_3_clone_clone_14_clone_clone_0'>
+    <model name='box_54'>
       <link name='link'>
         <inertial>
           <mass>1</mass>
@@ -6766,7 +5974,7 @@
               <uri>file://media/materials/scripts/gazebo.material</uri>
             </script>
             <shader type='vertex'>
-              <normal_map>__default__</normal_map>
+              <normal_map>_default_</normal_map>
             </shader>
             <ambient>0.3 0.3 0.3 1</ambient>
             <diffuse>0.7 0.7 0.7 1</diffuse>
@@ -6837,7 +6045,7 @@
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>-12.2836 4.48431 -0.049551 0.001197 0.004904 -1.33154</pose>
     </model>
-    <model name='long_box_clone_clone_29_clone_3_clone_clone_14_clone_clone_0_clone'>
+    <model name='box_55'>
       <link name='link'>
         <inertial>
           <mass>1</mass>
@@ -6868,7 +6076,7 @@
               <uri>file://media/materials/scripts/gazebo.material</uri>
             </script>
             <shader type='vertex'>
-              <normal_map>__default__</normal_map>
+              <normal_map>_default_</normal_map>
             </shader>
             <ambient>0.3 0.3 0.3 1</ambient>
             <diffuse>0.7 0.7 0.7 1</diffuse>
@@ -6939,7 +6147,7 @@
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>10.7917 11.6253 -0.049551 -0.004407 0.002461 -2.6324</pose>
     </model>
-    <model name='long_box_clone_clone_29_clone_3_clone_clone_14_clone_clone_0_clone_0'>
+    <model name='box_56'>
       <link name='link'>
         <inertial>
           <mass>1</mass>
@@ -6970,7 +6178,7 @@
               <uri>file://media/materials/scripts/gazebo.material</uri>
             </script>
             <shader type='vertex'>
-              <normal_map>__default__</normal_map>
+              <normal_map>_default_</normal_map>
             </shader>
             <ambient>0.3 0.3 0.3 1</ambient>
             <diffuse>0.7 0.7 0.7 1</diffuse>
@@ -7041,7 +6249,7 @@
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>46.3387 -214.788 -0.049551 -0.004407 0.002461 -2.6324</pose>
     </model>
-    <model name='long_box_clone_clone_29_clone_3_clone_clone_14_clone_clone_0_clone_1'>
+    <model name='box_57'>
       <link name='link'>
         <inertial>
           <mass>1</mass>
@@ -7072,7 +6280,7 @@
               <uri>file://media/materials/scripts/gazebo.material</uri>
             </script>
             <shader type='vertex'>
-              <normal_map>__default__</normal_map>
+              <normal_map>_default_</normal_map>
             </shader>
             <ambient>0.3 0.3 0.3 1</ambient>
             <diffuse>0.7 0.7 0.7 1</diffuse>
@@ -7143,7 +6351,7 @@
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>75.1324 -212.939 -0.049551 -0.004407 0.002461 -2.6324</pose>
     </model>
-    <model name='long_box_clone_clone_29_clone_3_clone_clone_14_clone_clone_0_clone_2'>
+    <model name='box_58'>
       <link name='link'>
         <inertial>
           <mass>1</mass>
@@ -7174,7 +6382,7 @@
               <uri>file://media/materials/scripts/gazebo.material</uri>
             </script>
             <shader type='vertex'>
-              <normal_map>__default__</normal_map>
+              <normal_map>_default_</normal_map>
             </shader>
             <ambient>0.3 0.3 0.3 1</ambient>
             <diffuse>0.7 0.7 0.7 1</diffuse>
@@ -7245,7 +6453,7 @@
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>101.146 -212.35 -0.049551 -0.004407 0.002461 -2.6324</pose>
     </model>
-    <model name='long_box_clone_clone_29_clone_3_clone_clone_14_clone_clone_0_clone_0_clone'>
+    <model name='box_59'>
       <link name='link'>
         <inertial>
           <mass>1</mass>
@@ -7276,7 +6484,7 @@
               <uri>file://media/materials/scripts/gazebo.material</uri>
             </script>
             <shader type='vertex'>
-              <normal_map>__default__</normal_map>
+              <normal_map>_default_</normal_map>
             </shader>
             <ambient>0.3 0.3 0.3 1</ambient>
             <diffuse>0.7 0.7 0.7 1</diffuse>
@@ -7347,7 +6555,7 @@
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>37.9257 -188.214 -0.049551 8.7e-05 0.005047 -1.55363</pose>
     </model>
-    <model name='long_box_clone_clone_29_clone_3_clone_clone_14_clone_clone_0_clone_0_clone_0'>
+    <model name='box_60'>
       <link name='link'>
         <inertial>
           <mass>1</mass>
@@ -7378,7 +6586,7 @@
               <uri>file://media/materials/scripts/gazebo.material</uri>
             </script>
             <shader type='vertex'>
-              <normal_map>__default__</normal_map>
+              <normal_map>_default_</normal_map>
             </shader>
             <ambient>0.3 0.3 0.3 1</ambient>
             <diffuse>0.7 0.7 0.7 1</diffuse>
@@ -7449,7 +6657,7 @@
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>64.7514 -188.681 -0.049551 8.7e-05 0.005047 -1.55363</pose>
     </model>
-    <model name='long_box_clone_clone_29_clone_3_clone_clone_14_clone_clone_0_clone_0_clone_1'>
+    <model name='box_61'>
       <link name='link'>
         <inertial>
           <mass>1</mass>
@@ -7480,7 +6688,7 @@
               <uri>file://media/materials/scripts/gazebo.material</uri>
             </script>
             <shader type='vertex'>
-              <normal_map>__default__</normal_map>
+              <normal_map>_default_</normal_map>
             </shader>
             <ambient>0.3 0.3 0.3 1</ambient>
             <diffuse>0.7 0.7 0.7 1</diffuse>
@@ -7551,7 +6759,7 @@
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>93.1371 -188.198 -0.049551 8.7e-05 0.005047 -1.55363</pose>
     </model>
-    <model name='long_box_clone_clone_29_clone_3_clone_clone_14_clone_clone_0_clone_0_clone_2'>
+    <model name='box_62'>
       <link name='link'>
         <inertial>
           <mass>1</mass>
@@ -7582,7 +6790,7 @@
               <uri>file://media/materials/scripts/gazebo.material</uri>
             </script>
             <shader type='vertex'>
-              <normal_map>__default__</normal_map>
+              <normal_map>_default_</normal_map>
             </shader>
             <ambient>0.3 0.3 0.3 1</ambient>
             <diffuse>0.7 0.7 0.7 1</diffuse>
@@ -7653,7 +6861,7 @@
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>-179.036 -209.121 -0.049551 8.7e-05 0.005047 -1.55363</pose>
     </model>
-    <model name='long_box_clone_clone_29_clone_3_clone_clone_14_clone_clone_0_clone_0_clone_3'>
+    <model name='box_63'>
       <link name='link'>
         <inertial>
           <mass>1</mass>
@@ -7684,7 +6892,7 @@
               <uri>file://media/materials/scripts/gazebo.material</uri>
             </script>
             <shader type='vertex'>
-              <normal_map>__default__</normal_map>
+              <normal_map>_default_</normal_map>
             </shader>
             <ambient>0.3 0.3 0.3 1</ambient>
             <diffuse>0.7 0.7 0.7 1</diffuse>
@@ -7755,7 +6963,7 @@
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>-153.509 -209.322 -0.049551 8.7e-05 0.005047 -1.55363</pose>
     </model>
-    <model name='long_box_clone_clone_29_clone_3_clone_clone_14_clone_clone_0_clone_0_clone_4'>
+    <model name='box_64'>
       <link name='link'>
         <inertial>
           <mass>1</mass>
@@ -7786,7 +6994,7 @@
               <uri>file://media/materials/scripts/gazebo.material</uri>
             </script>
             <shader type='vertex'>
-              <normal_map>__default__</normal_map>
+              <normal_map>_default_</normal_map>
             </shader>
             <ambient>0.3 0.3 0.3 1</ambient>
             <diffuse>0.7 0.7 0.7 1</diffuse>
@@ -7857,7 +7065,7 @@
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>-128.882 -209.402 -0.049551 8.7e-05 0.005047 -1.55363</pose>
     </model>
-    <model name='long_box_clone_clone_29_clone_3_clone_clone_14_clone_clone_0_clone_0_clone_5'>
+    <model name='box_65'>
       <link name='link'>
         <inertial>
           <mass>1</mass>
@@ -7888,7 +7096,7 @@
               <uri>file://media/materials/scripts/gazebo.material</uri>
             </script>
             <shader type='vertex'>
-              <normal_map>__default__</normal_map>
+              <normal_map>_default_</normal_map>
             </shader>
             <ambient>0.3 0.3 0.3 1</ambient>
             <diffuse>0.7 0.7 0.7 1</diffuse>
@@ -7959,7 +7167,7 @@
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>-26.1271 97.2617 -0.049551 8.7e-05 0.005047 -1.55363</pose>
     </model>
-    <model name='long_box_clone_clone_29_clone_3_clone_clone_14_clone_clone_0_clone_0_clone_6'>
+    <model name='box_66'>
       <link name='link'>
         <inertial>
           <mass>1</mass>
@@ -7990,7 +7198,7 @@
               <uri>file://media/materials/scripts/gazebo.material</uri>
             </script>
             <shader type='vertex'>
-              <normal_map>__default__</normal_map>
+              <normal_map>_default_</normal_map>
             </shader>
             <ambient>0.3 0.3 0.3 1</ambient>
             <diffuse>0.7 0.7 0.7 1</diffuse>
