@@ -5,8 +5,15 @@ cc_binary(
     srcs = [
         "src/main.cc",
     ],
-    linkopts = ["-lignition-math2"],
-    copts = ["-I/usr/include/ignition/math2", "-std=c++11"],
+    linkopts = [
+	"-lignition-math2",
+        "-lmanifold0",
+    ],
+    copts = [
+	"-I/usr/include/ignition/math2",
+	"-I/usr/include/manifold0",
+	"-std=c++11"
+    ],
     deps = [
     ], 
 )
