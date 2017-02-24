@@ -9,9 +9,10 @@ REPO_DIR=`readlink -f ${SCRIPTS_DIR}/../`
 
 
 DOCKER_MOUNT_ARGS="\
-    -v ${HOME}/.tmux.conf:/home/gazebo/.tmux.conf \
+    -v ${HOME}/.tmux.conf:/home/drake/.tmux.conf \
     -v /tmp/.X11-unix:/tmp/.X11-unix:ro \
-    -v /dev:/dev"
+    -v /dev:/dev \
+    -v /home/agalbachicar/Localwork/drake/drake_vol:/home/drake/volume"
 
 xhost +
 docker run --name ${1} --privileged --rm \
