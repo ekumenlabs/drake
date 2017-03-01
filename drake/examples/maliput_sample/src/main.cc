@@ -7,6 +7,26 @@
 #include "drake/automotive/maliput/api/lane.h"
 #include "drake/automotive/maliput/api/junction.h"
 #include "drake/automotive/maliput/api/branch_point.h"
+#include "drake/automotive/maliput/api/lane_data.h"
+
+void PrintGeoCoordinatesOfRoad(const drake::maliput::api::Lane* lane, const double step);
+
+void PrintGeoCoordinatesOfRoad(const drake::maliput::api::Lane* lane, const double step) {
+	drake::maliput::api::LanePosition lp(0.0, 0.0, 0.0);
+
+	while (lp.s < lane->length()) {
+		auto gp = lane->ToGeoPosition(lp);
+		std::cout << "------";
+		std::cout << "[" << lp.s << ";" << lp.r << ";" << lp.h << "] --> ";
+		std::cout << "[" << gp.x << ";" << gp.y << ";" << gp.z << "]" << std::endl;
+		lp.s += step;
+	}
+	lp.s = lane->length();
+	auto gp = lane->ToGeoPosition(lp);
+	std::cout << "------";
+	std::cout << "[" << lp.s << ";" << lp.r << ";" << lp.h << "] --> ";
+	std::cout << "[" << gp.x << ";" << gp.y << ";" << gp.z << "]" << std::endl;
+}
 
 int main(int argc, char **argv) {
 	if (argc < 2) {
@@ -15,6 +35,8 @@ int main(int argc, char **argv) {
 	}
 	std::string fileName(argv[1]);
 	std::cout << "Opening " << fileName << std::endl;
+
+	const double step = 1.0;
 
 	auto roadGeometry =
 	  drake::maliput::monolane::LoadFile(fileName);
@@ -31,7 +53,12 @@ int main(int argc, char **argv) {
 			// Iterate over the lanes
 			for (int li = 0; li < segment->num_lanes(); ++li) {
 				const drake::maliput::api::Lane* lane = segment->lane(li);
-				std::cout << "----Lane: " << lane->id().id << "| Length: " << lane->length() << std::endl;
+				std::cout << "----Lane: " << lane->id().id <<
+					" | Length: " << lane->length() <<
+					" | Lane bounds: [" << lane->lane_bounds(0.0).r_min << ";" << lane->lane_bounds(0.0).r_max << "]" <<
+					" | Drivable bounds: [" << lane->driveable_bounds(0.0).r_min << ";" << lane->driveable_bounds(0.0).r_max << "]" <<
+					std::endl;
+				PrintGeoCoordinatesOfRoad(lane, step);
 	  		}
 		}
 	}
