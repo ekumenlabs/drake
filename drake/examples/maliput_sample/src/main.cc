@@ -16,16 +16,22 @@ void PrintGeoCoordinatesOfRoad(const drake::maliput::api::Lane* lane, const doub
 
 	while (lp.s < lane->length()) {
 		auto gp = lane->ToGeoPosition(lp);
+		auto rot = lane->GetOrientation(lp);
 		std::cout << "------";
 		std::cout << "[" << lp.s << ";" << lp.r << ";" << lp.h << "] --> ";
-		std::cout << "[" << gp.x << ";" << gp.y << ";" << gp.z << "]" << std::endl;
+		std::cout << "[" << gp.x << ";" << gp.y << ";" << gp.z << "] | ";
+		std::cout << "[" << rot.roll << ";" << rot.pitch << ";" << rot.yaw << "]";
+	    std::cout << std::endl;
 		lp.s += step;
 	}
 	lp.s = lane->length();
 	auto gp = lane->ToGeoPosition(lp);
+	auto rot = lane->GetOrientation(lp);
 	std::cout << "------";
 	std::cout << "[" << lp.s << ";" << lp.r << ";" << lp.h << "] --> ";
-	std::cout << "[" << gp.x << ";" << gp.y << ";" << gp.z << "]" << std::endl;
+	std::cout << "[" << gp.x << ";" << gp.y << ";" << gp.z << "] | ";
+	std::cout << "[" << rot.roll << ";" << rot.pitch << ";" << rot.yaw << "]";
+	std::cout << std::endl;
 }
 
 int main(int argc, char **argv) {
