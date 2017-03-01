@@ -2,7 +2,7 @@
 
 ## Description
 
-This is a sample program that opens a Monolane file and prints all its junctions, segments and lanes.
+This is a sample program that opens a Monolane file and prints all its junctions, segments, lanes and branch points.
 
 ## To build
 
