@@ -65,7 +65,22 @@ int main(int argc, char **argv) {
 					" | Drivable bounds: [" << lane->driveable_bounds(0.0).r_min << ";" << lane->driveable_bounds(0.0).r_max << "]" <<
 					std::endl;
 				PrintGeoCoordinatesOfRoad(lane, step);
-	  		}
+			}
+		}
+	}
+	for (int bi = 0; bi < roadGeometry->num_branch_points(); ++bi) {
+		const drake::maliput::api::BranchPoint *branchPoint = roadGeometry->branch_point(bi);
+		std::cout << "Branch point: " << branchPoint->id().id << std::endl;
+		// Get the lane end set A
+		const drake::maliput::api::LaneEndSet *laneEndSetA =
+			branchPoint->GetASide();
+		for (int lei = 0; lei < laneEndSetA->size(); ++lei) {
+			const drake::maliput::api::LaneEnd &laneEnd = laneEndSetA->get(lei);
+			std::cout << "-- LaneEnd: [" << laneEnd.lane->id().id << ";";
+			if (laneEnd.end == drake::maliput::api::LaneEnd::Which::kStart)
+				std::cout << "Start]" << std::endl;
+			else
+				std::cout << "End]" << std::endl;
 		}
 	}
 	return 0;
