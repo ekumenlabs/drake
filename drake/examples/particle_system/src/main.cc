@@ -15,11 +15,11 @@ int main (int argc, char **argv) {
 	std::unique_ptr<systems::SystemOutput<double>> particleOutput;
 	std::unique_ptr<systems::ContinuousState<double>> particleDerivatives;
 
-	particle.reset(new drake::particle::Particle<double>());
+	particle.reset(new drake::particle::Particle<double>());/*
 	particleContext = particle->CreateDefaultContext();
 	particleOutput = particle->AllocateOutput(*particleContext);
 	particleDerivatives = particle->AllocateTimeDerivatives();
-
+*/
 	const double t_final = 1.0;
 	const double x0 = 0.0;
 	const double v0 = 0.0;

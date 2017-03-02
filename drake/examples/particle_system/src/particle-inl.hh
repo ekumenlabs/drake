@@ -41,13 +41,10 @@ void Particle<T>::DoCalcTimeDerivatives(
   new_derivatives->SetAtIndex(0,
     context.get_continuous_state_vector().GetAtIndex(1));
   new_derivatives->SetAtIndex(1, T(get_acceleration()));
-
-  std::cout << "[" << context.get_continuous_state_vector().GetAtIndex(0) <<
-    ";" << context.get_continuous_state_vector().GetAtIndex(1) << "]" << std::endl;
 }
 
 template <typename T>
-void Particle<T>::SetDefaultState(const systems::Context<T>& context,
+void Particle<T>::SetDefaultSgit tate(const systems::Context<T>& context,
                               systems::State<T>* state) const {
   DRAKE_DEMAND(state != nullptr);
   Vector2<T> x0;
