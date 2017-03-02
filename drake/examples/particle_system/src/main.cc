@@ -1,5 +1,6 @@
 #include <iostream>
 #include <memory>
+#include <stdlib.h>
 
 #include "drake/examples/particle_system/src/particle.hh"
 #include "drake/examples/particle_system/src/particle-inl.hh"
@@ -9,22 +10,40 @@
 namespace drake {
 namespace particle {
 
-int main (int argc, char **argv) {
-	std::unique_ptr<systems::System<double>> particle;
-	std::unique_ptr<systems::Context<double>> particleContext;
-	std::unique_ptr<systems::SystemOutput<double>> particleOutput;
-	std::unique_ptr<systems::ContinuousState<double>> particleDerivatives;
+void PrintHelp() {
+	std::cerr << "Run this program the following way:" << std::endl;
+	std::cerr << "bazel run drake/examples/particle_system:sample [t_final] [x_init] [v_init] [accel]" << std::endl;
+	std::cerr << "All the values are doubles." << std::endl;
+}
 
-	particle.reset(new drake::particle::Particle<double>());/*
+void PrintValues(const double t_final,
+	const double xi,
+	const double vi,
+	const double a) {
+	std::cout << "t_final\txi\tvi\ta" << std::endl;
+	std::cout << t_final << xi << vi << a << std::endl;
+}
+
+int main (int argc, char **argv) {
+	if (argc < 5) {
+		PrintHelp();
+	}
+	const double t_final = atof(argv[1]);
+	const double xi = atof(argv[2]);
+	const double vi = atof(argv[3]);
+	const double a = atof(argv[4]);
+	PrintValues(t_final, xi, vi, a);
+
+	std::unique_ptr<drake::particle::Particle<double>> particle;
+	particle.reset(new drake::particle::Particle<double>());
+    std::unique_ptr<systems::Context<double>> particleContext;
 	particleContext = particle->CreateDefaultContext();
-	particleOutput = particle->AllocateOutput(*particleContext);
-	particleDerivatives = particle->AllocateTimeDerivatives();
-*/
-	const double t_final = 1.0;
-	const double x0 = 0.0;
-	const double v0 = 0.0;
+
+	particle->SetAcceleration(a);
 	// Prepare to integrate.
-	drake::systems::Simulator<double> simulator(*particle, std::move(particleContext));
+	drake::systems::Simulator<double> simulator(
+		*particle,
+		std::move(particleContext));
 	simulator.reset_integrator<systems::RungeKutta3Integrator<double>>(
 		*particle,
 		simulator.get_mutable_context());
@@ -36,8 +55,8 @@ int main (int argc, char **argv) {
 	// Set the initial state for the particle
 	systems::VectorBase<double>* xc = simulator.get_mutable_context()->
 		get_mutable_continuous_state_vector();
-	xc->SetAtIndex(0, x0);
-	xc->SetAtIndex(1, v0);
+	xc->SetAtIndex(0, xi);
+	xc->SetAtIndex(1, vi);
   // Integrate.
   simulator.StepTo(t_final);
 

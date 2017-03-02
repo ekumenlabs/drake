@@ -25,8 +25,8 @@ void Particle<T>::DoCalcOutput(const systems::Context<T>& context,
 
   T currentTime = context.get_time();
   T dt = currentTime - lastTime;
-  output_vector->SetAtIndex(0, T(T(1/2) * get_acceleration() * dt * dt + context_state.GetAtIndex(1) * dt + context_state.GetAtIndex(0)));
-  output_vector->SetAtIndex(1, T(get_acceleration() * dt + context_state.GetAtIndex(1)));
+  output_vector->SetAtIndex(0, T(T(1/2) * GetAcceleration() * dt * dt + context_state.GetAtIndex(1) * dt + context_state.GetAtIndex(0)));
+  output_vector->SetAtIndex(1, T(GetAcceleration() * dt + context_state.GetAtIndex(1)));
 }
 
 template <typename T>
@@ -40,15 +40,18 @@ void Particle<T>::DoCalcTimeDerivatives(
   // and the other one is the acceleration
   new_derivatives->SetAtIndex(0,
     context.get_continuous_state_vector().GetAtIndex(1));
-  new_derivatives->SetAtIndex(1, T(get_acceleration()));
+  new_derivatives->SetAtIndex(1, T(GetAcceleration()));
+
+  std::cout << "[" << context.get_continuous_state_vector().GetAtIndex(0) <<
+    ";" << context.get_continuous_state_vector().GetAtIndex(1) << "]" << std::endl;
 }
 
 template <typename T>
-void Particle<T>::SetDefaultSgit tate(const systems::Context<T>& context,
+void Particle<T>::SetDefaultState(const systems::Context<T>& context,
                               systems::State<T>* state) const {
   DRAKE_DEMAND(state != nullptr);
   Vector2<T> x0;
-  x0 << 0.0, 0.0;
+  x0 << 0.0, 0.0;  // initial state values.
   state->get_mutable_continuous_state()->SetFromVector(x0);
 }
 
