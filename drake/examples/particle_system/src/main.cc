@@ -21,7 +21,7 @@ int main (int argc, char **argv) {
 	particleDerivatives = particle->AllocateTimeDerivatives();
 
 	const double t_final = 1.0;
-	const double x0 = 10.0;
+	const double x0 = 0.0;
 	const double v0 = 0.0;
 	// Prepare to integrate.
 	drake::systems::Simulator<double> simulator(*particle, std::move(particleContext));
@@ -29,8 +29,8 @@ int main (int argc, char **argv) {
 		*particle,
 		simulator.get_mutable_context());
 	simulator.get_mutable_integrator()->set_fixed_step_mode(true);
-	simulator.get_mutable_integrator()->set_minimum_step_size(1e-3);
-	simulator.get_mutable_integrator()->set_maximum_step_size(1e-3);
+	simulator.get_mutable_integrator()->set_minimum_step_size(10e-3);
+	simulator.get_mutable_integrator()->set_maximum_step_size(10e-3);
 	simulator.Initialize();
 
 	// Set the initial state for the particle
@@ -41,8 +41,10 @@ int main (int argc, char **argv) {
   // Integrate.
   simulator.StepTo(t_final);
 
-  std::cout << "Last position: " << x0 << std::endl;
-  std::cout << "Last speed: " << v0 << std::endl;
+  const drake::systems::Context<double> &context = simulator.get_context();
+  const drake::systems::VectorBase<double> &csVector = context.get_continuous_state_vector();
+  std::cout << "Last position: " << csVector.GetAtIndex(0) << std::endl;
+  std::cout << "Last speed: " << csVector.GetAtIndex(1) << std::endl;
 
   return 0;
 }

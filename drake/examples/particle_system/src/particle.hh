@@ -11,15 +11,19 @@ class Particle : public systems::LeafSystem<T> {
 	public:
 		// Constructor for the Particle system.
 		Particle();
-		double get_acceleration() const { return -10.0; }
-	protected:
+		double get_acceleration() const { return 10.0; }
+
 		void DoCalcOutput(const systems::Context<T>& context,
             systems::SystemOutput<T>* output) const override;
+
 		void DoCalcTimeDerivatives(
 			const systems::Context<T>& context,
 			systems::ContinuousState<T>* derivatives) const override;
+
 		void SetDefaultState(const systems::Context<T>& context,
 			systems::State<T>* state) const override;
+
+		double lastTime{0.0};
 };
 
 }
