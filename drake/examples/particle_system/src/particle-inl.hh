@@ -25,8 +25,14 @@ void Particle<T>::DoCalcOutput(const systems::Context<T>& context,
 
   T currentTime = context.get_time();
   T dt = currentTime - lastTime;
-  output_vector->SetAtIndex(0, T(T(1/2) * GetAcceleration() * dt * dt + context_state.GetAtIndex(1) * dt + context_state.GetAtIndex(0)));
-  output_vector->SetAtIndex(1, T(GetAcceleration() * dt + context_state.GetAtIndex(1)));
+  // Calculate the final position
+  const T xf(T(1/2) * GetAcceleration() * dt * dt +
+    context_state.GetAtIndex(1) * dt +
+    context_state.GetAtIndex(0));
+  // Calculate the final speed
+  const T vf(GetAcceleration() * dt + context_state.GetAtIndex(1));
+  output_vector->SetAtIndex(0, xf);
+  output_vector->SetAtIndex(1, vf);
 }
 
 template <typename T>
@@ -41,9 +47,6 @@ void Particle<T>::DoCalcTimeDerivatives(
   new_derivatives->SetAtIndex(0,
     context.get_continuous_state_vector().GetAtIndex(1));
   new_derivatives->SetAtIndex(1, T(GetAcceleration()));
-
-  std::cout << "[" << context.get_continuous_state_vector().GetAtIndex(0) <<
-    ";" << context.get_continuous_state_vector().GetAtIndex(1) << "]" << std::endl;
 }
 
 template <typename T>

@@ -21,7 +21,10 @@ void PrintValues(const double t_final,
 	const double vi,
 	const double a) {
 	std::cout << "t_final\txi\tvi\ta" << std::endl;
-	std::cout << t_final << xi << vi << a << std::endl;
+	std::cout << t_final << '\t';
+	std::cout << xi << '\t';
+	std::cout << vi << '\t';
+	std::cout << a << std::endl;
 }
 
 int main (int argc, char **argv) {
@@ -62,8 +65,8 @@ int main (int argc, char **argv) {
 
   const drake::systems::Context<double> &context = simulator.get_context();
   const drake::systems::VectorBase<double> &csVector = context.get_continuous_state_vector();
-  std::cout << "Last position: " << csVector.GetAtIndex(0) << std::endl;
-  std::cout << "Last speed: " << csVector.GetAtIndex(1) << std::endl;
+  std::cout << "Last position: " << csVector.GetAtIndex(0) << " m" << std::endl;
+  std::cout << "Last speed: " << csVector.GetAtIndex(1) << " m/s" << std::endl;
 
   return 0;
 }
