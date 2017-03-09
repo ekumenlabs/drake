@@ -1,0 +1,8 @@
+<?xml version='1.0'?>
+<sdf version='1.6'>
+  <model name='particle_box'>
+    <include>
+      
+    </include>
+  </model>
+</sdf>

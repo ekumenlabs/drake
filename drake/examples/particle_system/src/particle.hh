@@ -1,40 +1,35 @@
-#ifndef PARTICLE_H
-#define PARTICLE_H
+#ifndef PARTICLE_HH
+#define PARTICLE_HH
 
+#include "drake/common/drake_copyable.h"
 #include "drake/systems/framework/leaf_system.h"
 
 namespace drake {
-namespace particle {
+  namespace particles {
 
-template <typename T>
-class Particle : public systems::LeafSystem<T> {
-	public:
-		// Constructor for the Particle system.
-		Particle();
+    template <typename T>
+    class Particle : public systems::LeafSystem<T> {
+    public:
+      DRAKE_NO_COPY_NO_MOVE_NO_ASSIGN(Particle)
+      // Constructor for the Particle system.
+      Particle();
 
-		double GetAcceleration() const {
-			return a;
-		}
-		void SetAcceleration(const double _a) {
-			a = _a;
-		}
+      void SetInitialConditions(const T& position, const T& velocity);
+      
+      void DoCalcOutput(const systems::Context<T>& context,
+			systems::SystemOutput<T>* output) const override;
+      
+      void DoCalcTimeDerivatives(const systems::Context<T>& context,
+				 systems::ContinuousState<T>* derivatives) const override;
+      
+      void SetDefaultState(const systems::Context<T>& context,
+			   systems::State<T>* state) const override;
 
-		void DoCalcOutput(const systems::Context<T>& context,
-            systems::SystemOutput<T>* output) const override;
+    private:
+      Vector2<T> ic_{Vector2<T>::Zero()};
+    };
 
-		void DoCalcTimeDerivatives(
-			const systems::Context<T>& context,
-			systems::ContinuousState<T>* derivatives) const override;
+  }  // namespace particles
+}  // namespace drake
 
-		void SetDefaultState(const systems::Context<T>& context,
-			systems::State<T>* state) const override;
-
-	private:
-		double lastTime{0.0};
-		double a{1.0};
-};
-
-}
-}
-
-#endif
+#endif  // PARTICLE_HH

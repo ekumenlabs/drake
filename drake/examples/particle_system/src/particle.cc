@@ -1,9 +1,9 @@
-#include "drake/examples/particle_system/src/particle.hh"
+#include "drake/examples/particle_system/src/particle-inl.hh"
 
 namespace drake {
-namespace particle {
+  namespace particles {
 
-template class Particle<double>;
+    template class Particle<double>;
 
-}
-}
+  }  // namespace particles
+}  // namespace drake

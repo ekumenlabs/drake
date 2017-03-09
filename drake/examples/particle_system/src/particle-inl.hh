@@ -1,63 +1,61 @@
-#ifndef PARTICLE_INL_H
-#define PARTICLE_INL_H
+#ifndef PARTICLE_INL_HH
+#define PARTICLE_INL_HH
 
 #include "drake/examples/particle_system/src/particle.hh"
-#include "drake/systems/framework/basic_vector.h"
 
 namespace drake {
-namespace particle {
+  namespace particles {
 
-template <typename T>
-Particle<T>::Particle() {
-  this->DeclareContinuousState(1, 1, 0);
-  this->DeclareOutputPort(systems::kVectorValued, 2);
-}
+    template <typename T>
+    Particle<T>::Particle() {
+      this->DeclareInputPort(systems::kVectorValued, 1);
+      this->DeclareContinuousState(1, 1, 0);
+      this->DeclareOutputPort(systems::kVectorValued, 2);
+    }
+    
+    template <typename T>
+    void Particle<T>::SetInitialConditions(const T& position, const T& velocity) {
+      ic_ << position, velocity;
+    }
+    
+    template <typename T>
+    void Particle<T>::DoCalcOutput(const systems::Context<T>& context,
+				   systems::SystemOutput<T>* output) const {
+      // Get current state from context.
+      const systems::VectorBase<T>& state_vec =
+	context.get_continuous_state_vector();
+      // Obtain the structure we need to write into.
+      systems::BasicVector<T>* const output_vec =
+	output->GetMutableVectorData(0);
+      
+      output_vec->set_value(state_vec.CopyToVector());
+    }
 
-template <typename T>
-void Particle<T>::DoCalcOutput(const systems::Context<T>& context,
-                           systems::SystemOutput<T>* output) const {
-  // Obtain the state.
-  const systems::VectorBase<T>& context_state =
-      context.get_continuous_state_vector();
-  // Obtain the structure we need to write into.
-  systems::BasicVector<T>* const output_vector =
-      output->GetMutableVectorData(0);
+    template <typename T>
+    void Particle<T>::DoCalcTimeDerivatives(const systems::Context<T>& context,
+					    systems::ContinuousState<T>* derivatives) const {
+      // Get current state from context.
+      const systems::VectorBase<T>& cstate_vec =
+	context.get_continuous_state_vector();
+      // Obtain the structure we need to write into.
+      systems::VectorBase<T>* const deriv_vec =
+	derivatives->get_mutable_vector();
+      // Get current acceleration input value
+      const systems::BasicVector<T>* accel = this->EvalVectorInput(context, 0);
+      // Set the derivatives. The first one is the speed
+      // and the other one is the acceleration
+      deriv_vec->SetAtIndex(0, cstate_vec.GetAtIndex(1));
+      deriv_vec->SetAtIndex(1, accel->GetAtIndex(0));
+    }
 
-  T currentTime = context.get_time();
-  T dt = currentTime - lastTime;
-  // Calculate the final position
-  const T xf(T(1/2) * GetAcceleration() * dt * dt +
-    context_state.GetAtIndex(1) * dt +
-    context_state.GetAtIndex(0));
-  // Calculate the final speed
-  const T vf(GetAcceleration() * dt + context_state.GetAtIndex(1));
-  output_vector->SetAtIndex(0, xf);
-  output_vector->SetAtIndex(1, vf);
-}
+    template <typename T>
+    void Particle<T>::SetDefaultState(const systems::Context<T>& context,
+				      systems::State<T>* state) const {
+      systems::ContinuousState<T>* cstate = state->get_mutable_continuous_state();
+      cstate->SetFromVector(ic_);
+    }
+    
+  }  // namespace particles
+}  // namespace drake
 
-template <typename T>
-void Particle<T>::DoCalcTimeDerivatives(
-    const systems::Context<T>& context,
-    systems::ContinuousState<T>* derivatives) const {
-  // Obtain the structure we need to write into.
-  systems::VectorBase<T>* const new_derivatives =
-      derivatives->get_mutable_vector();
-  // Set the derivatives. The first one is the speed
-  // and the other one is the acceleration
-  new_derivatives->SetAtIndex(0,
-    context.get_continuous_state_vector().GetAtIndex(1));
-  new_derivatives->SetAtIndex(1, T(GetAcceleration()));
-}
-
-template <typename T>
-void Particle<T>::SetDefaultState(const systems::Context<T>& context,
-                              systems::State<T>* state) const {
-  DRAKE_DEMAND(state != nullptr);
-  Vector2<T> x0;
-  x0 << 0.0, 0.0;  // initial state values.
-  state->get_mutable_continuous_state()->SetFromVector(x0);
-}
-
-}
-}
-#endif
+#endif  // PARTICLE_INL_HH
