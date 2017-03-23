@@ -115,6 +115,7 @@ if(lcm_FOUND)
   target_link_libraries(automotive_demo
       drakeAutomotiveLcm
       drakeLCMTypes
+      drakeMaliputOneway
       drakeMaliputDragway)
 
   add_executable(car_sim_lcm car_sim_lcm.cc car_sim_lcm_common.cc)

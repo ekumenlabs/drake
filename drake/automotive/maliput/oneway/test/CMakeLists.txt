@@ -1,0 +1,2 @@
+drake_add_cc_test(oneway_test)
+target_link_libraries(oneway_test drakeMaliputOneway)

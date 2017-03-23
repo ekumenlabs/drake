@@ -73,6 +73,16 @@ The following demos are available:
        --num_dragway_lanes=3 \
        --num_trajectory_car=12
    ```
+   
+ * A 1-lane dragway with a single `TrajectoryCar` vehicles traveling on it
+   plus one `SimpleCar`.
+
+   ```
+   bazel run //drake/automotive:demo -- \
+       --num_dragway_lanes=1 \
+       --num_trajectory_car=1
+   ```
+
 
 Driving the Prius
 -----------------
