@@ -281,6 +281,7 @@ drake_cc_binary(
     deps = [
         ":automotive_simulator",
         "//drake/automotive/maliput/dragway",
+        "//drake/automotive/maliput/oneway",
         "//drake/common:text_logging_gflags",
     ],
 )

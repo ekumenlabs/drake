@@ -7,6 +7,7 @@
 #include "drake/automotive/automotive_simulator.h"
 #include "drake/automotive/create_trajectory_params.h"
 #include "drake/automotive/maliput/dragway/road_geometry.h"
+#include "drake/automotive/maliput/oneway/road_geometry.h"
 #include "drake/common/drake_path.h"
 #include "drake/common/text_logging_gflags.h"
 
@@ -50,7 +51,8 @@ namespace {
 
 enum class RoadNetworkType {
   flat = 0,
-  dragway = 1
+  oneway = 1,
+  dragway = 2
 };
 
 std::string MakeChannelName(const std::string& name) {
@@ -91,9 +93,22 @@ void AddVehicles(RoadNetworkType road_network_type,
     }
   }
 
-  if (road_network_type == RoadNetworkType::dragway) {
+  if (road_network_type == RoadNetworkType::oneway) {
     DRAKE_DEMAND(road_geometry != nullptr);
-    const maliput::dragway::RoadGeometry* dragway_road_geometry =
+    DRAKE_DEMAND(road_geometry != nullptr);
+    const maliput::api::RoadGeometry* oneway_road_geometry =
+        dynamic_cast<const maliput::oneway::RoadGeometry*>(road_geometry);
+    DRAKE_DEMAND(oneway_road_geometry != nullptr);
+    const double speed = FLAGS_dragway_base_speed;
+    const double start_time = 0;
+    const auto& params = CreateTrajectoryParamsForDragway(
+        *oneway_road_geometry, 0, speed, start_time);
+    simulator->AddTrajectoryCarFromSdf(kSdfFile, std::get<0>(params),
+                                       std::get<1>(params),
+                                       std::get<2>(params));
+  } else if (road_network_type == RoadNetworkType::dragway) {
+    DRAKE_DEMAND(road_geometry != nullptr);
+    const maliput::api::RoadGeometry* dragway_road_geometry =
         dynamic_cast<const maliput::dragway::RoadGeometry*>(road_geometry);
     DRAKE_DEMAND(dragway_road_geometry != nullptr);
     for (int i = 0; i < FLAGS_num_trajectory_car; ++i) {
@@ -148,6 +163,20 @@ const maliput::api::RoadGeometry* AddDragway(
   return simulator->SetRoadGeometry(std::move(road_geometry));
 }
 
+// Adds a oneway to the provided `simulator`. The  lane width and
+// lane length are all user-specifiable via command line
+// flags.
+const maliput::api::RoadGeometry* AddOneway(
+    AutomotiveSimulator<double>* simulator) {
+  std::unique_ptr<const maliput::api::RoadGeometry> road_geometry
+      = std::make_unique<const maliput::oneway::RoadGeometry>(
+          maliput::api::RoadGeometryId({"Automotive Demo Oneway"}),
+          FLAGS_dragway_length,
+          FLAGS_dragway_lane_width);
+  return simulator->SetRoadGeometry(std::move(road_geometry));
+}
+
+
 // Adds a terrain to the simulated world. The type of terrain added depends on
 // the provided `road_network_type` parameter. A pointer to the road network is
 // returned. A return value of `nullptr` is possible if no road network is
@@ -156,6 +185,9 @@ const maliput::api::RoadGeometry* AddTerrain(RoadNetworkType road_network_type,
     AutomotiveSimulator<double>* simulator) {
   const maliput::api::RoadGeometry* road_geometry{nullptr};
   switch (road_network_type) {
+    case RoadNetworkType::oneway:
+      road_geometry = AddOneway(simulator);
+      break;
     case RoadNetworkType::flat: {
       AddFlatTerrain(simulator);
       break;
@@ -171,8 +203,10 @@ const maliput::api::RoadGeometry* AddTerrain(RoadNetworkType road_network_type,
 // Determines and returns the road network type based on the command line
 // arguments.
 RoadNetworkType DetermineRoadNetworkType() {
-  if (FLAGS_num_dragway_lanes > 0) {
+  if (FLAGS_num_dragway_lanes > 1) {
     return RoadNetworkType::dragway;
+  } else if (FLAGS_num_dragway_lanes > 0) {
+    return RoadNetworkType::oneway;
   } else {
     return RoadNetworkType::flat;
   }
