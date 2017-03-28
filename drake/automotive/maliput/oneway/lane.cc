@@ -7,6 +7,8 @@
 #include "drake/automotive/maliput/oneway/segment.h"
 #include "drake/common/drake_assert.h"
 
+#include <ignition/math.hh>
+
 namespace drake {
 namespace maliput {
 namespace oneway {
@@ -23,6 +25,24 @@ Lane::Lane(const Segment* segment, const api::LaneId& id,
   branch_point_ = std::make_unique<BranchPoint>(
       api::BranchPointId({id.id + "_Branch_Point"}), this,
       segment->junction()->road_geometry());
+  // We create the control points and get an interpolation of them.
+  std::vector<ignition::math::Vector3d> points;
+  points.push_back(ignition::math::Vector3d(0.0, 0.0, 0.0));
+  points.push_back(ignition::math::Vector3d(20.0, 0.0, 0.0));
+  points.push_back(ignition::math::Vector3d(40.0, 15.0, 0.0));
+  points.push_back(ignition::math::Vector3d(60.0, 50.0, 0.0));
+  points_.clear();
+  points_ = InterpolateRoad(points, 1.0);
+  // Get a vector of different lengths
+  lengths_.clear();
+  length_ = ComputeLength(points_, &lengths_);
+  // Create the spline and calculate all the tangents.
+  spline_.Tension(0.0);
+  spline_.AutoCalculate(false);
+  for (const auto &point : points_) {
+    spline_.AddPoint(point);
+  }
+  spline_.RecalcTangents();
 }
 
 const api::Segment* Lane::do_segment() const {
@@ -60,16 +80,52 @@ api::RBounds Lane::do_driveable_bounds(double) const {
 api::LanePosition Lane::DoEvalMotionDerivatives(
     const api::LanePosition& position,
     const api::IsoLaneVelocity& velocity) const {
+  std::cout << "-->DoEvalMotionDerivatives: [" << position.s << ";" << position.r << ";" << position.h << "]" << std::endl;
+  std::cout << "-->DoEvalMotionDerivatives: [" << position.s << ";" << position.r << ";" << position.h << "]" << std::endl;
   return api::LanePosition(velocity.sigma_v, velocity.rho_v, velocity.eta_v);
 }
 
 api::GeoPosition Lane::DoToGeoPosition(
     const api::LanePosition& lane_pos) const {
-  return {lane_pos.s, lane_pos.r, lane_pos.h};
+  // We don't care about r and h coordinates, we will evaluate
+  // the value at the centerline. However, we need to get the point
+  // from which we need to interpolate.
+  if (lane_pos.s > length_ && lane_pos.s >= 0.0) {
+    std::cerr << "DoToGeoPosition" << std::endl;
+    DRAKE_DEMAND(lane_pos.s > length_ && lane_pos.s >= 0.0);
+  }
+  const auto point = spline_.Interpolate(lane_pos.s / length_);
+  std::cout << "-->DoToGeoPosition: [" << lane_pos.s << ";" << lane_pos.r << ";" << lane_pos.h <<"] --> [" << point << "]" << std::endl;
+  return {point.X(), point.Y(), point.Z()};
 }
 
 api::Rotation Lane::DoGetOrientation(
     const api::LanePosition& lane_pos) const {
+  // We don't care about r and h coordinates, we will evaluate
+  // the value at the centerline. However, we need to get the point
+  // from which we need to interpolate.
+  if (lane_pos.s > length_ && lane_pos.s >= 0.0) {
+    std::cerr << "DoGetOrientation" << std::endl;
+    DRAKE_DEMAND(lane_pos.s > length_ && lane_pos.s >= 0.0);
+  }
+
+  uint i = 0;
+  for (i = 0; i < lengths_.size(); i++) {
+    if (lengths_[i] > lane_pos.s)
+      break;
+  }
+  ignition::math::Vector3d tangent;
+
+  tangent = spline_.Tangent(i - 1);
+  if (!tangent.IsFinite())
+    DRAKE_ABORT();
+
+  std::cout << "-->DoGetOrientation" << std::endl;
+  /*
+  return api::Rotation(std::atan2(tangent.Y(), tangent.Z()),
+    std::atan2(tangent.X(), tangent.Z()),
+    std::atan2(tangent.X(), tangent.Y()));
+    */
   return api::Rotation(0, 0, 0);  // roll, pitch, yaw.
 }
 
@@ -77,7 +133,65 @@ api::LanePosition Lane::DoToLanePosition(
     const api::GeoPosition& geo_pos,
     api::GeoPosition* nearest_point,
     double* distance) const {
+  std::cerr << "DoToLanePosition" << std::endl;
   DRAKE_ABORT();  // TODO(liangfok) Implement me.
+}
+
+double Lane::ComputeLength(
+  const std::vector<ignition::math::Vector3d> &points,
+  std::vector<double> *lengths) {
+  double length = 0.0;
+  if (lengths == nullptr) {
+    for (uint i = 0; i < points.size() - 1; i++) {
+      length += (points[i].Distance(points[i+1]));
+    }
+  }
+  else {
+    for (uint i = 0; i < points.size() - 1; i++) {
+      length += (points[i].Distance(points[i+1]));
+      lengths->push_back(length);
+    }
+  }
+  return length;
+}
+
+
+std::vector<ignition::math::Vector3d> Lane::InterpolateRoad(
+  const std::vector<ignition::math::Vector3d> &_points,
+  const double distanceThreshold) {
+  ignition::math::Spline spline;
+  spline.AutoCalculate(true);
+  std::vector<ignition::math::Vector3d> newPoints;
+
+  // Add all the control points
+  for (uint i = 0; i < _points.size(); i++) {
+    spline.AddPoint(_points[i]);
+  }
+
+  double distance;
+  for (uint i = 0; i < (_points.size()-1); i++) {
+    newPoints.push_back(_points[i]);
+    distance = _points[i].Distance(_points[i+1]);
+    if (distance > distanceThreshold) {
+      ignition::math::Vector3d newPoint = spline.Interpolate(i, 0.5);
+      newPoints.push_back(newPoint);
+    }
+  }
+  newPoints.push_back(_points.back());
+
+  bool distanceCheck = true;
+  for (uint i = 0; i < newPoints.size()-1; i++) {
+    distance = newPoints[i].Distance(newPoints[i+1]);
+    if (distance > distanceThreshold) {
+      distanceCheck = false;
+      break;
+    }
+  }
+  if (distanceCheck == false) {
+    return InterpolateRoad(newPoints, distanceThreshold);
+  }
+
+  return newPoints;
 }
 
 }  // namespace oneway

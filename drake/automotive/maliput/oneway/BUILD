@@ -6,6 +6,7 @@ load("//tools:drake.bzl", "drake_cc_binary", "drake_cc_googletest", "drake_cc_li
 
 package(default_visibility = ["//visibility:public"])
 
+
 drake_cc_library(
     name = "oneway",
     srcs = [
@@ -22,11 +23,19 @@ drake_cc_library(
         "road_geometry.h",
         "segment.h",
     ],
+    copts = [
+        "-I/usr/include/ignition/math2",
+        "-std=c++11"
+    ],
+    linkopts = [
+        "-lignition-math2",
+    ],
     deps = [
         "//drake/automotive/maliput/api",
         "//drake/common",
     ],
 )
+
 
 drake_cc_binary(
     name = "oneway_to_urdf",
@@ -38,6 +47,13 @@ drake_cc_binary(
         "//drake/common:text_logging_gflags",
         "//drake/thirdParty:spruce",
         "@gflags//:gflags",
+    ],
+    copts = [
+        "-I/usr/include/ignition/math2",
+        "-std=c++11"
+    ],
+    linkopts = [
+        "-lignition-math2",
     ],
 )
 

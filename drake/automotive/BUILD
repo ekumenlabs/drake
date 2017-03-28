@@ -284,6 +284,12 @@ drake_cc_binary(
         "//drake/automotive/maliput/oneway",
         "//drake/common:text_logging_gflags",
     ],
+    copts = [
+        "-I/usr/include/ignition/math2",
+    ],
+    linkopts = [
+        "-lignition-math2",
+    ],
 )
 
 drake_cc_library(

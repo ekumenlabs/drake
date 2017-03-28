@@ -80,15 +80,31 @@ std::tuple<Curve2<double>, double, double> CreateTrajectoryParamsForDragway(
   const maliput::api::Segment* segment = road_geometry.junction(0)->segment(0);
   DRAKE_DEMAND(index < segment->num_lanes());
   const maliput::api::Lane* lane = segment->lane(index);
-  const maliput::api::GeoPosition start_geo_position =
-      lane->ToGeoPosition(maliput::api::LanePosition(
-          {0 /* s */, 0 /* r */, 0 /* h */}));
-  const maliput::api::GeoPosition end_geo_position =
-      lane->ToGeoPosition(maliput::api::LanePosition(
-          {lane->length() /* s */, 0 /* r */, 0 /* h */}));
+
+  // const maliput::api::GeoPosition start_geo_position =
+  //     lane->ToGeoPosition(maliput::api::LanePosition(
+  //         {0 /* s */, 0 /* r */, 0 /* h */}));
+  // const maliput::api::GeoPosition end_geo_position =
+  //     lane->ToGeoPosition(maliput::api::LanePosition(
+  //         {lane->length() /* s */, 0 /* r */, 0 /* h */}));
+
   std::vector<Curve2<double>::Point2> waypoints;
+  /*
   waypoints.push_back({start_geo_position.x, start_geo_position.y});
   waypoints.push_back({end_geo_position.x, end_geo_position.y});
+  */
+  const double step = 0.5;
+  double current_length  = 0.0;
+  while (current_length < lane->length()) {
+    const auto geo_position = lane->ToGeoPosition(
+      maliput::api::LanePosition(current_length, 0.0, 0.0));
+    waypoints.push_back({geo_position.x, geo_position.y});
+    current_length += step;
+  }
+  const auto geo_position = lane->ToGeoPosition(
+      maliput::api::LanePosition(lane->length(), 0.0, 0.0));
+  waypoints.push_back({geo_position.x, geo_position.y});
+
   Curve2<double> curve(waypoints);
   return std::make_tuple(curve, speed, start_time);
 }

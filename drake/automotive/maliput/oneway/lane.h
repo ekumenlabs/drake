@@ -1,9 +1,12 @@
 #pragma once
 
 #include <memory>
+#include <vector>
 
 #include "drake/automotive/maliput/api/branch_point.h"
 #include "drake/automotive/maliput/api/lane.h"
+
+#include <ignition/math.hh>
 
 namespace drake {
 namespace maliput {
@@ -128,13 +131,26 @@ class Lane final : public api::Lane {
                                      api::GeoPosition* nearest_point,
                                      double* distance) const final;
 
+  double ComputeLength(
+    const std::vector<ignition::math::Vector3d> &points,
+    std::vector<double> *lengths = nullptr);
+
+  std::vector<ignition::math::Vector3d> InterpolateRoad(
+    const std::vector<ignition::math::Vector3d> &points,
+    const double minimum_distance);
+
   const Segment* segment_{};  // The segment to which this lane belongs.
   const api::LaneId id_;
-  const double length_{};
+  //const double length_{};
+  double length_{};
   const api::RBounds bounds_;
 
   // The following variable is actually `const` after construction.
   std::unique_ptr<api::BranchPoint> branch_point_;
+
+  ignition::math::Spline spline_;
+  std::vector<ignition::math::Vector3d> points_;
+  std::vector<double> lengths_;
 };
 
 
