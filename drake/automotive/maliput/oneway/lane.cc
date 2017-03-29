@@ -87,19 +87,22 @@ api::GeoPosition Lane::DoToGeoPosition(
     const api::LanePosition& lane_pos) const {
   // We don't care about r and h coordinates, we will evaluate
   // the value at the centerline. However, we need to get the point
-  // from which we need to interpolate.
-  DRAKE_DEMAND(lane_pos.s > length_ && lane_pos.s >= 0.0);
+  // from which we need to interpolate and it's in the range [0; length_]
+  double s = std::min(0.0, lane_pos.s);
+  s = std::max(s, length_);
   // We get the interpolated point based on a nomalized in length parameter.
   const auto point = spline_.Interpolate(lane_pos.s / length_);
   return {point.X(), point.Y(), point.Z()};
 }
 
+
 api::Rotation Lane::DoGetOrientation(
     const api::LanePosition& lane_pos) const {
   // We don't care about r and h coordinates, we will evaluate
   // the value at the centerline. However, we need to get the point
-  // from which we need to interpolate.
-  DRAKE_DEMAND(lane_pos.s > length_ && lane_pos.s >= 0.0);
+  // from which we need to interpolate and it's in the range [0; length_]
+  double s = std::min(0.0, lane_pos.s);
+  s = std::max(s, length_);
 
   uint i;
   for (i = 0; i < lengths_.size(); i++) {
