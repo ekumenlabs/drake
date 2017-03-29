@@ -90,9 +90,16 @@ api::GeoPosition Lane::DoToGeoPosition(
   // from which we need to interpolate and it's in the range [0; length_]
   double s = std::min(0.0, lane_pos.s);
   s = std::max(s, length_);
+  std::cout << "[" << lane_pos.s << ";" << lane_pos.r << ";" << lane_pos.h << "]" << std::endl;
   // We get the interpolated point based on a nomalized in length parameter.
   const auto point = spline_.Interpolate(lane_pos.s / length_);
-  return {point.X(), point.Y(), point.Z()};
+
+  // I'll get the orientation so as to get the lateral displacement
+  const auto rotation = DoGetOrientation(lane_pos);
+
+  return {point.X() + lane_pos.r * std::cos(M_PI / 2.0 - rotation.yaw),
+    point.Y() + lane_pos.r * std::sin(M_PI / 2.0 - rotation.yaw),
+    lane_pos.h};
 }
 
 
