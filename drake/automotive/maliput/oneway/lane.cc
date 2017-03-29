@@ -97,8 +97,8 @@ api::GeoPosition Lane::DoToGeoPosition(
   // I'll get the orientation so as to get the lateral displacement
   const auto rotation = DoGetOrientation(lane_pos);
 
-  return {point.X() + lane_pos.r * std::cos(M_PI / 2.0 - rotation.yaw),
-    point.Y() + lane_pos.r * std::sin(M_PI / 2.0 - rotation.yaw),
+  return {point.X() + lane_pos.r * std::cos(M_PI / 2.0 + rotation.yaw),
+    point.Y() + lane_pos.r * std::sin(M_PI / 2.0 + rotation.yaw),
     lane_pos.h};
 }
 
