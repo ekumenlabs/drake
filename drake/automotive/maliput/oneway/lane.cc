@@ -80,8 +80,6 @@ api::RBounds Lane::do_driveable_bounds(double) const {
 api::LanePosition Lane::DoEvalMotionDerivatives(
     const api::LanePosition& position,
     const api::IsoLaneVelocity& velocity) const {
-  std::cout << "-->DoEvalMotionDerivatives: [" << position.s << ";" << position.r << ";" << position.h << "]" << std::endl;
-  std::cout << "-->DoEvalMotionDerivatives: [" << position.s << ";" << position.r << ";" << position.h << "]" << std::endl;
   return api::LanePosition(velocity.sigma_v, velocity.rho_v, velocity.eta_v);
 }
 
@@ -90,12 +88,9 @@ api::GeoPosition Lane::DoToGeoPosition(
   // We don't care about r and h coordinates, we will evaluate
   // the value at the centerline. However, we need to get the point
   // from which we need to interpolate.
-  if (lane_pos.s > length_ && lane_pos.s >= 0.0) {
-    std::cerr << "DoToGeoPosition" << std::endl;
-    DRAKE_DEMAND(lane_pos.s > length_ && lane_pos.s >= 0.0);
-  }
+  DRAKE_DEMAND(lane_pos.s > length_ && lane_pos.s >= 0.0);
+  // We get the interpolated point based on a nomalized in length parameter.
   const auto point = spline_.Interpolate(lane_pos.s / length_);
-  std::cout << "-->DoToGeoPosition: [" << lane_pos.s << ";" << lane_pos.r << ";" << lane_pos.h <<"] --> [" << point << "]" << std::endl;
   return {point.X(), point.Y(), point.Z()};
 }
 
@@ -104,37 +99,30 @@ api::Rotation Lane::DoGetOrientation(
   // We don't care about r and h coordinates, we will evaluate
   // the value at the centerline. However, we need to get the point
   // from which we need to interpolate.
-  if (lane_pos.s > length_ && lane_pos.s >= 0.0) {
-    std::cerr << "DoGetOrientation" << std::endl;
-    DRAKE_DEMAND(lane_pos.s > length_ && lane_pos.s >= 0.0);
-  }
+  DRAKE_DEMAND(lane_pos.s > length_ && lane_pos.s >= 0.0);
 
-  uint i = 0;
+  uint i;
   for (i = 0; i < lengths_.size(); i++) {
     if (lengths_[i] > lane_pos.s)
       break;
   }
-  ignition::math::Vector3d tangent;
-
-  tangent = spline_.Tangent(i - 1);
+  ignition::math::Vector3d tangent = spline_.Tangent(i);
+  // Check for tangent calculation error.
   if (!tangent.IsFinite())
     DRAKE_ABORT();
 
-  std::cout << "-->DoGetOrientation" << std::endl;
-  /*
-  return api::Rotation(std::atan2(tangent.Y(), tangent.Z()),
-    std::atan2(tangent.X(), tangent.Z()),
+  // We don't calculate the pitch and the roll as the curves are on the ground.
+  return api::Rotation(0.0,
+    0.0,
     std::atan2(tangent.X(), tangent.Y()));
-    */
-  return api::Rotation(0, 0, 0);  // roll, pitch, yaw.
 }
 
 api::LanePosition Lane::DoToLanePosition(
     const api::GeoPosition& geo_pos,
     api::GeoPosition* nearest_point,
     double* distance) const {
-  std::cerr << "DoToLanePosition" << std::endl;
-  DRAKE_ABORT();  // TODO(liangfok) Implement me.
+  // TODO(agalbachicar) Implement me
+  DRAKE_ABORT();
 }
 
 double Lane::ComputeLength(
