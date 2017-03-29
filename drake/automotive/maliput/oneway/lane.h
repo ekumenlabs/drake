@@ -141,7 +141,6 @@ class Lane final : public api::Lane {
 
   const Segment* segment_{};  // The segment to which this lane belongs.
   const api::LaneId id_;
-  //const double length_{};
   double length_{};
   const api::RBounds bounds_;
 
