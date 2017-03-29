@@ -149,40 +149,39 @@ double Lane::ComputeLength(
 
 std::vector<ignition::math::Vector3d> Lane::InterpolateRoad(
   const std::vector<ignition::math::Vector3d> &_points,
-  const double distanceThreshold) {
+  const double distance_threshold) {
   ignition::math::Spline spline;
   spline.AutoCalculate(true);
-  std::vector<ignition::math::Vector3d> newPoints;
+  std::vector<ignition::math::Vector3d> new_points;
 
   // Add all the control points
-  for (uint i = 0; i < _points.size(); i++) {
-    spline.AddPoint(_points[i]);
+  for (const auto &point : _points) {
+    spline.AddPoint(point);
   }
 
   double distance;
   for (uint i = 0; i < (_points.size()-1); i++) {
-    newPoints.push_back(_points[i]);
+    new_points.push_back(_points[i]);
     distance = _points[i].Distance(_points[i+1]);
-    if (distance > distanceThreshold) {
-      ignition::math::Vector3d newPoint = spline.Interpolate(i, 0.5);
-      newPoints.push_back(newPoint);
+    if (distance > distance_threshold) {
+      ignition::math::Vector3d new_point = spline.Interpolate(i, 0.5);
+      new_points.push_back(new_point);
     }
   }
-  newPoints.push_back(_points.back());
+  new_points.push_back(_points.back());
 
-  bool distanceCheck = true;
-  for (uint i = 0; i < newPoints.size()-1; i++) {
-    distance = newPoints[i].Distance(newPoints[i+1]);
-    if (distance > distanceThreshold) {
-      distanceCheck = false;
+  bool distance_check = true;
+  for (uint i = 0; i < new_points.size()-1; i++) {
+    distance = new_points[i].Distance(new_points[i+1]);
+    if (distance > distance_threshold) {
+      distance_check = false;
       break;
     }
   }
-  if (distanceCheck == false) {
-    return InterpolateRoad(newPoints, distanceThreshold);
+  if (distance_check == false) {
+    return InterpolateRoad(new_points, distance_threshold);
   }
-
-  return newPoints;
+  return new_points;
 }
 
 }  // namespace oneway

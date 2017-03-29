@@ -29,14 +29,17 @@ namespace oneway {
 namespace {
 
 int exec(int argc, char* argv[]) {
+  std::cout << "Stating" << std::endl;
   gflags::ParseCommandLineFlags(&argc, &argv, true);
+  std::cout << "Parsing" << std::endl;
   logging::HandleSpdlogGflags();
+  std::cout << "Logging" << std::endl;
 
   RoadGeometry road_geometry(
       {"Oneway road"},
       FLAGS_length,
       FLAGS_lane_width);
-
+  std::cout << "RoadGeometry created." << std::endl;
   utility::ObjFeatures features;
 
   // Creates the destination directory if it does not already exist.
@@ -45,6 +48,7 @@ int exec(int argc, char* argv[]) {
   if (!directory.exists()) {
     spruce::dir::mkdirAll(directory);
   }
+  std::cout << "Directory: " << directory.getStr() << std::endl;
   DRAKE_DEMAND(directory.exists());
 
   // The following is necessary for users to know where to find the resulting
@@ -54,6 +58,7 @@ int exec(int argc, char* argv[]) {
   my_path.setAsCurrent();
 
   drake::log()->info("Creating Oneway URDF in {}.", my_path.getStr());
+  std::cout << "Creating Oneway URDF in " <<  my_path.getStr() << std::endl;
   utility::GenerateUrdfFile(&road_geometry, directory.getStr(),
       FLAGS_file_name_root, features);
   return 0;
