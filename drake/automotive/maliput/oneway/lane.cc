@@ -28,11 +28,23 @@ Lane::Lane(const Segment* segment, const api::LaneId& id,
   // We create the control points and get an interpolation of them.
   std::vector<ignition::math::Vector3d> points;
   points.push_back(ignition::math::Vector3d(0.0, 0.0, 0.0));
-  points.push_back(ignition::math::Vector3d(20.0, 0.0, 0.0));
-  points.push_back(ignition::math::Vector3d(40.0, 15.0, 0.0));
-  points.push_back(ignition::math::Vector3d(60.0, 50.0, 0.0));
+  points.push_back(ignition::math::Vector3d(8.6602540378, 5.0000000000, 0.0));
+  points.push_back(ignition::math::Vector3d(10.0000000000, 17.3205080757, 0.0));
+  points.push_back(ignition::math::Vector3d(0.0, 30.0, 0.0));
+  points.push_back(ignition::math::Vector3d(-20, 34.6410161514, 0.0));
+  points.push_back(ignition::math::Vector3d(-43.3012701892, 25.0000000000, 0.0));
+  points.push_back(ignition::math::Vector3d(-60, 0, 0.0));
+  points.push_back(ignition::math::Vector3d(-60.6217782649, -35.0000000000, 0.0));
+  points.push_back(ignition::math::Vector3d(-40.0000000000, -69.2820323028, 0.0));
+  points.push_back(ignition::math::Vector3d(0, -90.0, 0.0));
+  points.push_back(ignition::math::Vector3d(50, -86.6025403784, 0.0));
+  points.push_back(ignition::math::Vector3d(95.2627944163, -55.0000000000, 0.0));
+  points.push_back(ignition::math::Vector3d(120, 0.0, 0.0));
+
+
+
   points_.clear();
-  points_ = InterpolateRoad(points, 1.0);
+  points_ = InterpolateRoad(points, 0.5);
   // Get a vector of different lengths
   lengths_.clear();
   length_ = ComputeLength(points_, &lengths_);
@@ -90,7 +102,6 @@ api::GeoPosition Lane::DoToGeoPosition(
   // from which we need to interpolate and it's in the range [0; length_]
   double s = std::min(0.0, lane_pos.s);
   s = std::max(s, length_);
-  std::cout << "[" << lane_pos.s << ";" << lane_pos.r << ";" << lane_pos.h << "]" << std::endl;
   // We get the interpolated point based on a nomalized in length parameter.
   const auto point = spline_.Interpolate(lane_pos.s / length_);
 
@@ -120,11 +131,11 @@ api::Rotation Lane::DoGetOrientation(
   // Check for tangent calculation error.
   if (!tangent.IsFinite())
     DRAKE_ABORT();
-
+  //tangent = tangent.Normalize();
   // We don't calculate the pitch and the roll as the curves are on the ground.
   return api::Rotation(0.0,
     0.0,
-    std::atan2(tangent.X(), tangent.Y()));
+    std::atan2(tangent.Y(),tangent.X()));
 }
 
 api::LanePosition Lane::DoToLanePosition(
