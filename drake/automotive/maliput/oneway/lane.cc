@@ -27,6 +27,7 @@ Lane::Lane(const Segment* segment, const api::LaneId& id,
   std::vector<ignition::math::Vector3d> points;
 
   // Spiral points
+  /*
   points.push_back(ignition::math::Vector3d(0.0, 0.0, 0.0));
   points.push_back(ignition::math::Vector3d(8.6602540378, 5.0000000000, 0.0));
   points.push_back(ignition::math::Vector3d(10.0000000000, 17.3205080757, 0.0));
@@ -40,26 +41,32 @@ Lane::Lane(const Segment* segment, const api::LaneId& id,
   points.push_back(ignition::math::Vector3d(50, -86.6025403784, 0.0));
   points.push_back(ignition::math::Vector3d(95.2627944163, -55.0000000000, 0.0));
   points.push_back(ignition::math::Vector3d(120, 0.0, 0.0));
+  */
 
+  // 90° curve
+  /*
+  points.push_back(ignition::math::Vector3d(0.0, 0.0, 0.0));
+  points.push_back(ignition::math::Vector3d(15.0, 0.0, 0.0));
+  points.push_back(ignition::math::Vector3d(20.0, 5.0, 0.0));
+  points.push_back(ignition::math::Vector3d(20.0, 10.0, 0.0));
+  points.push_back(ignition::math::Vector3d(20.0, 25.0, 0.0));
+  */
 
-  // // 90° curve
-  // points.push_back(ignition::math::Vector3d(0.0, 0.0, 0.0));
-  // points.push_back(ignition::math::Vector3d(15.0, 0.0, 0.0));
-  // points.push_back(ignition::math::Vector3d(20.0, 5.0, 0.0));
-  // points.push_back(ignition::math::Vector3d(20.0, 10.0, 0.0));
-  // points.push_back(ignition::math::Vector3d(20.0, 25.0, 0.0));
+  // 135° curve
+  /*
+  points.push_back(ignition::math::Vector3d(0.0, 0.0, 0.0));
+  points.push_back(ignition::math::Vector3d(15.0, 0.0, 0.0));
+  points.push_back(ignition::math::Vector3d(25.0, 5.0, 0.0));
+  points.push_back(ignition::math::Vector3d(40.0, 20.0, 0.0));
+  */
 
-  // // 135° curve
-  // points.push_back(ignition::math::Vector3d(0.0, 0.0, 0.0));
-  // points.push_back(ignition::math::Vector3d(15.0, 0.0, 0.0));
-  // points.push_back(ignition::math::Vector3d(25.0, 5.0, 0.0));
-  // points.push_back(ignition::math::Vector3d(40.0, 20.0, 0.0));
-
-  // //45° curve
-  // points.push_back(ignition::math::Vector3d(0.0, 0.0, 0.0));
-  // points.push_back(ignition::math::Vector3d(15.0, 0.0, 0.0));
-  // points.push_back(ignition::math::Vector3d(15.0, 5.0, 0.0));
-  // points.push_back(ignition::math::Vector3d(0.0, 20.0, 0.0));
+  //45° curve
+  /*
+  points.push_back(ignition::math::Vector3d(0.0, 0.0, 0.0));
+  points.push_back(ignition::math::Vector3d(15.0, 0.0, 0.0));
+  points.push_back(ignition::math::Vector3d(15.0, 5.0, 0.0));
+  points.push_back(ignition::math::Vector3d(0.0, 20.0, 0.0));
+  */
 
 
   points_.clear();
