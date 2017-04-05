@@ -12,11 +12,12 @@ namespace drake {
 namespace maliput {
 namespace rndf {
 
+typedef Eigen::Matrix<double, 2, 1, Eigen::DontAlign> Point2;
+
 class SplineLane : public Lane {
  public:
   DRAKE_NO_COPY_NO_MOVE_NO_ASSIGN(SplineLane)
 
-  typedef Eigen::Matrix<double, 2, 1, Eigen::DontAlign> Point2;
 
   SplineLane(const api::LaneId& id, const api::Segment* segment,
           const std::vector<Point2> &control_points,
@@ -55,7 +56,9 @@ class SplineLane : public Lane {
       double* distance) const override;
 
   V2 xy_of_p(const double p) const override;
+  V2 xy_dot_of_p(const double p) const override { return {0.0, 0.0}; };
   double heading_of_p(const double p) const override;
+  double heading_dot_of_p(const double p) const override { return 0.0; };
 
   std::vector<ignition::math::Vector3d> control_points_;
   std::vector<double> lengths_;

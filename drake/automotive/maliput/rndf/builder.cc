@@ -65,6 +65,14 @@ const Connection* Builder::Connect(
   return connections_.back().get();
 }
 
+const Connection* Builder::Connect(
+      const std::string& id,
+      const std::vector<Endpoints> &points) {
+  connections_.push_back(std::make_unique<Connection>(
+    id, points));
+  return connections_.back().get();
+}
+
 
 void Builder::SetDefaultBranch(
     const Connection* in, const api::LaneEnd::Which in_end,
@@ -239,6 +247,30 @@ Lane* Builder::BuildConnection(
                                  lane_bounds_, driveable_bounds_,
                                  elevation, superelevation);
       break;
+    }
+    case Connection::kSpline: {
+
+      std::vector<SplineLane::Point2> points;
+      for (const auto& point : connection->points()) {
+        points.push_back(SplineLane::Point2{point.x(), point.y()});
+      }
+      const CubicPolynomial elevation(MakeCubic(
+          arc_length,
+          conn->start().z().z(),
+          conn->end().z().z() - conn->start().z().z(),
+          conn->start().z().z_dot(),
+          conn->end().z().z_dot()));
+      const CubicPolynomial superelevation(MakeCubic(
+          arc_length,
+          conn->start().z().theta(),
+          conn->end().z().theta() - conn->start().z().theta(),
+          conn->start().z().theta_dot(),
+          conn->end().z().theta_dot()));
+      lane = segment->NewSplineLane(lane_id,
+                                  points,
+                                  0.0, 0.0,
+                                  lane_bounds_, driveable_bounds_,
+                                  elevation, superelevation);
     }
     default: {
       DRAKE_ABORT();

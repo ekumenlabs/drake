@@ -14,6 +14,9 @@ namespace rndf {
 
 class ArcLane;
 class LineLane;
+class SplineLane;
+
+typedef Eigen::Matrix<double, 2, 1, Eigen::DontAlign> Point2;
 
 /// An api::Segment implementation.
 class Segment : public api::Segment {
@@ -40,6 +43,15 @@ class Segment : public api::Segment {
   ArcLane* NewArcLane(api::LaneId id,
                       const V2& center, const double radius,
                       const double theta0, const double d_theta,
+                      const api::RBounds& lane_bounds,
+                      const api::RBounds& driveable_bounds,
+                      const CubicPolynomial& elevation,
+                      const CubicPolynomial& superelevation);
+
+  /// Gives the segment a newly constructed SplineLane.
+  SplineLane* NewSplineLane(const api::LaneId& id,
+                      const std::vector<Point2> &control_points,
+                      const double theta_i, const double theta_f,
                       const api::RBounds& lane_bounds,
                       const api::RBounds& driveable_bounds,
                       const CubicPolynomial& elevation,

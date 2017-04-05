@@ -199,7 +199,7 @@ class Connection {
   DRAKE_NO_COPY_NO_MOVE_NO_ASSIGN(Connection)
 
   /// Possible connection geometries:  line- or arc-segment.
-  enum Type { kLine, kArc };
+  enum Type { kLine, kArc, kSpline };
 
   /// Constructs a line-segment connection joining @p start to @p end.
   Connection(const std::string& id,
@@ -218,6 +218,13 @@ class Connection {
              double cx, double cy, double radius, double d_theta)
       : type_(kArc), id_(id), start_(start), end_(end),
         cx_(cx), cy_(cy), radius_(radius), d_theta_(d_theta) {}
+
+  /// Constructs a spline-segment connection joining @p points[0] to @p points[size-1].
+  Connection(const std::string& id,
+      const std::vector<Endpoint>& points)
+      : type_(kSpline), id_(id), start_(points.front()), end_(points.back()), points_(points) {
+    DRAKE_DEMAND(points_.size() > 2);
+  }
 
   /// Returns the geometric type of the path.
   Type type() const { return type_; }
@@ -255,11 +262,17 @@ class Connection {
     return d_theta_;
   }
 
+  const std::vector<Endpoint> &points() const {
+    DRAKE_DEMAND(type_ == kSpline);
+    return points;
+  }
+
  private:
   Type type_{};
   std::string id_;
   Endpoint start_;
   Endpoint end_;
+  std::vector<Endpoint> points_;
 
   // Bits specific to type_ == kArc:
   double cx_{};
@@ -340,6 +353,11 @@ class Builder {
       const Endpoint& start,
       const ArcOffset& arc,
       const EndpointZ& z_end);
+
+
+  const Connection* Connect(
+      const std::string& id,
+      const std::vector<Endpoints> &points);
 
   /// Sets the default branch for one end of a connection.
   ///
