@@ -6,6 +6,7 @@
 #include "drake/automotive/maliput/rndf/arc_lane.h"
 #include "drake/automotive/maliput/rndf/branch_point.h"
 #include "drake/automotive/maliput/rndf/line_lane.h"
+#include "drake/automotive/maliput/rndf/spline_lane.h"
 #include "drake/automotive/maliput/rndf/road_geometry.h"
 #include "drake/common/drake_assert.h"
 #include "drake/common/text_logging.h"
@@ -67,7 +68,7 @@ const Connection* Builder::Connect(
 
 const Connection* Builder::Connect(
       const std::string& id,
-      const std::vector<Endpoints> &points) {
+      const std::vector<Endpoint> &points) {
   connections_.push_back(std::make_unique<Connection>(
     id, points));
   return connections_.back().get();
@@ -250,18 +251,22 @@ Lane* Builder::BuildConnection(
     }
     case Connection::kSpline: {
 
-      std::vector<SplineLane::Point2> points;
-      for (const auto& point : connection->points()) {
-        points.push_back(SplineLane::Point2{point.x(), point.y()});
+      std::vector<Point2> points;
+      for (const auto& point : conn->points()) {
+        points.push_back(Point2{point.xy().x(), point.xy().y()});
       }
+      const V2 xy0(conn->start().xy().x(),
+                   conn->start().xy().y());
+      const V2 dxy(conn->end().xy().x() - xy0.x(),
+                   conn->end().xy().y() - xy0.y());
       const CubicPolynomial elevation(MakeCubic(
-          arc_length,
+          dxy.norm(),
           conn->start().z().z(),
           conn->end().z().z() - conn->start().z().z(),
           conn->start().z().z_dot(),
           conn->end().z().z_dot()));
       const CubicPolynomial superelevation(MakeCubic(
-          arc_length,
+          dxy.norm(),
           conn->start().z().theta(),
           conn->end().z().theta() - conn->start().z().theta(),
           conn->start().z().theta_dot(),
@@ -271,6 +276,7 @@ Lane* Builder::BuildConnection(
                                   0.0, 0.0,
                                   lane_bounds_, driveable_bounds_,
                                   elevation, superelevation);
+      break;
     }
     default: {
       DRAKE_ABORT();
