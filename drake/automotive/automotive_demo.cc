@@ -269,7 +269,6 @@ void AddVehicles(RoadNetworkType road_network_type,
             "StalledCarChannel" + std::to_string(i), state);
       }
     }
-
   } else if (road_network_type == RoadNetworkType::onramp) {
     DRAKE_DEMAND(road_geometry != nullptr);
     for (int i = 0; i < FLAGS_num_maliput_railcar; ++i) {
@@ -298,7 +297,6 @@ void AddVehicles(RoadNetworkType road_network_type,
                                        std::get<2>(params));
     }
   }
-  */
 }
 
 // Adds a flat terrain to the provided simulator.
@@ -314,7 +312,6 @@ void AddFlatTerrain(AutomotiveSimulator<double>*) {
   // drake/multibody/rigid_body_tree_construction.h.
 }
 
-/*
 // Adds a dragway to the provided `simulator`. The number of lanes, lane width,
 // lane length, and the shoulder width are all user-specifiable via command line
 // flags.
@@ -329,7 +326,6 @@ const maliput::api::RoadGeometry* AddDragway(
           FLAGS_dragway_shoulder_width);
   return simulator->SetRoadGeometry(std::move(road_geometry));
 }
-*/
 
 // Adds a dragway to the provided `simulator`. The number of lanes, lane width,
 // lane length, and the shoulder width are all user-specifiable via command line
@@ -340,15 +336,12 @@ const maliput::api::RoadGeometry* AddRNDF(
   return simulator->SetRoadGeometry(onramp_generator->Build());
 }
 
-/*
 // Adds a monolane-based onramp road network to the provided `simulator`.
 const maliput::api::RoadGeometry* AddOnramp(
     AutomotiveSimulator<double>* simulator) {
   auto onramp_generator = std::make_unique<MonolaneOnrampMerge>();
   return simulator->SetRoadGeometry(onramp_generator->BuildOnramp());
 }
-*/
-
 // Adds a terrain to the simulated world. The type of terrain added depends on
 // the provided `road_network_type` parameter. A pointer to the road network is
 // returned. A return value of `nullptr` is possible if no road network is
@@ -357,7 +350,7 @@ const maliput::api::RoadGeometry* AddTerrain(RoadNetworkType road_network_type,
     AutomotiveSimulator<double>* simulator) {
   const maliput::api::RoadGeometry* road_geometry{nullptr};
 
-  /*switch (road_network_type) {
+  switch (road_network_type) {
     case RoadNetworkType::flat: {
       AddFlatTerrain(simulator);
       break;
@@ -376,15 +369,11 @@ const maliput::api::RoadGeometry* AddTerrain(RoadNetworkType road_network_type,
     }
   }
   return road_geometry;
-  */
-  road_geometry = AddRNDF(simulator);
-  return road_geometry;
 }
 
 // Determines and returns the road network type based on the command line
 // arguments.
 RoadNetworkType DetermineRoadNetworkType() {
-  /*
   int num_environments_selected{0};
   if (FLAGS_with_onramp) ++num_environments_selected;
   if (FLAGS_num_dragway_lanes) ++num_environments_selected;
@@ -392,10 +381,7 @@ RoadNetworkType DetermineRoadNetworkType() {
     throw std::runtime_error("ERROR: More than one road network selected. Only "
         "one road network can be selected at a time.");
   }
-  */
 
-  return RoadNetworkType::rndf;
-  /*
   if (FLAGS_num_dragway_lanes > 0) {
     return RoadNetworkType::dragway;
   } else if (FLAGS_with_onramp) {
@@ -403,7 +389,7 @@ RoadNetworkType DetermineRoadNetworkType() {
   } else {
     return RoadNetworkType::flat;
   }
-  */
+
 }
 
 int main(int argc, char* argv[]) {
