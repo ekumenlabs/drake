@@ -7,6 +7,7 @@
 #include <string>
 #include <tuple>
 #include <vector>
+#include <iostream>
 
 #include "drake/automotive/maliput/api/lane_data.h"
 #include "drake/automotive/maliput/rndf/junction.h"
@@ -264,7 +265,7 @@ class Connection {
 
   const std::vector<Endpoint> &points() const {
     DRAKE_DEMAND(type_ == kSpline);
-    return points;
+    return points_;
   }
 
  private:
@@ -357,7 +358,7 @@ class Builder {
 
   const Connection* Connect(
       const std::string& id,
-      const std::vector<Endpoints> &points);
+      const std::vector<Endpoint> &points);
 
   /// Sets the default branch for one end of a connection.
   ///
