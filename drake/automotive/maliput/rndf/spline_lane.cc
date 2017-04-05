@@ -13,7 +13,7 @@ namespace maliput {
 namespace rndf {
 
 SplineLane::SplineLane(const api::LaneId& id, const api::Segment* segment,
-                      const std::vector<SplineLane::Point2> &control_points,
+                      const std::vector<Point2> &control_points,
                       const double theta_i, const double theta_f,
                       const api::RBounds& lane_bounds,
                       const api::RBounds& driveable_bounds,
@@ -70,23 +70,23 @@ double SplineLane::heading_of_p(const double p) const {
   // Check for tangent calculation error.
   if (!tangent.IsFinite())
     DRAKE_ABORT();
-  //tangent = tangent.Normalize();
+  tangent = tangent.Normalize();
   // We don't calculate the pitch and the roll as the curves are on the ground.
   return std::atan2(tangent.Y(),tangent.X());
 }
 
 
-SplineLane::Point2 SplineLane::IgnitionVector3d2Point2(
+Point2 SplineLane::IgnitionVector3d2Point2(
   const ignition::math::Vector3d &point) {
-  return SplineLane::Point2{point.X(), point.Y()};
+  return Point2{point.X(), point.Y()};
 }
-ignition::math::Vector3d SplineLane::Point22IgnitionVector3d(
-  const SplineLane::Point2 &point) {
+ignition::math::Vector3d Point22IgnitionVector3d(
+  const Point2 &point) {
   return ignition::math::Vector3d(point.x(), point.y(), 0.0);
 }
 
 std::vector<ignition::math::Vector3d> SplineLane::Points22IgnitionVector3ds(
-  const std::vector<SplineLane::Point2> &points) {
+  const std::vector<Point2> &points) {
   std::vector<ignition::math::Vector3d> ignition_points;
   for(const auto& point : points) {
     ignition_points.push_back(
@@ -95,12 +95,12 @@ std::vector<ignition::math::Vector3d> SplineLane::Points22IgnitionVector3ds(
   return ignition_points;
 }
 
-std::vector<SplineLane::Point2> SplineLane::IgnitionVector3ds2Points(
+std::vector<Point2> SplineLane::IgnitionVector3ds2Points(
   const std::vector<ignition::math::Vector3d> &points) {
-  std::vector<SplineLane::Point2> ignition_points;
+  std::vector<Point2> ignition_points;
   for(const auto& point : points) {
     ignition_points.push_back(
-      SplineLane::Point2{point.X(), point.Y()});
+      Point2{point.X(), point.Y()});
   }
   return ignition_points;
 }
