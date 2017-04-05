@@ -335,9 +335,12 @@ class Lane : public api::Lane {
 
   const api::RBounds lane_bounds_;
   const api::RBounds driveable_bounds_;
+protected:
   const double p_scale_{};
+private:
   const CubicPolynomial elevation_;
   const CubicPolynomial superelevation_;
+
 };
 
 

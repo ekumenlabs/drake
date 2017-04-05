@@ -15,6 +15,13 @@ drake_cc_library(
         ":lanes",
         ":loader",
     ],
+    copts = [
+        "-I/usr/include/ignition/math2",
+        "-std=c++11"
+    ],
+    linkopts = [
+        "-lignition-math2",
+    ],
 )
 
 drake_cc_library(
@@ -27,6 +34,7 @@ drake_cc_library(
         "line_lane.cc",
         "road_geometry.cc",
         "segment.cc",
+        "spline_lane.cc",
     ],
     hdrs = [
         "arc_lane.h",
@@ -36,6 +44,14 @@ drake_cc_library(
         "line_lane.h",
         "road_geometry.h",
         "segment.h",
+        "spline_lane.h",
+    ],
+    copts = [
+        "-I/usr/include/ignition/math2",
+        "-std=c++11"
+    ],
+    linkopts = [
+        "-lignition-math2",
     ],
     deps = [
         "//drake/automotive/maliput/api",
@@ -54,6 +70,13 @@ drake_cc_library(
     ],
     deps = [
         ":lanes",
+    ],
+    copts = [
+        "-I/usr/include/ignition/math2",
+        "-std=c++11"
+    ],
+    linkopts = [
+        "-lignition-math2",
     ],
 )
 
