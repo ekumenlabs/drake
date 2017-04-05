@@ -10,7 +10,9 @@
 #include "drake/automotive/gen/maliput_railcar_params.h"
 #include "drake/automotive/maliput/api/lane_data.h"
 #include "drake/automotive/maliput/dragway/road_geometry.h"
+#include "drake/automotive/maliput/rndf/road_geometry.h"
 #include "drake/automotive/monolane_onramp_merge.h"
+#include "drake/automotive/rndf_generator.h"
 #include "drake/common/drake_path.h"
 #include "drake/common/text_logging_gflags.h"
 
@@ -106,6 +108,7 @@ enum class RoadNetworkType {
   onramp = 2,
 };
 
+/*
 std::string MakeChannelName(const std::string& name) {
   const std::string default_prefix{"DRIVING_COMMAND"};
   if (name.empty()) {
@@ -113,6 +116,8 @@ std::string MakeChannelName(const std::string& name) {
   }
   return default_prefix + "_" + name;
 }
+*/
+
 
 // Adds a MaliputRailcar to the simulation involving a dragway. It throws a
 // std::runtime_error if there is insufficient lane length for adding the
@@ -264,6 +269,33 @@ void AddVehicles(RoadNetworkType road_network_type,
             "StalledCarChannel" + std::to_string(i), state);
       }
     }
+  } else if (road_network_type == RoadNetworkType::rndf) {
+    DRAKE_DEMAND(road_geometry != nullptr);
+    const maliput::rndf::RoadGeometry* rndf_road_geometry =
+        dynamic_cast<const maliput::rndf::RoadGeometry*>(road_geometry);
+    DRAKE_DEMAND(rndf_road_geometry != nullptr);
+
+      std::vector<std::string> lanes;
+      lanes.push_back("s1l1");
+      lanes.push_back("s1l1tos3l1");
+      lanes.push_back("s3l1");
+      lanes.push_back("s3l1tos4l1");
+      lanes.push_back("s4l1");
+
+      const auto& params1 = CreateTrajectoryParamsForRndf(
+          *rndf_road_geometry, lanes, 4.0, 5.0);
+      simulator->AddPriusTrajectoryCar(std::get<0>(params1),
+                                       std::get<1>(params1),
+                                       std::get<2>(params1));
+      lanes.clear();
+      lanes.push_back("s1l1");
+      lanes.push_back("s2l1");
+      const auto& params2 = CreateTrajectoryParamsForRndf(
+          *rndf_road_geometry, lanes, 4.0, 7.0);
+      simulator->AddPriusTrajectoryCar(std::get<0>(params2),
+                                       std::get<1>(params2),
+                                       std::get<2>(params2));
+
   } else if (road_network_type == RoadNetworkType::onramp) {
     DRAKE_DEMAND(road_geometry != nullptr);
     for (int i = 0; i < FLAGS_num_maliput_railcar; ++i) {

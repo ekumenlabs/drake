@@ -24,7 +24,6 @@ class SplineLane : public Lane {
  public:
   DRAKE_NO_COPY_NO_MOVE_NO_ASSIGN(SplineLane)
 
-
   SplineLane(const api::LaneId& id, const api::Segment* segment,
           const std::vector<std::tuple<ignition::math::Vector3d,
             ignition::math::Vector3d>> &control_points,
@@ -37,7 +36,13 @@ class SplineLane : public Lane {
     const std::vector<std::tuple<ignition::math::Vector3d,
     ignition::math::Vector3d>> &points);
 
+<<<<<<< HEAD
   static double Tension() { return kTension; }
+=======
+  /*static std::vector<ignition::math::Vector3d> InterpolateRoad(
+    const std::vector<ignition::math::Vector3d> &_points,
+    const double distance_threshold);*/
+>>>>>>> Made some changes to spline lane to remove unused code. Detected 90 degree roads issue when visualizing.
 
  private:
   api::LanePosition DoToLanePosition(

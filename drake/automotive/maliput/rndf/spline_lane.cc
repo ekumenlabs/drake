@@ -187,6 +187,7 @@ double SplineLane::ComputeLength(
   return spline.ArcLength();
 }
 
+
 }  // namespace rndf
 }  // namespace maliput
 }  // namespace drake

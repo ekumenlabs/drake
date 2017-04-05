@@ -11,7 +11,16 @@ drake_cc_library(
     srcs = [],
     hdrs = [],
     deps = [
+        ":builder",
+        ":lanes",
         ":loader",
+    ],
+    copts = [
+        "-I/usr/include/ignition/math2",
+        "-std=c++11"
+    ],
+    linkopts = [
+        "-lignition-math2",
     ],
 )
 
@@ -56,6 +65,13 @@ drake_cc_library(
         "@ignition_math",
         "@ignition_rndf",
     ],
+    copts = [
+        "-I/usr/include/ignition/math2",
+        "-std=c++11"
+    ],
+    linkopts = [
+        "-lignition-math2",
+    ],
 )
 
 drake_cc_library(
@@ -77,12 +93,5 @@ filegroup(
 
 # === test/ ===
 
-drake_cc_googletest(
-    name = "ignition_math_test",
-    srcs = ["test/ignition_math_test.cc"],
-    deps = [
-        "@ignition_math",
-    ],
-)
 
 cpplint()

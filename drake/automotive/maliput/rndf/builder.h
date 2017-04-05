@@ -118,6 +118,13 @@ class Connection {
     DRAKE_DEMAND(waypoints_.size() >= 2);
   }
 
+  /// Constructs a spline-segment connection joining @p points[0] to @p points[size-1].
+  Connection(const std::string& id,
+      const std::vector<Endpoint>& points)
+      : type_(kSpline), id_(id), start_(points.front()), end_(points.back()), points_(points) {
+    DRAKE_DEMAND(points_.size() >= 2);
+  }
+
   /// Returns the geometric type of the path.
   Type type() const { return type_; }
 
@@ -137,6 +144,11 @@ class Connection {
     return waypoints_;
   }
 
+  const std::vector<Endpoint> &points() const {
+    DRAKE_DEMAND(type_ == kSpline);
+    return points_;
+  }
+
  private:
   Type type_{};
   std::string id_;
@@ -144,6 +156,7 @@ class Connection {
   DirectedWaypoint end_;
   std::vector<DirectedWaypoint> waypoints_;
 };
+
 
 // N.B. The Builder class overview documentation lives at the top of this file.
 class Builder {

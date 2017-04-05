@@ -3,6 +3,7 @@
 #include <cmath>
 #include <utility>
 
+
 #include "drake/automotive/maliput/rndf/branch_point.h"
 #include "drake/automotive/maliput/rndf/spline_lane.h"
 #include "drake/automotive/maliput/rndf/road_geometry.h"
@@ -55,6 +56,14 @@ void Builder::CreateConnection(
     entry_it->second
   };
   CreateLane(lane_bounds_, driveable_bounds_, control_points);
+}
+
+const Connection* Builder::Connect(
+      const std::string& id,
+      const std::vector<Endpoint> &points) {
+  connections_.push_back(std::make_unique<Connection>(
+    id, points));
+  return connections_.back().get();
 }
 
 
@@ -216,6 +225,18 @@ Lane* Builder::BuildConnection(
         driveable_bounds_);
       break;
     }
+    case Connection::kSpline: {
+
+      std::vector<Point2> points;
+      for (const auto& point : conn->points()) {
+        points.push_back(Point2{point.xy().x(), point.xy().y()});
+      }
+      lane = segment->NewSplineLane(lane_id,
+                                  points,
+                                  lane_bounds_, driveable_bounds_,
+                                  CubicPolynomial(), CubicPolynomial());
+      break;
+    }
     default: {
       DRAKE_ABORT();
     }
@@ -272,6 +293,7 @@ std::string Builder::BuildName(const uint segment_id,
     std::to_string(lane_id) + "_" +
     std::to_string(waypoint_id);
 }
+
 
 }  // namespace rndf
 }  // namespace maliput

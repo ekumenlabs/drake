@@ -42,6 +42,14 @@ class Segment : public api::Segment {
                       const api::RBounds& lane_bounds,
                       const api::RBounds& driveable_bounds);
 
+  /// Gives the segment a newly constructed SplineLane.
+  SplineLane* NewSplineLane(const api::LaneId& id,
+                      const std::vector<Point2> &control_points,
+                      const api::RBounds& lane_bounds,
+                      const api::RBounds& driveable_bounds,
+                      const CubicPolynomial& elevation,
+                      const CubicPolynomial& superelevation);
+
   ~Segment() override = default;
 
  private:

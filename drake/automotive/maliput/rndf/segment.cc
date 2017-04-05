@@ -29,6 +29,25 @@ SplineLane* Segment::NewSplineLane(const api::LaneId& id,
   return result;
 }
 
+SplineLane* Segment::NewSplineLane(const api::LaneId& id,
+                      const std::vector<Point2> &control_points,
+                      const api::RBounds& lane_bounds,
+                      const api::RBounds& driveable_bounds,
+                      const CubicPolynomial& elevation,
+                      const CubicPolynomial& superelevation) {
+  DRAKE_DEMAND(lane_.get() == nullptr);
+  std::unique_ptr<SplineLane> lane = std::make_unique<SplineLane>(
+      id, this,
+      control_points,
+      lane_bounds,
+      driveable_bounds,
+      elevation,
+      superelevation);
+  SplineLane* result = lane.get();
+  lane_ = std::move(lane);
+  return result;
+}
+
 
 const api::Lane* Segment::do_lane(int index) const {
   DRAKE_DEMAND(index == 0);
