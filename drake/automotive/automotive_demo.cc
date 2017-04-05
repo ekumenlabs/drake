@@ -154,12 +154,22 @@ void AddVehicles(RoadNetworkType road_network_type,
       lanes.push_back("s1l1");
       lanes.push_back("s1l1tos3l1");
       lanes.push_back("s3l1");
+      lanes.push_back("s3l1tos4l1");
+      lanes.push_back("s4l1");
 
-      const auto& params = CreateTrajectoryParamsForRndf(
+      const auto& params1 = CreateTrajectoryParamsForRndf(
           *rndf_road_geometry, lanes, 4.0, 5.0);
-      simulator->AddPriusTrajectoryCar(std::get<0>(params),
-                                       std::get<1>(params),
-                                       std::get<2>(params));
+      simulator->AddPriusTrajectoryCar(std::get<0>(params1),
+                                       std::get<1>(params1),
+                                       std::get<2>(params1));
+      lanes.clear();
+      lanes.push_back("s1l1");
+      lanes.push_back("s2l1");
+      const auto& params2 = CreateTrajectoryParamsForRndf(
+          *rndf_road_geometry, lanes, 4.0, 7.0);
+      simulator->AddPriusTrajectoryCar(std::get<0>(params2),
+                                       std::get<1>(params2),
+                                       std::get<2>(params2));
 
     /*
   } else if (road_network_type == RoadNetworkType::onramp) {
