@@ -9,6 +9,7 @@
 #include "drake/automotive/curve2.h"
 #include "drake/automotive/maliput/api/road_geometry.h"
 #include "drake/automotive/maliput/dragway/road_geometry.h"
+#include "drake/automotive/maliput/rndf/road_geometry.h"
 #include "drake/automotive/trajectory_car.h"
 
 namespace drake {
@@ -40,6 +41,11 @@ std::tuple<Curve2<double>, double, double> CreateTrajectoryParams(int index);
  */
 std::tuple<Curve2<double>, double, double> CreateTrajectoryParamsForDragway(
     const maliput::dragway::RoadGeometry& road_geometry, int index,
+    double speed, double start_time);
+
+std::tuple<Curve2<double>, double, double> CreateTrajectoryParamsForRndf(
+    const maliput::rndf::RoadGeometry& road_geometry,
+    const std::vector<std::string> &lanes,
     double speed, double start_time);
 
 }  // namespace automotive
