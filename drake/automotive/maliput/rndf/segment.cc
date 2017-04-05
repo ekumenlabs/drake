@@ -4,6 +4,7 @@
 
 #include "drake/automotive/maliput/rndf/arc_lane.h"
 #include "drake/automotive/maliput/rndf/line_lane.h"
+#include "drake/automotive/maliput/rndf/spline_lane.h"
 #include "drake/common/drake_assert.h"
 
 namespace drake {
@@ -45,6 +46,27 @@ ArcLane* Segment::NewArcLane(api::LaneId id,
       lane_bounds, driveable_bounds,
       elevation, superelevation);
   ArcLane* result = lane.get();
+  lane_ = std::move(lane);
+  return result;
+}
+
+SplineLane* Segment::NewSplineLane(const api::LaneId& id,
+                      const std::vector<Point2> &control_points,
+                      const double theta_i, const double theta_f,
+                      const api::RBounds& lane_bounds,
+                      const api::RBounds& driveable_bounds,
+                      const CubicPolynomial& elevation,
+                      const CubicPolynomial& superelevation) {
+  DRAKE_DEMAND(lane_.get() == nullptr);
+  std::unique_ptr<SplineLane> lane = std::make_unique<SplineLane>(
+      id, this,
+      control_points,
+      theta_i, theta_f,
+      lane_bounds,
+      driveable_bounds,
+      elevation,
+      superelevation);
+  SplineLane* result = lane.get();
   lane_ = std::move(lane);
   return result;
 }
