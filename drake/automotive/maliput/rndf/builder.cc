@@ -255,27 +255,13 @@ Lane* Builder::BuildConnection(
       for (const auto& point : conn->points()) {
         points.push_back(Point2{point.xy().x(), point.xy().y()});
       }
-      const V2 xy0(conn->start().xy().x(),
-                   conn->start().xy().y());
-      const V2 dxy(conn->end().xy().x() - xy0.x(),
-                   conn->end().xy().y() - xy0.y());
-      const CubicPolynomial elevation(MakeCubic(
-          dxy.norm(),
-          conn->start().z().z(),
-          conn->end().z().z() - conn->start().z().z(),
-          conn->start().z().z_dot(),
-          conn->end().z().z_dot()));
-      const CubicPolynomial superelevation(MakeCubic(
-          dxy.norm(),
-          conn->start().z().theta(),
-          conn->end().z().theta() - conn->start().z().theta(),
-          conn->start().z().theta_dot(),
-          conn->end().z().theta_dot()));
+      /*
+      CubicPolynomial elevation;
+      CubicPolynomial superelevation;*/
       lane = segment->NewSplineLane(lane_id,
                                   points,
-                                  0.0, 0.0,
                                   lane_bounds_, driveable_bounds_,
-                                  elevation, superelevation);
+                                  CubicPolynomial(), CubicPolynomial());
       break;
     }
     default: {

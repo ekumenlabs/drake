@@ -21,7 +21,6 @@ class SplineLane : public Lane {
 
   SplineLane(const api::LaneId& id, const api::Segment* segment,
           const std::vector<Point2> &control_points,
-          const double theta_i, const double theta_f,
           const api::RBounds& lane_bounds,
           const api::RBounds& driveable_bounds,
           const CubicPolynomial& elevation,
@@ -56,15 +55,15 @@ class SplineLane : public Lane {
       double* distance) const override;
 
   V2 xy_of_p(const double p) const override;
-  V2 xy_dot_of_p(const double p) const override { return {0.0, 0.0}; };
+  V2 xy_dot_of_p(const double p) const override;
   double heading_of_p(const double p) const override;
-  double heading_dot_of_p(const double p) const override { return 0.0; };
+  double heading_dot_of_p(const double p) const override;
+
+  double module_p(const double _p) const;
 
   std::vector<ignition::math::Vector3d> control_points_;
-  std::vector<double> lengths_;
+  // std::vector<double> lengths_;
   ignition::math::Spline spline_;
-  double theta_i_;
-  double theta_f_;
 };
 
 }  // namespace rndf
