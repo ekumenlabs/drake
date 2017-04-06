@@ -12,9 +12,9 @@ namespace drake {
 namespace maliput {
 namespace rndf {
 
+
 SplineLane::SplineLane(const api::LaneId& id, const api::Segment* segment,
                       const std::vector<Point2> &control_points,
-                      const double theta_i, const double theta_f,
                       const api::RBounds& lane_bounds,
                       const api::RBounds& driveable_bounds,
                       const CubicPolynomial& elevation,
@@ -25,11 +25,10 @@ SplineLane::SplineLane(const api::LaneId& id, const api::Segment* segment,
           ComputeLength(Points22IgnitionVector3ds(control_points), nullptr),
           elevation,
           superelevation),
-      control_points_(Points22IgnitionVector3ds(control_points)),
-      theta_i_(theta_i),
-      theta_f_(theta_f) {
+      control_points_(Points22IgnitionVector3ds(control_points)) {
 
-  ComputeLength(control_points_, &lengths_);
+  //ComputeLength(control_points_, &lengths_);
+  /*
   std::vector<ignition::math::Vector3d> points;
   points = InterpolateRoad(control_points_, 0.1);
   // Create the spline and calculate all the tangents.
@@ -39,9 +38,14 @@ SplineLane::SplineLane(const api::LaneId& id, const api::Segment* segment,
     spline_.AddPoint(point);
   }
   spline_.RecalcTangents();
-
-  theta_i_ += 0.0;
-  theta_f_ += 0.0;
+  */
+  // Create the spline and calculate all the tangents.
+  spline_.Tension(0.0);
+  spline_.AutoCalculate(false);
+  for (const auto &point : control_points_) {
+    spline_.AddPoint(point);
+  }
+  spline_.RecalcTangents();
 }
 
 
@@ -57,24 +61,32 @@ V2 SplineLane::xy_of_p(const double p) const {
   return {point.X(), point.Y()};
 }
 
-double SplineLane::heading_of_p(const double p) const {
-  double s = std::min(0.0, p * p_scale_);
-  s = std::max(s, p_scale_);
+V2 SplineLane::xy_dot_of_p(const double p) const {
+  auto p1 = module_p(p);
+  auto p2 = module_p(p + 0.001);
 
-  uint i;
-  for (i = 0; i < lengths_.size(); i++) {
-    if (lengths_[i] > s)
-      break;
-  }
-  ignition::math::Vector3d tangent = spline_.Tangent(i);
-  // Check for tangent calculation error.
-  if (!tangent.IsFinite())
-    DRAKE_ABORT();
-  tangent = tangent.Normalize();
-  // We don't calculate the pitch and the roll as the curves are on the ground.
-  return std::atan2(tangent.Y(),tangent.X());
+  const auto& point_p1 = spline_.Interpolate(p1);
+  const auto& point_p2 = spline_.Interpolate(p2);
+  const auto tangent = (point_p2 - point_p1) * 0.5;
+  return {tangent.X(), tangent.Y()};
 }
 
+double SplineLane::heading_of_p(const double p) const {
+  const auto tangent = xy_dot_of_p(p);
+  return std::atan2(tangent.y(), tangent.x());
+}
+
+double SplineLane::heading_dot_of_p(const double p) const {
+  const auto h_p = heading_of_p(p);
+  const auto h_p_dp = heading_of_p(p + 0.001);
+  return (h_p_dp - h_p) * 0.5;
+}
+
+double SplineLane::module_p(const double _p) const {
+    double p = std::min(0.0, _p);
+    p = std::max(1.0, p);
+    return p;
+}
 
 Point2 SplineLane::IgnitionVector3d2Point2(
   const ignition::math::Vector3d &point) {
