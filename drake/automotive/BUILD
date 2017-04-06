@@ -507,6 +507,14 @@ py_binary(
     deps = [
         "@lcm//:lcm-python",
     ],
+<<<<<<< HEAD
+=======
+    args = [
+        "-with_rndf",
+        "-lane_names=s1l1,s1l1tos3l1,s3l1",
+        "-rndf_base_speed=5"
+    ],
+>>>>>>> Corrected spline lane module and generator.
 )
 
 

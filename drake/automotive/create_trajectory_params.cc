@@ -136,6 +136,5 @@ std::tuple<Curve2<double>, double, double> CreateTrajectoryParamsForRndf(
 }
 
 
-
 }  // namespace automotive
 }  // namespace drake

@@ -77,6 +77,7 @@ V3 SplineLane::s_hat_of_srh(const double s, const double r, const double h,
   const V3 W_prime = W_prime_of_srh(s, r, h, Rabg);
   return W_prime * (1.0 / W_prime.norm());
 }
+
 V3 SplineLane::W_prime_of_srh(const double s, const double r, const double h,
                         const Rot3& Rabg) const {
   const V2 G_prime = xy_dot_of_s(s);
