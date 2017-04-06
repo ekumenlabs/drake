@@ -62,6 +62,10 @@ DEFINE_double(onramp_base_speed, 25, "The speed of the vehicles added to the "
 DEFINE_bool(onramp_swap_start, false, "Whether to swap the starting lanes of "
     "the vehicles on the onramp.");
 
+DEFINE_string(lane_names, "",
+  "A comma-separated list (e.g. 'lane_1,lane_2,lane_3' that generates a path "
+  "for the car to follow.");
+
 namespace drake {
 
 using maliput::api::Lane;
@@ -150,26 +154,26 @@ void AddVehicles(RoadNetworkType road_network_type,
         dynamic_cast<const maliput::rndf::RoadGeometry*>(road_geometry);
     DRAKE_DEMAND(rndf_road_geometry != nullptr);
 
-      std::vector<std::string> lanes;
-      lanes.push_back("s1l1");
-      lanes.push_back("s1l1tos3l1");
-      lanes.push_back("s3l1");
-      lanes.push_back("s3l1tos4l1");
-      lanes.push_back("s4l1");
-
-      const auto& params1 = CreateTrajectoryParamsForRndf(
-          *rndf_road_geometry, lanes, 4.0, 5.0);
-      simulator->AddPriusTrajectoryCar(std::get<0>(params1),
-                                       std::get<1>(params1),
-                                       std::get<2>(params1));
-      lanes.clear();
-      lanes.push_back("s1l1");
-      lanes.push_back("s2l1");
-      const auto& params2 = CreateTrajectoryParamsForRndf(
-          *rndf_road_geometry, lanes, 4.0, 7.0);
-      simulator->AddPriusTrajectoryCar(std::get<0>(params2),
-                                       std::get<1>(params2),
-                                       std::get<2>(params2));
+      std::vector<std::string> lane_name_paths;
+      /*
+      lane_name_paths.push_back("s1l1");
+      lane_name_paths.push_back("s1l1tos3l1");
+      lane_name_paths.push_back("s3l1");
+      lane_name_paths.push_back("s3l1tos4l1");
+      lane_name_paths.push_back("s4l1");
+      */
+//s1l1,s1l1tos3l1,s3l1,s3l1tos4l1,s4l1
+      std::string testStr(FLAGS_lane_names);
+      std::istringstream simple_lane_name_stream(FLAGS_lane_names);
+      std::string lane_name;
+      while (getline(simple_lane_name_stream, lane_name, ',')) {
+        lane_name_paths.push_back(lane_name);
+      }
+      const auto& params = CreateTrajectoryParamsForRndf(
+          *rndf_road_geometry, lane_name_paths, 4.0, 5.0);
+      simulator->AddPriusTrajectoryCar(std::get<0>(params),
+                                       std::get<1>(params),
+                                       std::get<2>(params));
 
     /*
   } else if (road_network_type == RoadNetworkType::onramp) {
