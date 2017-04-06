@@ -42,5 +42,11 @@ std::tuple<Curve2<double>, double, double> CreateTrajectoryParamsForDragway(
     const maliput::dragway::RoadGeometry& road_geometry, int index,
     double speed, double start_time);
 
+std::tuple<Curve2<double>, double, double> CreateTrajectoryParamsForCustomMonolane(
+    const maliput::api::RoadGeometry& road_geometry,
+    const std::vector<std::string> &lane_names,
+    const double speed,
+    const double start_time);
+
 }  // namespace automotive
 }  // namespace drake

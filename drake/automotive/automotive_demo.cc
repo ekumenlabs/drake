@@ -12,6 +12,9 @@
 #include "drake/common/drake_path.h"
 #include "drake/common/text_logging_gflags.h"
 
+#include "drake/automotive/maliput/monolane/loader.h"
+#include "drake/automotive/maliput/monolane/road_geometry.h"
+
 DEFINE_string(simple_car_names, "",
               "A comma-separated list (e.g. 'Russ,Jeremy,Liang' would spawn 3 "
               "cars subscribed to DRIVING_COMMAND_Russ, "
@@ -60,6 +63,19 @@ DEFINE_double(onramp_base_speed, 25, "The speed of the vehicles added to the "
 DEFINE_bool(onramp_swap_start, false, "Whether to swap the starting lanes of "
     "the vehicles on the onramp.");
 
+DEFINE_bool(load_custom_monolane, false,
+  "It loads a custom yaml file and a sequence of lanes to follow.");
+DEFINE_string(monolane_filepath, "",
+  "The path of the monolane file to load into the visualizer.");
+DEFINE_string(lane_names, "",
+  "A comma-separated list (e.g. 'lane_1,lane_2,lane_3' that generates a path "
+  "for the car to follow.");
+DEFINE_double(custom_monolane_base_speed, 10.0,
+  "The speed of the vehicles on the right-most lane of the custom monolane.");
+DEFINE_double(custom_monolane_vehicle_delay, 10.0,
+  "The starting time delay.");
+
+
 namespace drake {
 
 using maliput::api::Lane;
@@ -70,7 +86,8 @@ namespace {
 enum class RoadNetworkType {
   flat = 0,
   dragway = 1,
-  onramp = 2
+  onramp = 2,
+  custom_monolane = 3,
 };
 
 std::string MakeChannelName(const std::string& name) {
@@ -156,6 +173,31 @@ void AddVehicles(RoadNetworkType road_network_type,
       simulator->AddPriusMaliputRailcar("MaliputRailcar" + std::to_string(i),
           lane_direction, params, state);
     }
+  } else if (road_network_type == RoadNetworkType::custom_monolane) {
+    DRAKE_DEMAND(road_geometry != nullptr);
+    const maliput::monolane::RoadGeometry* monolane_road_geometry =
+        dynamic_cast<const maliput::monolane::RoadGeometry*>(road_geometry);
+    DRAKE_DEMAND(monolane_road_geometry != nullptr);
+
+    std::vector<std::string> lane_name_paths;
+
+    std::string testStr(FLAGS_lane_names);
+    std::istringstream simple_lane_name_stream(testStr);
+    std::string lane_name;
+    while (getline(simple_lane_name_stream, lane_name, ',')) {
+      lane_name_paths.push_back(lane_name);
+    }
+
+
+    const auto& params = CreateTrajectoryParamsForCustomMonolane(
+      *monolane_road_geometry,
+      lane_name_paths,
+      FLAGS_custom_monolane_base_speed,
+      FLAGS_custom_monolane_vehicle_delay);
+    simulator->AddPriusTrajectoryCar("TrajectoryCar_Monolane",
+     std::get<0>(params),
+     std::get<1>(params),
+     std::get<2>(params));
   } else {
     for (int i = 0; i < FLAGS_num_trajectory_car; ++i) {
       const auto& params = CreateTrajectoryParams(i);
@@ -202,6 +244,12 @@ const maliput::api::RoadGeometry* AddOnramp(
   return simulator->SetRoadGeometry(onramp_generator->BuildOnramp());
 }
 
+const maliput::api::RoadGeometry* AddCustomMonolane(
+    AutomotiveSimulator<double>* simulator) {
+  return simulator->SetRoadGeometry(
+    drake::maliput::monolane::LoadFile(FLAGS_monolane_filepath));
+}
+
 // Adds a terrain to the simulated world. The type of terrain added depends on
 // the provided `road_network_type` parameter. A pointer to the road network is
 // returned. A return value of `nullptr` is possible if no road network is
@@ -222,6 +270,10 @@ const maliput::api::RoadGeometry* AddTerrain(RoadNetworkType road_network_type,
       road_geometry = AddOnramp(simulator);
       break;
     }
+    case RoadNetworkType::custom_monolane: {
+      road_geometry = AddCustomMonolane(simulator);
+      break;
+    }
   }
   return road_geometry;
 }
@@ -237,6 +289,9 @@ RoadNetworkType DetermineRoadNetworkType() {
         "one road network can be selected at a time.");
   }
 
+  if (FLAGS_load_custom_monolane) {
+    return RoadNetworkType::custom_monolane;
+  }
   if (FLAGS_num_dragway_lanes > 0) {
     return RoadNetworkType::dragway;
   } else if (FLAGS_with_onramp) {

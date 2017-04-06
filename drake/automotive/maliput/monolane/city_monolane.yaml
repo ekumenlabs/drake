@@ -1,0 +1,748 @@
+# -*- yaml -*-
+---
+# distances are meters; angles are degrees.
+maliput_monolane_builder:
+  id: city_1
+  lane_bounds: [-2, 2]
+  driveable_bounds: [-4, 4]
+  position_precision: 0.01
+  orientation_precision: 0.5
+  points:
+    street_2_1_1:
+      xypoint: [100.0, -2.0, 90.0]
+      zpoint: [0.0, 0, 0, 0]
+    street_2_1_2:
+      xypoint: [100.0, 5.0, 90.0]
+      zpoint: [0.0, 0, 0, 0]
+    street_2_1_3:
+      xypoint: [100.0, 93.0, 90.0]
+      zpoint: [0.0, 0, 0, 0]
+    street_2_1_4:
+      xypoint: [100.0, 107.0, 90.0]
+      zpoint: [0.0, 0, 0, 0]
+    street_2_1_5:
+      xypoint: [100.0, 193.0, 90.0]
+      zpoint: [0.0, 0, 0, 0]
+    street_2_1_6:
+      xypoint: [100.0, 207.0, 90.0]
+      zpoint: [0.0, 0, 0, 0]
+    street_2_1_7:
+      xypoint: [100.0, 290.0, 90.0]
+      zpoint: [0.0, 0, 0, 0]
+    street_2_1_8:
+      xypoint: [100.0, 293.0, 90.0]
+      zpoint: [0.0, 0, 0, 0]
+    street_2_1_9:
+      xypoint: [100.0, 307.0, 90.0]
+      zpoint: [0.0, 0, 0, 0]
+    street_2_1_10:
+      xypoint: [100.0, 310.0, 90.0]
+      zpoint: [0.0, 0, 0, 0]
+    street_2_1_11:
+      xypoint: [100.0, 395.0, 90.0]
+      zpoint: [0.0, 0, 0, 0]
+    street_2_1_12:
+      xypoint: [100.0, 402.0, 90.0]
+      zpoint: [0.0, 0, 0, 0]
+    street_3_1_1:
+      xypoint: [200.0, -2.0, 90.0]
+      zpoint: [0.0, 0, 0, 0]
+    street_3_1_2:
+      xypoint: [200.0, 5.0, 90.0]
+      zpoint: [0.0, 0, 0, 0]
+    street_3_1_3:
+      xypoint: [200.0, 93.0, 90.0]
+      zpoint: [0.0, 0, 0, 0]
+    street_3_1_4:
+      xypoint: [200.0, 107.0, 90.0]
+      zpoint: [0.0, 0, 0, 0]
+    street_3_1_5:
+      xypoint: [200.0, 190.0, 90.0]
+      zpoint: [0.0, 0, 0, 0]
+    street_3_1_6:
+      xypoint: [200.0, 193.0, 90.0]
+      zpoint: [0.0, 0, 0, 0]
+    street_3_1_7:
+      xypoint: [200.0, 207.0, 90.0]
+      zpoint: [0.0, 0, 0, 0]
+    street_3_1_8:
+      xypoint: [200.0, 210.0, 90.0]
+      zpoint: [0.0, 0, 0, 0]
+    street_3_1_9:
+      xypoint: [200.0, 293.0, 90.0]
+      zpoint: [0.0, 0, 0, 0]
+    street_3_1_10:
+      xypoint: [200.0, 307.0, 90.0]
+      zpoint: [0.0, 0, 0, 0]
+    street_3_1_11:
+      xypoint: [200.0, 395.0, 90.0]
+      zpoint: [0.0, 0, 0, 0]
+    street_3_1_12:
+      xypoint: [200.0, 402.0, 90.0]
+      zpoint: [0.0, 0, 0, 0]
+    street_4_1_1:
+      xypoint: [300.0, -2.0, 90.0]
+      zpoint: [0.0, 0, 0, 0]
+    street_4_1_2:
+      xypoint: [300.0, 5.0, 90.0]
+      zpoint: [0.0, 0, 0, 0]
+    street_4_1_3:
+      xypoint: [300.0, 90.0, 90.0]
+      zpoint: [0.0, 0, 0, 0]
+    street_4_1_4:
+      xypoint: [300.0, 93.0, 90.0]
+      zpoint: [0.0, 0, 0, 0]
+    street_4_1_5:
+      xypoint: [300.0, 107.0, 90.0]
+      zpoint: [0.0, 0, 0, 0]
+    street_4_1_6:
+      xypoint: [300.0, 110.0, 90.0]
+      zpoint: [0.0, 0, 0, 0]
+    street_4_1_7:
+      xypoint: [300.0, 193.0, 90.0]
+      zpoint: [0.0, 0, 0, 0]
+    street_4_1_8:
+      xypoint: [300.0, 207.0, 90.0]
+      zpoint: [0.0, 0, 0, 0]
+    street_4_1_9:
+      xypoint: [300.0, 293.0, 90.0]
+      zpoint: [0.0, 0, 0, 0]
+    street_4_1_10:
+      xypoint: [300.0, 307.0, 90.0]
+      zpoint: [0.0, 0, 0, 0]
+    street_4_1_11:
+      xypoint: [300.0, 395.0, 90.0]
+      zpoint: [0.0, 0, 0, 0]
+    street_4_1_12:
+      xypoint: [300.0, 402.0, 90.0]
+      zpoint: [0.0, 0, 0, 0]
+    street_5_1_1:
+      xypoint: [-2.0, 100.0, 0.0]
+      zpoint: [0.0, 0, 0, 0]
+    street_5_1_2:
+      xypoint: [5.0, 100.0, 0.0]
+      zpoint: [0.0, 0, 0, 0]
+    street_5_1_3:
+      xypoint: [93.0, 100.0, 0.0]
+      zpoint: [0.0, 0, 0, 0]
+    street_5_1_4:
+      xypoint: [107.0, 100.0, 0.0]
+      zpoint: [0.0, 0, 0, 0]
+    street_5_1_5:
+      xypoint: [193.0, 100.0, 0.0]
+      zpoint: [0.0, 0, 0, 0]
+    street_5_1_6:
+      xypoint: [207.0, 100.0, 0.0]
+      zpoint: [0.0, 0, 0, 0]
+    street_5_1_7:
+      xypoint: [293.0, 100.0, 0.0]
+      zpoint: [0.0, 0, 0, 0]
+    street_5_1_8:
+      xypoint: [307.0, 100.0, 0.0]
+      zpoint: [0.0, 0, 0, 0]
+    street_5_1_9:
+      xypoint: [395.0, 100.0, 0.0]
+      zpoint: [0.0, 0, 0, 0]
+    street_5_1_10:
+      xypoint: [402.0, 100.0, 0.0]
+      zpoint: [0.0, 0, 0, 0]
+    street_6_1_1:
+      xypoint: [-2.0, 200.0, 0.0]
+      zpoint: [0.0, 0, 0, 0]
+    street_6_1_2:
+      xypoint: [5.0, 200.0, 0.0]
+      zpoint: [0.0, 0, 0, 0]
+    street_6_1_3:
+      xypoint: [93.0, 200.0, 0.0]
+      zpoint: [0.0, 0, 0, 0]
+    street_6_1_4:
+      xypoint: [107.0, 200.0, 0.0]
+      zpoint: [0.0, 0, 0, 0]
+    street_6_1_5:
+      xypoint: [193.0, 200.0, 0.0]
+      zpoint: [0.0, 0, 0, 0]
+    street_6_1_6:
+      xypoint: [207.0, 200.0, 0.0]
+      zpoint: [0.0, 0, 0, 0]
+    street_6_1_7:
+      xypoint: [293.0, 200.0, 0.0]
+      zpoint: [0.0, 0, 0, 0]
+    street_6_1_8:
+      xypoint: [307.0, 200.0, 0.0]
+      zpoint: [0.0, 0, 0, 0]
+    street_6_1_9:
+      xypoint: [395.0, 200.0, 0.0]
+      zpoint: [0.0, 0, 0, 0]
+    street_6_1_10:
+      xypoint: [402.0, 200.0, 0.0]
+      zpoint: [0.0, 0, 0, 0]
+    street_7_1_1:
+      xypoint: [-2.0, 300.0, 0.0]
+      zpoint: [0.0, 0, 0, 0]
+    street_7_1_2:
+      xypoint: [5.0, 300.0, 0.0]
+      zpoint: [0.0, 0, 0, 0]
+    street_7_1_3:
+      xypoint: [93.0, 300.0, 0.0]
+      zpoint: [0.0, 0, 0, 0]
+    street_7_1_4:
+      xypoint: [107.0, 300.0, 0.0]
+      zpoint: [0.0, 0, 0, 0]
+    street_7_1_5:
+      xypoint: [193.0, 300.0, 0.0]
+      zpoint: [0.0, 0, 0, 0]
+    street_7_1_6:
+      xypoint: [207.0, 300.0, 0.0]
+      zpoint: [0.0, 0, 0, 0]
+    street_7_1_7:
+      xypoint: [293.0, 300.0, 0.0]
+      zpoint: [0.0, 0, 0, 0]
+    street_7_1_8:
+      xypoint: [307.0, 300.0, 0.0]
+      zpoint: [0.0, 0, 0, 0]
+    street_7_1_9:
+      xypoint: [395.0, 300.0, 0.0]
+      zpoint: [0.0, 0, 0, 0]
+    street_7_1_10:
+      xypoint: [402.0, 300.0, 0.0]
+      zpoint: [0.0, 0, 0, 0]
+    street_8_1_1:
+      xypoint: [-2.0, -2.0, 45.0]
+      zpoint: [0.0, 0, 0, 0]
+    street_8_1_2:
+      xypoint: [5.0710678118654755, 5.0710678118654755, 45.0]
+      zpoint: [0.0, 0, 0, 0]
+    street_8_1_3:
+      xypoint: [95.05025253169417, 95.05025253169417, 45.0]
+      zpoint: [0.0, 0, 0, 0]
+    street_8_1_4:
+      xypoint: [104.94974746830584, 104.94974746830584, 45.0]
+      zpoint: [0.0, 0, 0, 0]
+    street_8_1_5:
+      xypoint: [195.05025253169416, 195.05025253169416, 45.0]
+      zpoint: [0.0, 0, 0, 0]
+    street_8_1_6:
+      xypoint: [204.94974746830584, 204.94974746830584, 45.0]
+      zpoint: [0.0, 0, 0, 0]
+    street_8_1_7:
+      xypoint: [295.0502525316942, 295.0502525316942, 45.0]
+      zpoint: [0.0, 0, 0, 0]
+    street_8_1_8:
+      xypoint: [304.9497474683058, 304.9497474683058, 45.0]
+      zpoint: [0.0, 0, 0, 0]
+    street_8_1_9:
+      xypoint: [394.9289321881345, 394.9289321881345, 45.0]
+      zpoint: [0.0, 0, 0, 0]
+    street_8_1_10:
+      xypoint: [402.0, 402.0, 45.0]
+      zpoint: [0.0, 0, 0, 0]
+    street_9_1_1:
+      xypoint: [-2.0, 402.0, -45.0]
+      zpoint: [0.0, 0, 0, 0]
+    street_9_1_2:
+      xypoint: [5.0710678118654755, 394.9289321881345, -45.0]
+      zpoint: [0.0, 0, 0, 0]
+    street_9_1_3:
+      xypoint: [92.92893218813452, 307.0710678118655, -45.0]
+      zpoint: [0.0, 0, 0, 0]
+    street_9_1_4:
+      xypoint: [95.05025253169417, 304.9497474683058, -45.0]
+      zpoint: [0.0, 0, 0, 0]
+    street_9_1_5:
+      xypoint: [104.94974746830584, 295.0502525316941, -45.0]
+      zpoint: [0.0, 0, 0, 0]
+    street_9_1_6:
+      xypoint: [107.07106781186548, 292.9289321881345, -45.0]
+      zpoint: [0.0, 0, 0, 0]
+    street_9_1_7:
+      xypoint: [192.92893218813452, 207.07106781186548, -45.0]
+      zpoint: [0.0, 0, 0, 0]
+    street_9_1_8:
+      xypoint: [195.05025253169416, 204.94974746830584, -45.0]
+      zpoint: [0.0, 0, 0, 0]
+    street_9_1_9:
+      xypoint: [204.94974746830584, 195.05025253169416, -45.0]
+      zpoint: [0.0, 0, 0, 0]
+    street_9_1_10:
+      xypoint: [207.07106781186548, 192.92893218813452, -45.0]
+      zpoint: [0.0, 0, 0, 0]
+    street_9_1_11:
+      xypoint: [292.9289321881345, 107.07106781186548, -45.0]
+      zpoint: [0.0, 0, 0, 0]
+    street_9_1_12:
+      xypoint: [295.0502525316942, 104.94974746830582, -45.0]
+      zpoint: [0.0, 0, 0, 0]
+    street_9_1_13:
+      xypoint: [304.9497474683058, 95.05025253169418, -45.0]
+      zpoint: [0.0, 0, 0, 0]
+    street_9_1_14:
+      xypoint: [307.0710678118655, 92.92893218813452, -45.0]
+      zpoint: [0.0, 0, 0, 0]
+    street_9_1_15:
+      xypoint: [394.9289321881345, 5.0710678118654755, -45.0]
+      zpoint: [0.0, 0, 0, 0]
+    street_9_1_16:
+      xypoint: [402.0, -2.0, -45.0]
+      zpoint: [0.0, 0, 0, 0]
+    RingRoad1_1_1:
+      xypoint: [-2.0, -2.0, 0.0]
+      zpoint: [0.0, 0, 0, 0]
+    RingRoad1_1_2:
+      xypoint: [5.0, -2.0, 0.0]
+      zpoint: [0.0, 0, 0, 0]
+    RingRoad1_1_3:
+      xypoint: [93.0, -2.0, 0.0]
+      zpoint: [0.0, 0, 0, 0]
+    RingRoad1_1_4:
+      xypoint: [193.0, -2.0, 0.0]
+      zpoint: [0.0, 0, 0, 0]
+    RingRoad1_1_5:
+      xypoint: [293.0, -2.0, 0.0]
+      zpoint: [0.0, 0, 0, 0]
+    RingRoad1_1_6:
+      xypoint: [395.0, -2.0, 0.0]
+      zpoint: [0.0, 0, 0, 0]
+    RingRoad1_1_7:
+      xypoint: [402.0, -2.0, 0.0]
+      zpoint: [0.0, 0, 0, 0]
+    RingRoad2_1_1:
+      xypoint: [402.0, -2.0, 90.0]
+      zpoint: [0.0, 0, 0, 0]
+    RingRoad2_1_2:
+      xypoint: [402.0, 5.0, 90.0]
+      zpoint: [0.0, 0, 0, 0]
+    RingRoad2_1_3:
+      xypoint: [402.0, 8.0, 90.0]
+      zpoint: [0.0, 0, 0, 0]
+    RingRoad2_1_4:
+      xypoint: [402.0, 107.0, 90.0]
+      zpoint: [0.0, 0, 0, 0]
+    RingRoad2_1_5:
+      xypoint: [402.0, 207.0, 90.0]
+      zpoint: [0.0, 0, 0, 0]
+    RingRoad2_1_6:
+      xypoint: [402.0, 307.0, 90.0]
+      zpoint: [0.0, 0, 0, 0]
+    RingRoad2_1_7:
+      xypoint: [402.0, 395.0, 90.0]
+      zpoint: [0.0, 0, 0, 0]
+    RingRoad2_1_8:
+      xypoint: [402.0, 402.0, 90.0]
+      zpoint: [0.0, 0, 0, 0]
+    RingRoad3_1_1:
+      xypoint: [402.0, 402.0, 180.0]
+      zpoint: [0.0, 0, 0, 0]
+    RingRoad3_1_2:
+      xypoint: [395.0, 402.0, 180.0]
+      zpoint: [0.0, 0, 0, 0]
+    RingRoad3_1_3:
+      xypoint: [392.0, 402.0, 180.0]
+      zpoint: [0.0, 0, 0, 0]
+    RingRoad3_1_4:
+      xypoint: [293.0, 402.0, 180.0]
+      zpoint: [0.0, 0, 0, 0]
+    RingRoad3_1_5:
+      xypoint: [193.0, 402.0, 180.0]
+      zpoint: [0.0, 0, 0, 0]
+    RingRoad3_1_6:
+      xypoint: [93.0, 402.0, 180.0]
+      zpoint: [0.0, 0, 0, 0]
+    RingRoad3_1_7:
+      xypoint: [8.0, 402.0, 180.0]
+      zpoint: [0.0, 0, 0, 0]
+    RingRoad3_1_8:
+      xypoint: [5.0, 402.0, 180.0]
+      zpoint: [0.0, 0, 0, 0]
+    RingRoad3_1_9:
+      xypoint: [-2.0, 402.0, 180.0]
+      zpoint: [0.0, 0, 0, 0]
+    RingRoad4_1_1:
+      xypoint: [-2.0, 402.0, -90.0]
+      zpoint: [0.0, 0, 0, 0]
+    RingRoad4_1_2:
+      xypoint: [-2.0, 395.0, -90.0]
+      zpoint: [0.0, 0, 0, 0]
+    RingRoad4_1_3:
+      xypoint: [-2.0, 307.0, -90.0]
+      zpoint: [0.0, 0, 0, 0]
+    RingRoad4_1_4:
+      xypoint: [-2.0, 207.0, -90.0]
+      zpoint: [0.0, 0, 0, 0]
+    RingRoad4_1_5:
+      xypoint: [-2.0, 107.0, -90.0]
+      zpoint: [0.0, 0, 0, 0]
+    RingRoad4_1_6:
+      xypoint: [-2.0, 8.0, -90.0]
+      zpoint: [0.0, 0, 0, 0]
+    RingRoad4_1_7:
+      xypoint: [-2.0, 5.0, -90.0]
+      zpoint: [0.0, 0, 0, 0]
+    RingRoad4_1_8:
+      xypoint: [-2.0, -2.0, -90.0]
+      zpoint: [0.0, 0, 0, 0]
+  connections:
+    street_2_1_2-street_2_1_3: {start: points.street_2_1_2, length: 88.0, explicit_end: points.street_2_1_3}
+    street_2_1_3-street_5_1_4:
+      start: points.street_2_1_3
+      arc: [7.000000000000001, -90.0]
+      explicit_end: points.street_5_1_4
+    street_2_1_3-street_8_1_4:
+      start: points.street_2_1_3
+      arc: [16.89949493661169, -45.0]
+      explicit_end: points.street_8_1_4
+    street_2_1_3-street_2_1_4: {start: points.street_2_1_3, length: 14.0, explicit_end: points.street_2_1_4}
+    street_2_1_4-street_2_1_5: {start: points.street_2_1_4, length: 86.0, explicit_end: points.street_2_1_5}
+    street_2_1_5-street_6_1_4:
+      start: points.street_2_1_5
+      arc: [7.000000000000001, -90.0]
+      explicit_end: points.street_6_1_4
+    street_2_1_5-street_2_1_6: {start: points.street_2_1_5, length: 14.0, explicit_end: points.street_2_1_6}
+    street_2_1_6-street_2_1_7: {start: points.street_2_1_6, length: 83.0, explicit_end: points.street_2_1_7}
+    street_2_1_7-street_9_1_6:
+      start: points.street_2_1_7
+      arc: [4.142135623730951, -135.0]
+      explicit_end: points.street_9_1_6
+    street_2_1_7-street_2_1_8: {start: points.street_2_1_7, length: 3.0, explicit_end: points.street_2_1_8}
+    street_2_1_8-street_7_1_4:
+      start: points.street_2_1_8
+      arc: [7.000000000000001, -90.0]
+      explicit_end: points.street_7_1_4
+    street_2_1_8-street_2_1_9: {start: points.street_2_1_8, length: 14.0, explicit_end: points.street_2_1_9}
+    street_2_1_9-street_2_1_10: {start: points.street_2_1_9, length: 3.0, explicit_end: points.street_2_1_10}
+    street_2_1_10-street_2_1_11: {start: points.street_2_1_10, length: 85.0, explicit_end: points.street_2_1_11}
+    street_2_1_11-RingRoad3_1_6:
+      start: points.street_2_1_11
+      arc: [7.000000000000001, 90.0]
+      explicit_end: points.RingRoad3_1_6
+    street_3_1_2-street_3_1_3: {start: points.street_3_1_2, length: 88.0, explicit_end: points.street_3_1_3}
+    street_3_1_3-street_5_1_6:
+      start: points.street_3_1_3
+      arc: [7.000000000000001, -90.0]
+      explicit_end: points.street_5_1_6
+    street_3_1_3-street_3_1_4: {start: points.street_3_1_3, length: 14.0, explicit_end: points.street_3_1_4}
+    street_3_1_4-street_3_1_5: {start: points.street_3_1_4, length: 83.0, explicit_end: points.street_3_1_5}
+    street_3_1_5-street_9_1_10:
+      start: points.street_3_1_5
+      arc: [4.142135623730951, -135.0]
+      explicit_end: points.street_9_1_10
+    street_3_1_5-street_3_1_6: {start: points.street_3_1_5, length: 3.0, explicit_end: points.street_3_1_6}
+    street_3_1_6-street_6_1_6:
+      start: points.street_3_1_6
+      arc: [7.000000000000001, -90.0]
+      explicit_end: points.street_6_1_6
+    street_3_1_6-street_8_1_6:
+      start: points.street_3_1_6
+      arc: [16.89949493661169, -45.0]
+      explicit_end: points.street_8_1_6
+    street_3_1_6-street_3_1_7: {start: points.street_3_1_6, length: 14.0, explicit_end: points.street_3_1_7}
+    street_3_1_7-street_3_1_8: {start: points.street_3_1_7, length: 3.0, explicit_end: points.street_3_1_8}
+    street_3_1_8-street_3_1_9: {start: points.street_3_1_8, length: 83.0, explicit_end: points.street_3_1_9}
+    street_3_1_9-street_7_1_6:
+      start: points.street_3_1_9
+      arc: [7.000000000000001, -90.0]
+      explicit_end: points.street_7_1_6
+    street_3_1_9-street_3_1_10: {start: points.street_3_1_9, length: 14.0, explicit_end: points.street_3_1_10}
+    street_3_1_10-street_3_1_11: {start: points.street_3_1_10, length: 88.0, explicit_end: points.street_3_1_11}
+    street_3_1_11-RingRoad3_1_5:
+      start: points.street_3_1_11
+      arc: [7.000000000000001, 90.0]
+      explicit_end: points.RingRoad3_1_5
+    street_4_1_2-street_4_1_3: {start: points.street_4_1_2, length: 85.0, explicit_end: points.street_4_1_3}
+    street_4_1_3-street_9_1_14:
+      start: points.street_4_1_3
+      arc: [4.142135623730951, -135.0]
+      explicit_end: points.street_9_1_14
+    street_4_1_3-street_4_1_4: {start: points.street_4_1_3, length: 3.0, explicit_end: points.street_4_1_4}
+    street_4_1_4-street_5_1_8:
+      start: points.street_4_1_4
+      arc: [7.000000000000001, -90.0]
+      explicit_end: points.street_5_1_8
+    street_4_1_4-street_4_1_5: {start: points.street_4_1_4, length: 14.0, explicit_end: points.street_4_1_5}
+    street_4_1_5-street_4_1_6: {start: points.street_4_1_5, length: 3.0, explicit_end: points.street_4_1_6}
+    street_4_1_6-street_4_1_7: {start: points.street_4_1_6, length: 83.0, explicit_end: points.street_4_1_7}
+    street_4_1_7-street_6_1_8:
+      start: points.street_4_1_7
+      arc: [7.000000000000001, -90.0]
+      explicit_end: points.street_6_1_8
+    street_4_1_7-street_4_1_8: {start: points.street_4_1_7, length: 14.0, explicit_end: points.street_4_1_8}
+    street_4_1_8-street_4_1_9: {start: points.street_4_1_8, length: 86.0, explicit_end: points.street_4_1_9}
+    street_4_1_9-street_7_1_8:
+      start: points.street_4_1_9
+      arc: [7.000000000000001, -90.0]
+      explicit_end: points.street_7_1_8
+    street_4_1_9-street_8_1_8:
+      start: points.street_4_1_9
+      arc: [16.89949493661164, -45.0]
+      explicit_end: points.street_8_1_8
+    street_4_1_9-street_4_1_10: {start: points.street_4_1_9, length: 14.0, explicit_end: points.street_4_1_10}
+    street_4_1_10-street_4_1_11: {start: points.street_4_1_10, length: 88.0, explicit_end: points.street_4_1_11}
+    street_4_1_11-RingRoad3_1_4:
+      start: points.street_4_1_11
+      arc: [7.000000000000001, 90.0]
+      explicit_end: points.RingRoad3_1_4
+    street_5_1_2-street_5_1_3: {start: points.street_5_1_2, length: 88.0, explicit_end: points.street_5_1_3}
+    street_5_1_3-street_2_1_4:
+      start: points.street_5_1_3
+      arc: [7.000000000000001, 90.0]
+      explicit_end: points.street_2_1_4
+    street_5_1_3-street_8_1_4:
+      start: points.street_5_1_3
+      arc: [16.89949493661169, 45.0]
+      explicit_end: points.street_8_1_4
+    street_5_1_3-street_5_1_4: {start: points.street_5_1_3, length: 14.0, explicit_end: points.street_5_1_4}
+    street_5_1_4-street_5_1_5: {start: points.street_5_1_4, length: 86.0, explicit_end: points.street_5_1_5}
+    street_5_1_5-street_3_1_4:
+      start: points.street_5_1_5
+      arc: [7.000000000000001, 90.0]
+      explicit_end: points.street_3_1_4
+    street_5_1_5-street_5_1_6: {start: points.street_5_1_5, length: 14.0, explicit_end: points.street_5_1_6}
+    street_5_1_6-street_5_1_7: {start: points.street_5_1_6, length: 86.0, explicit_end: points.street_5_1_7}
+    street_5_1_7-street_4_1_5:
+      start: points.street_5_1_7
+      arc: [7.000000000000001, 90.0]
+      explicit_end: points.street_4_1_5
+    street_5_1_7-street_9_1_13:
+      start: points.street_5_1_7
+      arc: [16.89949493661164, -45.0]
+      explicit_end: points.street_9_1_13
+    street_5_1_7-street_5_1_8: {start: points.street_5_1_7, length: 14.0, explicit_end: points.street_5_1_8}
+    street_5_1_8-street_5_1_9: {start: points.street_5_1_8, length: 88.0, explicit_end: points.street_5_1_9}
+    street_5_1_9-RingRoad2_1_4:
+      start: points.street_5_1_9
+      arc: [7.000000000000001, 90.0]
+      explicit_end: points.RingRoad2_1_4
+    street_6_1_2-street_6_1_3: {start: points.street_6_1_2, length: 88.0, explicit_end: points.street_6_1_3}
+    street_6_1_3-street_2_1_6:
+      start: points.street_6_1_3
+      arc: [7.000000000000001, 90.0]
+      explicit_end: points.street_2_1_6
+    street_6_1_3-street_6_1_4: {start: points.street_6_1_3, length: 14.0, explicit_end: points.street_6_1_4}
+    street_6_1_4-street_6_1_5: {start: points.street_6_1_4, length: 86.0, explicit_end: points.street_6_1_5}
+    street_6_1_5-street_3_1_7:
+      start: points.street_6_1_5
+      arc: [7.000000000000001, 90.0]
+      explicit_end: points.street_3_1_7
+    street_6_1_5-street_8_1_6:
+      start: points.street_6_1_5
+      arc: [16.89949493661169, 45.0]
+      explicit_end: points.street_8_1_6
+    street_6_1_5-street_9_1_9:
+      start: points.street_6_1_5
+      arc: [16.89949493661169, -45.0]
+      explicit_end: points.street_9_1_9
+    street_6_1_5-street_6_1_6: {start: points.street_6_1_5, length: 14.0, explicit_end: points.street_6_1_6}
+    street_6_1_6-street_6_1_7: {start: points.street_6_1_6, length: 86.0, explicit_end: points.street_6_1_7}
+    street_6_1_7-street_4_1_8:
+      start: points.street_6_1_7
+      arc: [7.000000000000001, 90.0]
+      explicit_end: points.street_4_1_8
+    street_6_1_7-street_6_1_8: {start: points.street_6_1_7, length: 14.0, explicit_end: points.street_6_1_8}
+    street_6_1_8-street_6_1_9: {start: points.street_6_1_8, length: 88.0, explicit_end: points.street_6_1_9}
+    street_6_1_9-RingRoad2_1_5:
+      start: points.street_6_1_9
+      arc: [7.000000000000001, 90.0]
+      explicit_end: points.RingRoad2_1_5
+    street_7_1_2-street_7_1_3: {start: points.street_7_1_2, length: 88.0, explicit_end: points.street_7_1_3}
+    street_7_1_3-street_2_1_9:
+      start: points.street_7_1_3
+      arc: [7.000000000000001, 90.0]
+      explicit_end: points.street_2_1_9
+    street_7_1_3-street_9_1_5:
+      start: points.street_7_1_3
+      arc: [16.8994949366117, -45.0]
+      explicit_end: points.street_9_1_5
+    street_7_1_3-street_7_1_4: {start: points.street_7_1_3, length: 14.0, explicit_end: points.street_7_1_4}
+    street_7_1_4-street_7_1_5: {start: points.street_7_1_4, length: 86.0, explicit_end: points.street_7_1_5}
+    street_7_1_5-street_3_1_10:
+      start: points.street_7_1_5
+      arc: [7.000000000000001, 90.0]
+      explicit_end: points.street_3_1_10
+    street_7_1_5-street_7_1_6: {start: points.street_7_1_5, length: 14.0, explicit_end: points.street_7_1_6}
+    street_7_1_6-street_7_1_7: {start: points.street_7_1_6, length: 86.0, explicit_end: points.street_7_1_7}
+    street_7_1_7-street_4_1_10:
+      start: points.street_7_1_7
+      arc: [7.000000000000001, 90.0]
+      explicit_end: points.street_4_1_10
+    street_7_1_7-street_8_1_8:
+      start: points.street_7_1_7
+      arc: [16.89949493661164, 45.0]
+      explicit_end: points.street_8_1_8
+    street_7_1_7-street_7_1_8: {start: points.street_7_1_7, length: 14.0, explicit_end: points.street_7_1_8}
+    street_7_1_8-street_7_1_9: {start: points.street_7_1_8, length: 88.0, explicit_end: points.street_7_1_9}
+    street_7_1_9-RingRoad2_1_6:
+      start: points.street_7_1_9
+      arc: [7.000000000000001, 90.0]
+      explicit_end: points.RingRoad2_1_6
+    street_8_1_2-street_8_1_3: {start: points.street_8_1_2, length: 127.2497833620557,
+      explicit_end: points.street_8_1_3}
+    street_8_1_3-street_2_1_4:
+      start: points.street_8_1_3
+      arc: [16.89949493661166, 45.0]
+      explicit_end: points.street_2_1_4
+    street_8_1_3-street_5_1_4:
+      start: points.street_8_1_3
+      arc: [16.89949493661166, -45.0]
+      explicit_end: points.street_5_1_4
+    street_8_1_3-street_8_1_4: {start: points.street_8_1_3, length: 14.000000000000012,
+      explicit_end: points.street_8_1_4}
+    street_8_1_4-street_8_1_5: {start: points.street_8_1_4, length: 127.42135623730947,
+      explicit_end: points.street_8_1_5}
+    street_8_1_5-street_3_1_7:
+      start: points.street_8_1_5
+      arc: [16.89949493661169, 45.0]
+      explicit_end: points.street_3_1_7
+    street_8_1_5-street_6_1_6:
+      start: points.street_8_1_5
+      arc: [16.89949493661169, -45.0]
+      explicit_end: points.street_6_1_6
+    street_8_1_5-street_9_1_9:
+      start: points.street_8_1_5
+      arc: [7.000000000000017, -90.0]
+      explicit_end: points.street_9_1_9
+    street_8_1_5-street_8_1_6: {start: points.street_8_1_5, length: 14.000000000000032,
+      explicit_end: points.street_8_1_6}
+    street_8_1_6-street_8_1_7: {start: points.street_8_1_6, length: 127.42135623730951,
+      explicit_end: points.street_8_1_7}
+    street_8_1_7-street_4_1_10:
+      start: points.street_8_1_7
+      arc: [16.89949493661164, 45.0]
+      explicit_end: points.street_4_1_10
+    street_8_1_7-street_7_1_8:
+      start: points.street_8_1_7
+      arc: [16.89949493661164, -45.0]
+      explicit_end: points.street_7_1_8
+    street_8_1_7-street_8_1_8: {start: points.street_8_1_7, length: 13.999999999999952,
+      explicit_end: points.street_8_1_8}
+    street_8_1_8-street_8_1_9: {start: points.street_8_1_8, length: 127.24978336205572,
+      explicit_end: points.street_8_1_9}
+    street_8_1_9-RingRoad3_1_3:
+      start: points.street_8_1_9
+      arc: [4.142135623730951, 135.0]
+      explicit_end: points.RingRoad3_1_3
+    street_9_1_2-street_9_1_3: {start: points.street_9_1_2, length: 124.2497833620557,
+      explicit_end: points.street_9_1_3}
+    street_9_1_3-street_2_1_10:
+      start: points.street_9_1_3
+      arc: [4.142135623730951, 135.0]
+      explicit_end: points.street_2_1_10
+    street_9_1_3-street_9_1_4: {start: points.street_9_1_3, length: 3.000000000000014,
+      explicit_end: points.street_9_1_4}
+    street_9_1_4-street_7_1_4:
+      start: points.street_9_1_4
+      arc: [16.899494936611656, 45.0]
+      explicit_end: points.street_7_1_4
+    street_9_1_4-street_9_1_5: {start: points.street_9_1_4, length: 14.000000000000023,
+      explicit_end: points.street_9_1_5}
+    street_9_1_5-street_9_1_6: {start: points.street_9_1_5, length: 2.999999999999964,
+      explicit_end: points.street_9_1_6}
+    street_9_1_6-street_9_1_7: {start: points.street_9_1_6, length: 121.42135623730951,
+      explicit_end: points.street_9_1_7}
+    street_9_1_7-street_3_1_8:
+      start: points.street_9_1_7
+      arc: [4.142135623730951, 135.0]
+      explicit_end: points.street_3_1_8
+    street_9_1_7-street_9_1_8: {start: points.street_9_1_7, length: 2.999999999999984,
+      explicit_end: points.street_9_1_8}
+    street_9_1_8-street_6_1_6:
+      start: points.street_9_1_8
+      arc: [16.89949493661169, 45.0]
+      explicit_end: points.street_6_1_6
+    street_9_1_8-street_8_1_6:
+      start: points.street_9_1_8
+      arc: [7.000000000000017, 90.0]
+      explicit_end: points.street_8_1_6
+    street_9_1_8-street_9_1_9: {start: points.street_9_1_8, length: 14.000000000000032,
+      explicit_end: points.street_9_1_9}
+    street_9_1_9-street_9_1_10: {start: points.street_9_1_9, length: 2.999999999999984,
+      explicit_end: points.street_9_1_10}
+    street_9_1_10-street_9_1_11: {start: points.street_9_1_10, length: 121.42135623730951,
+      explicit_end: points.street_9_1_11}
+    street_9_1_11-street_4_1_6:
+      start: points.street_9_1_11
+      arc: [4.142135623730951, 135.0]
+      explicit_end: points.street_4_1_6
+    street_9_1_11-street_9_1_12: {start: points.street_9_1_11, length: 3.0000000000000244,
+      explicit_end: points.street_9_1_12}
+    street_9_1_12-street_5_1_8:
+      start: points.street_9_1_12
+      arc: [16.89949493661164, 45.0]
+      explicit_end: points.street_5_1_8
+    street_9_1_12-street_9_1_13: {start: points.street_9_1_12, length: 13.999999999999952,
+      explicit_end: points.street_9_1_13}
+    street_9_1_13-street_9_1_14: {start: points.street_9_1_13, length: 3.0000000000000244,
+      explicit_end: points.street_9_1_14}
+    street_9_1_14-street_9_1_15: {start: points.street_9_1_14, length: 124.2497833620557,
+      explicit_end: points.street_9_1_15}
+    street_9_1_15-RingRoad2_1_3:
+      start: points.street_9_1_15
+      arc: [4.142135623730951, 135.0]
+      explicit_end: points.RingRoad2_1_3
+    RingRoad1_1_2-RingRoad1_1_3: {start: points.RingRoad1_1_2, length: 88.0, explicit_end: points.RingRoad1_1_3}
+    RingRoad1_1_3-street_2_1_2:
+      start: points.RingRoad1_1_3
+      arc: [7.000000000000001, 90.0]
+      explicit_end: points.street_2_1_2
+    RingRoad1_1_3-RingRoad1_1_4: {start: points.RingRoad1_1_3, length: 100.0, explicit_end: points.RingRoad1_1_4}
+    RingRoad1_1_4-street_3_1_2:
+      start: points.RingRoad1_1_4
+      arc: [7.000000000000001, 90.0]
+      explicit_end: points.street_3_1_2
+    RingRoad1_1_4-RingRoad1_1_5: {start: points.RingRoad1_1_4, length: 100.0, explicit_end: points.RingRoad1_1_5}
+    RingRoad1_1_5-street_4_1_2:
+      start: points.RingRoad1_1_5
+      arc: [7.000000000000001, 90.0]
+      explicit_end: points.street_4_1_2
+    RingRoad1_1_5-RingRoad1_1_6: {start: points.RingRoad1_1_5, length: 102.0, explicit_end: points.RingRoad1_1_6}
+    RingRoad1_1_6-RingRoad2_1_2:
+      start: points.RingRoad1_1_6
+      arc: [7.000000000000001, 90.0]
+      explicit_end: points.RingRoad2_1_2
+    RingRoad2_1_2-RingRoad2_1_3: {start: points.RingRoad2_1_2, length: 3.0, explicit_end: points.RingRoad2_1_3}
+    RingRoad2_1_3-RingRoad2_1_4: {start: points.RingRoad2_1_3, length: 99.0, explicit_end: points.RingRoad2_1_4}
+    RingRoad2_1_4-RingRoad2_1_5: {start: points.RingRoad2_1_4, length: 100.0, explicit_end: points.RingRoad2_1_5}
+    RingRoad2_1_5-RingRoad2_1_6: {start: points.RingRoad2_1_5, length: 100.0, explicit_end: points.RingRoad2_1_6}
+    RingRoad2_1_6-RingRoad2_1_7: {start: points.RingRoad2_1_6, length: 88.0, explicit_end: points.RingRoad2_1_7}
+    RingRoad2_1_7-RingRoad3_1_2:
+      start: points.RingRoad2_1_7
+      arc: [7.000000000000001, 90.0]
+      explicit_end: points.RingRoad3_1_2
+    RingRoad3_1_2-RingRoad3_1_3: {start: points.RingRoad3_1_2, length: 3.0, explicit_end: points.RingRoad3_1_3}
+    RingRoad3_1_3-RingRoad3_1_4: {start: points.RingRoad3_1_3, length: 99.0, explicit_end: points.RingRoad3_1_4}
+    RingRoad3_1_4-RingRoad3_1_5: {start: points.RingRoad3_1_4, length: 100.0, explicit_end: points.RingRoad3_1_5}
+    RingRoad3_1_5-RingRoad3_1_6: {start: points.RingRoad3_1_5, length: 100.0, explicit_end: points.RingRoad3_1_6}
+    RingRoad3_1_6-RingRoad3_1_7: {start: points.RingRoad3_1_6, length: 85.0, explicit_end: points.RingRoad3_1_7}
+    RingRoad3_1_7-street_9_1_2:
+      start: points.RingRoad3_1_7
+      arc: [4.14213562373095, 135.0]
+      explicit_end: points.street_9_1_2
+    RingRoad3_1_7-RingRoad3_1_8: {start: points.RingRoad3_1_7, length: 3.0, explicit_end: points.RingRoad3_1_8}
+    RingRoad3_1_8-RingRoad4_1_2:
+      start: points.RingRoad3_1_8
+      arc: [6.999999999999999, 90.0]
+      explicit_end: points.RingRoad4_1_2
+    RingRoad4_1_2-RingRoad4_1_3: {start: points.RingRoad4_1_2, length: 88.0, explicit_end: points.RingRoad4_1_3}
+    RingRoad4_1_3-street_7_1_2:
+      start: points.RingRoad4_1_3
+      arc: [7.000000000000001, 90.0]
+      explicit_end: points.street_7_1_2
+    RingRoad4_1_3-RingRoad4_1_4: {start: points.RingRoad4_1_3, length: 100.0, explicit_end: points.RingRoad4_1_4}
+    RingRoad4_1_4-street_6_1_2:
+      start: points.RingRoad4_1_4
+      arc: [7.000000000000001, 90.0]
+      explicit_end: points.street_6_1_2
+    RingRoad4_1_4-RingRoad4_1_5: {start: points.RingRoad4_1_4, length: 100.0, explicit_end: points.RingRoad4_1_5}
+    RingRoad4_1_5-street_5_1_2:
+      start: points.RingRoad4_1_5
+      arc: [7.000000000000001, 90.0]
+      explicit_end: points.street_5_1_2
+    RingRoad4_1_5-RingRoad4_1_6: {start: points.RingRoad4_1_5, length: 99.0, explicit_end: points.RingRoad4_1_6}
+    RingRoad4_1_6-street_8_1_2:
+      start: points.RingRoad4_1_6
+      arc: [4.142135623730951, 135.0]
+      explicit_end: points.street_8_1_2
+    RingRoad4_1_6-RingRoad4_1_7: {start: points.RingRoad4_1_6, length: 3.0, explicit_end: points.RingRoad4_1_7}
+    RingRoad4_1_7-RingRoad1_1_2:
+      start: points.RingRoad4_1_7
+      arc: [7.000000000000001, 90.0]
+      explicit_end: points.RingRoad1_1_2
+  groups: {}

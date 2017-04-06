@@ -326,6 +326,7 @@ drake_cc_binary(
     ],
 )
 
+
 drake_cc_binary(
     name = "car_sim_lcm",
     srcs = [
@@ -381,6 +382,27 @@ py_binary(
     ],
 )
 
+py_binary(
+    name = "custom_monolane",
+    srcs = ["automotive_demo.py"],
+    data = [
+        ":automotive_demo",
+        ":lcm-spy",
+        ":steering_command_driver",
+        "@drake_visualizer//:drake-visualizer",
+        "@lcm//:lcm-logger",
+    ],
+    main = "automotive_demo.py",
+    deps = [
+        "@lcm//:lcm-python",
+    ],
+    args = [
+        "-load_custom_monolane",
+        "-lane_names=RingRoad1_1_2-RingRoad1_1_3,RingRoad1_1_3-street_2_1_2,street_2_1_2-street_2_1_3,street_2_1_3-street_8_1_4,street_8_1_4-street_8_1_5,street_8_1_5-street_9_1_9,street_9_1_9-street_9_1_10,street_9_1_10-street_9_1_11,street_9_1_11-street_4_1_6,street_4_1_6-street_4_1_7",
+        "-monolane_filepath=/home/agalbachicar/Localwork/drake/drake/automotive/maliput/monolane/city_monolane.yaml",
+    ]
+)
+
 genrule(
     name = "speed_bump_genrule",
     srcs = ["models/speed_bump/speed_bump.yaml"],
@@ -399,6 +421,11 @@ filegroup(
     srcs = glob(["models/**"]) + [
         "models/speed_bump/speed_bump.obj",
     ],
+)
+
+filegroup(
+    name = "yamls",
+    srcs = glob(["maliput/monolane/*.yaml"]),
 )
 
 # === test/ ===
