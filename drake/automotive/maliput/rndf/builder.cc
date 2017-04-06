@@ -255,9 +255,6 @@ Lane* Builder::BuildConnection(
       for (const auto& point : conn->points()) {
         points.push_back(Point2{point.xy().x(), point.xy().y()});
       }
-      /*
-      CubicPolynomial elevation;
-      CubicPolynomial superelevation;*/
       lane = segment->NewSplineLane(lane_id,
                                   points,
                                   lane_bounds_, driveable_bounds_,
