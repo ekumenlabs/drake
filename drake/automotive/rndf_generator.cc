@@ -54,12 +54,26 @@ RNDFTBuilder::Build() {
   	kFlatZ);*/
   std::vector<rndf::Endpoint> endpoints;
   endpoints.push_back(s3l1->end());
+
   endpoints.push_back(rndf::Endpoint(
-    rndf::EndpointXy(75.0, 75.0, 0.0),
+    rndf::EndpointXy(61.801, 63.7987, 0.0),
+    kFlatZ));
+  endpoints.push_back(rndf::Endpoint(
+    rndf::EndpointXy(65.5141, 69.6438, 0.0),
+    kFlatZ));
+  endpoints.push_back(rndf::Endpoint(
+    rndf::EndpointXy(72.9029, 75.2812, 0.0),
+    kFlatZ));
+  endpoints.push_back(rndf::Endpoint(
+    rndf::EndpointXy(77.5213, 79.2248, 0.0),
+    kFlatZ));
+  endpoints.push_back(rndf::Endpoint(
+    rndf::EndpointXy(79.6613, 79.9177, 0.0),
     kFlatZ));
   endpoints.push_back(rndf::Endpoint(
     rndf::EndpointXy(80.0, 80.0, 0.0),
     kFlatZ));
+
   const auto& s3l1tos4l1 = rb->Connect(
     "s3l1tos4l1",
     endpoints);
