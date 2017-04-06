@@ -135,7 +135,7 @@ double SplineLane::ComputeLength(
   return length;
 }
 
-
+/*
 std::vector<ignition::math::Vector3d> SplineLane::InterpolateRoad(
   const std::vector<ignition::math::Vector3d> &_points,
   const double distance_threshold) {
@@ -172,6 +172,7 @@ std::vector<ignition::math::Vector3d> SplineLane::InterpolateRoad(
   }
   return new_points;
 }
+*/
 
 }  // namespace rndf
 }  // namespace maliput
