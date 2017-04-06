@@ -399,7 +399,7 @@ py_binary(
     args = [
         "-load_custom_monolane",
         "-lane_names=RingRoad1_1_2-RingRoad1_1_3,RingRoad1_1_3-street_2_1_2,street_2_1_2-street_2_1_3,street_2_1_3-street_8_1_4,street_8_1_4-street_8_1_5,street_8_1_5-street_9_1_9,street_9_1_9-street_9_1_10,street_9_1_10-street_9_1_11,street_9_1_11-street_4_1_6,street_4_1_6-street_4_1_7",
-        "-monolane_filepath=/home/agalbachicar/Localwork/drake/drake/automotive/maliput/monolane/city_monolane.yaml",
+        "-monolane_filepath=$(location drake/automotive/maliput/monolane/city_monolane.yaml)",
     ]
 )
 
