@@ -224,7 +224,7 @@ class Connection {
   Connection(const std::string& id,
       const std::vector<Endpoint>& points)
       : type_(kSpline), id_(id), start_(points.front()), end_(points.back()), points_(points) {
-    DRAKE_DEMAND(points_.size() > 2);
+    DRAKE_DEMAND(points_.size() >= 2);
   }
 
   /// Returns the geometric type of the path.
