@@ -88,6 +88,10 @@ DEFINE_bool(with_stalled_cars, false, "Places a stalled vehicle at the end of "
             "each lane of a dragway. This option is only enabled when the "
             "road is a dragway.");
 
+DEFINE_string(lane_names, "",
+  "A comma-separated list (e.g. 'lane_1,lane_2,lane_3' that generates a path "
+  "for the car to follow.");
+
 namespace drake {
 
 using maliput::api::Lane;
