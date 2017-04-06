@@ -58,6 +58,14 @@ The following demos are available:
        --num_maliput_railcar=1
    ```
 
+ * Loading a custom monolane file. Right now, BUILD file is configured so it loads
+   an 'maliput/monolane/city_monolane.yaml'. It also loads a trajectory Prius that
+   follows a path configured as an argument. To run it:
+
+   ```
+   bazel run //drake/automotive:custom_monolane
+   ```
+
 Driving the Prius
 -----------------
 

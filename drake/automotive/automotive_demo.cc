@@ -188,7 +188,6 @@ void AddVehicles(RoadNetworkType road_network_type,
       lane_name_paths.push_back(lane_name);
     }
 
-
     const auto& params = CreateTrajectoryParamsForCustomMonolane(
       *monolane_road_geometry,
       lane_name_paths,
