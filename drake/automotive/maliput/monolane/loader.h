@@ -2,7 +2,6 @@
 
 #include <memory>
 #include <string>
-#include <iostream>
 
 namespace drake {
 namespace maliput {

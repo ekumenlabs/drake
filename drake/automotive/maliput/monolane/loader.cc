@@ -225,7 +225,6 @@ std::unique_ptr<const api::RoadGeometry> Load(const std::string& input) {
 
 
 std::unique_ptr<const api::RoadGeometry> LoadFile(const std::string& filename) {
-  std::cout << filename << std::endl;
   return BuildFrom(YAML::LoadFile(filename));
 }
 

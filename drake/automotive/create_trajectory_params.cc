@@ -114,7 +114,7 @@ std::tuple<Curve2<double>, double, double> CreateTrajectoryParamsForCustomMonola
         if (segment->id().id != segment_id) {
           continue;
         }
-        // As monolane contains only one lane each segment, we request
+        // As monolane contains only one lane in each segment, I request
         // the lane directly
         const drake::maliput::api::Lane *lane =
           dynamic_cast<const drake::maliput::api::Lane *>(segment->lane(0));

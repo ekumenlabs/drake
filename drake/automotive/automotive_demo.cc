@@ -181,8 +181,7 @@ void AddVehicles(RoadNetworkType road_network_type,
 
     std::vector<std::string> lane_name_paths;
 
-    std::string testStr(FLAGS_lane_names);
-    std::istringstream simple_lane_name_stream(testStr);
+    std::istringstream simple_lane_name_stream(FLAGS_lane_names);
     std::string lane_name;
     while (getline(simple_lane_name_stream, lane_name, ',')) {
       lane_name_paths.push_back(lane_name);
