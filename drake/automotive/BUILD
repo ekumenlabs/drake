@@ -458,6 +458,27 @@ py_binary(
     ],
 )
 
+py_binary(
+    name = "rndf",
+    srcs = ["automotive_demo.py"],
+    data = [
+        ":automotive_demo",
+        ":lcm-spy",
+        ":steering_command_driver",
+        "@drake_visualizer//:drake-visualizer",
+        "@lcm//:lcm-logger",
+        "//drake/automotive/maliput/monolane:yamls",
+    ],
+    main = "automotive_demo.py",
+    deps = [
+        "@lcm//:lcm-python",
+    ],
+    args = [
+        "-lane_names=s5l1"
+    ],
+)
+
+
 genrule(
     name = "speed_bump_genrule",
     srcs = ["models/speed_bump/speed_bump.yaml"],
