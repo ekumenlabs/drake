@@ -88,8 +88,14 @@ DEFINE_bool(with_stalled_cars, false, "Places a stalled vehicle at the end of "
             "each lane of a dragway. This option is only enabled when the "
             "road is a dragway.");
 
+DEFINE_bool(with_rndf, false, "Loads the rndf road network. Only one road "
+            "network can be enabled. Thus, if this option is enabled, no other "
+            "road network can be enabled.");
 DEFINE_double(rndf_base_speed, 10, "The speed of the vehicles added to the "
               "rndf.");
+DEFINE_double(rndf_base_speed, 10.0, "The speed of the vehicles added to the "
+
+DEFINE_double(rndf_delay, 5.0, "The starting time delay.");
 DEFINE_string(lane_names, "",
   "A comma-separated list (e.g. 'lane_1,lane_2,lane_3' that generates a path "
   "for the car to follow.");
