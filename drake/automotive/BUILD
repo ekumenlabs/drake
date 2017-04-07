@@ -474,7 +474,8 @@ py_binary(
         "@lcm//:lcm-python",
     ],
     args = [
-        "-lane_names=s1l1,s1l1tos3l1,s3l1,s3l1tos4l1,s4l1"
+        "-with_rndf",
+        "-lane_names=s1l1,s1l1tos3l1,s3l1"
     ],
 )
 
