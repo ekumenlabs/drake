@@ -102,7 +102,6 @@ std::string MakeChannelName(const std::string& name) {
 void AddVehicles(RoadNetworkType road_network_type,
     const maliput::api::RoadGeometry* road_geometry,
     AutomotiveSimulator<double>* simulator) {
-
   if (FLAGS_simple_car_names.empty()) {
     const std::string name = "SimpleCar";
     const std::string& channel_name = MakeChannelName(name);
