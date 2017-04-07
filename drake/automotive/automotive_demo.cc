@@ -65,8 +65,9 @@ DEFINE_bool(onramp_swap_start, false, "Whether to swap the starting lanes of "
 DEFINE_bool(with_rndf, false, "Loads the rndf road network. Only one road "
             "network can be enabled. Thus, if this option is enabled, no other "
             "road network can be enabled.");
-DEFINE_double(rndf_base_speed, 10, "The speed of the vehicles added to the "
+DEFINE_double(rndf_base_speed, 10.0, "The speed of the vehicles added to the "
               "rndf.");
+DEFINE_double(rndf_delay, 5.0, "The starting time delay.");
 DEFINE_string(lane_names, "",
   "A comma-separated list (e.g. 'lane_1,lane_2,lane_3' that generates a path "
   "for the car to follow.");
@@ -164,7 +165,7 @@ void AddVehicles(RoadNetworkType road_network_type,
         lane_name_paths.push_back(lane_name);
       }
       const auto& params = CreateTrajectoryParamsForRndf(
-          *rndf_road_geometry, lane_name_paths, FLAGS_rndf_base_speed, 5.0);
+          *rndf_road_geometry, lane_name_paths, FLAGS_rndf_base_speed, FLAGS_rndf_delay);
       simulator->AddPriusTrajectoryCar(std::get<0>(params),
                                        std::get<1>(params),
                                        std::get<2>(params));
