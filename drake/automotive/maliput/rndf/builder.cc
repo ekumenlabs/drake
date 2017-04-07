@@ -3,9 +3,7 @@
 #include <cmath>
 #include <utility>
 
-#include "drake/automotive/maliput/rndf/arc_lane.h"
 #include "drake/automotive/maliput/rndf/branch_point.h"
-#include "drake/automotive/maliput/rndf/line_lane.h"
 #include "drake/automotive/maliput/rndf/spline_lane.h"
 #include "drake/automotive/maliput/rndf/road_geometry.h"
 #include "drake/common/drake_assert.h"
