@@ -83,6 +83,8 @@ DEFINE_bool(with_stalled_cars, false, "Places a stalled vehicle at the end of "
             "each lane of a dragway. This option is only enabled when the "
             "road is a dragway.");
 
+DEFINE_double(rndf_base_speed, 10, "The speed of the vehicles added to the "
+              "rndf.");
 DEFINE_string(lane_names, "",
   "A comma-separated list (e.g. 'lane_1,lane_2,lane_3' that generates a path "
   "for the car to follow.");
@@ -253,14 +255,8 @@ void AddVehicles(RoadNetworkType road_network_type,
     DRAKE_DEMAND(rndf_road_geometry != nullptr);
 
       std::vector<std::string> lane_name_paths;
-      /*
-      lane_name_paths.push_back("s1l1");
-      lane_name_paths.push_back("s1l1tos3l1");
-      lane_name_paths.push_back("s3l1");
-      lane_name_paths.push_back("s3l1tos4l1");
-      lane_name_paths.push_back("s4l1");
-      */
 //s1l1,s1l1tos3l1,s3l1,s3l1tos4l1,s4l1
+//s5l1
       std::string testStr(FLAGS_lane_names);
       std::istringstream simple_lane_name_stream(FLAGS_lane_names);
       std::string lane_name;
@@ -268,7 +264,7 @@ void AddVehicles(RoadNetworkType road_network_type,
         lane_name_paths.push_back(lane_name);
       }
       const auto& params = CreateTrajectoryParamsForRndf(
-          *rndf_road_geometry, lane_name_paths, 4.0, 5.0);
+          *rndf_road_geometry, lane_name_paths, FLAGS_rndf_base_speed, 5.0);
       simulator->AddPriusTrajectoryCar(std::get<0>(params),
                                        std::get<1>(params),
                                        std::get<2>(params));
