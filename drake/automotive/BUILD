@@ -423,7 +423,8 @@ py_binary(
     ],
     args = [
         "-with_rndf",
-        "-lane_names=s1l1,s1l1tos3l1,s3l1"
+        "-lane_names=s1l1,s1l1tos3l1,s3l1",
+        "-rndf_base_speed=5"
     ],
 )
 
