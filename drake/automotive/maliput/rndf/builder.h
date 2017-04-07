@@ -156,33 +156,6 @@ class Endpoint {
 };
 
 
-/// Specification for path offset along a circular arc.
-///  * radius: radius of the arc, which must be non-negative
-///  * d_theta:  angle of arc segment (Δθ)
-///    * d_theta > 0 is counterclockwise ('veer to left')
-///    * d_theta < 0 is clockwise ('veer to right')
-class ArcOffset {
- public:
-  DRAKE_DEFAULT_COPY_AND_MOVE_AND_ASSIGN(ArcOffset)
-
-  /// Constructs an ArcOffset with all zero parameters.
-  ArcOffset() = default;
-
-  ArcOffset(double radius, double d_theta)
-      : radius_(radius), d_theta_(d_theta) {
-    DRAKE_DEMAND(radius_ > 0.);
-  }
-
-  double radius() const { return radius_; }
-
-  double d_theta() const { return d_theta_; }
-
- private:
-  double radius_{};
-  double d_theta_{};
-};
-
-
 /// Representation of a reference path connecting two endpoints.
 ///
 /// Upon building the RoadGeometry, a Connection yields a Segment
@@ -200,25 +173,8 @@ class Connection {
   DRAKE_NO_COPY_NO_MOVE_NO_ASSIGN(Connection)
 
   /// Possible connection geometries:  line- or arc-segment.
-  enum Type { kLine, kArc, kSpline };
+  enum Type { kSpline };
 
-  /// Constructs a line-segment connection joining @p start to @p end.
-  Connection(const std::string& id,
-             const Endpoint& start, const Endpoint& end)
-      : type_(kLine), id_(id), start_(start), end_(end) {}
-
-  /// Constructs an arc-segment connection joining @p start to @p end.
-  ///
-  /// @p cx, @p cy specify the center of the arc. @p radius is the radius,
-  /// and @p d_theta is the angle of arc.
-  ///
-  /// @p radius must be non-negative.  @p d_theta > 0 indicates a
-  /// counterclockwise arc from start to end.
-  Connection(const std::string& id,
-             const Endpoint& start, const Endpoint& end,
-             double cx, double cy, double radius, double d_theta)
-      : type_(kArc), id_(id), start_(start), end_(end),
-        cx_(cx), cy_(cy), radius_(radius), d_theta_(d_theta) {}
 
   /// Constructs a spline-segment connection joining @p points[0] to @p points[size-1].
   Connection(const std::string& id,
@@ -239,29 +195,29 @@ class Connection {
   /// Returns the parameters of the endpoint.
   const Endpoint& end() const { return end_; }
 
-  /// Returns the x-component of the arc center (for arc connections only).
-  double cx() const {
-    DRAKE_DEMAND(type_ == kArc);
-    return cx_;
-  }
+  // /// Returns the x-component of the arc center (for arc connections only).
+  // double cx() const {
+  //   DRAKE_DEMAND(type_ == kArc);
+  //   return cx_;
+  // }
 
-  /// Returns the y-component of the arc center (for arc connections only).
-  double cy() const {
-    DRAKE_DEMAND(type_ == kArc);
-    return cy_;
-  }
+  // /// Returns the y-component of the arc center (for arc connections only).
+  // double cy() const {
+  //   DRAKE_DEMAND(type_ == kArc);
+  //   return cy_;
+  // }
 
-  /// Returns the radius of the arc (for arc connections only).
-  double radius() const {
-    DRAKE_DEMAND(type_ == kArc);
-    return radius_;
-  }
+  // /// Returns the radius of the arc (for arc connections only).
+  // double radius() const {
+  //   DRAKE_DEMAND(type_ == kArc);
+  //   return radius_;
+  // }
 
-  /// Returns the angle of the arc (for arc connections only).
-  double d_theta() const {
-    DRAKE_DEMAND(type_ == kArc);
-    return d_theta_;
-  }
+  // /// Returns the angle of the arc (for arc connections only).
+  // double d_theta() const {
+  //   DRAKE_DEMAND(type_ == kArc);
+  //   return d_theta_;
+  // }
 
   const std::vector<Endpoint> &points() const {
     DRAKE_DEMAND(type_ == kSpline);
@@ -275,11 +231,11 @@ class Connection {
   Endpoint end_;
   std::vector<Endpoint> points_;
 
-  // Bits specific to type_ == kArc:
-  double cx_{};
-  double cy_{};
-  double radius_{};
-  double d_theta_{};
+  // // Bits specific to type_ == kArc:
+  // double cx_{};
+  // double cy_{};
+  // double radius_{};
+  // double d_theta_{};
 };
 
 
@@ -335,26 +291,6 @@ class Builder {
           const api::RBounds& driveable_bounds,
           const double linear_tolerance,
           const double angular_tolerance);
-
-  /// Connects @p start to an end-point linearly displaced from @p start.
-  /// @p length specifies the length of displacement (in the direction of the
-  /// heading of @p start).  @p z_end specifies the elevation characteristics
-  /// at the end-point.
-  const Connection* Connect(
-      const std::string& id,
-      const Endpoint& start,
-      const double length,
-      const EndpointZ& z_end);
-
-  /// Connects @p start to an end-point displaced from @p start via an arc.
-  /// @p arc specifies the shape of the arc.  @p z_end specifies the
-  /// elevation characteristics at the end-point.
-  const Connection* Connect(
-      const std::string& id,
-      const Endpoint& start,
-      const ArcOffset& arc,
-      const EndpointZ& z_end);
-
 
   const Connection* Connect(
       const std::string& id,
