@@ -62,6 +62,13 @@ The following demos are available:
        --num_trajectory_car=12 \
        --num_maliput_railcar=1
    ```
+ * A 'T' connection with a `TrajectoryCar` driving through the lanes. It
+   is based on Splines lanes with different control points. ```BUILD``` file
+   has the comma separated list of lanes to follow and the speed of the car:
+
+   ```
+   bazel run //drake/automotive:rndf
+   ```
 
 Driving the Prius
 -----------------
