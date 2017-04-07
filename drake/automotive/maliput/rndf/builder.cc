@@ -27,45 +27,6 @@ Builder::Builder(const api::RBounds& lane_bounds,
   DRAKE_DEMAND(lane_bounds_.r_max <= driveable_bounds_.r_max);
 }
 
-
-const Connection* Builder::Connect(
-    const std::string& id,
-    const Endpoint& start,
-    const double length,
-    const EndpointZ& z_end) {
-
-  const Endpoint end(
-      EndpointXy(start.xy().x() + (length * std::cos(start.xy().heading())),
-                 start.xy().y() + (length * std::sin(start.xy().heading())),
-                 start.xy().heading()),
-      z_end);
-  connections_.push_back(std::make_unique<Connection>(id, start, end));
-  return connections_.back().get();
-}
-
-
-const Connection* Builder::Connect(
-    const std::string& id,
-    const Endpoint& start,
-    const ArcOffset& arc,
-    const EndpointZ& z_end) {
-  const double alpha = start.xy().heading();
-  const double theta0 = alpha - std::copysign(M_PI / 2., arc.d_theta());
-  const double theta1 = theta0 + arc.d_theta();
-
-  const double cx = start.xy().x() - (arc.radius() * std::cos(theta0));
-  const double cy = start.xy().y() - (arc.radius() * std::sin(theta0));
-
-  const Endpoint end(EndpointXy(cx + (arc.radius() * std::cos(theta1)),
-                                cy + (arc.radius() * std::sin(theta1)),
-                                alpha + arc.d_theta()),
-                     z_end);
-
-  connections_.push_back(std::make_unique<Connection>(
-      id, start, end, cx, cy, arc.radius(), arc.d_theta()));
-  return connections_.back().get();
-}
-
 const Connection* Builder::Connect(
       const std::string& id,
       const std::vector<Endpoint> &points) {
@@ -96,22 +57,6 @@ Group* Builder::MakeGroup(const std::string& id,
 
 
 namespace {
-// Construct a CubicPolynomial such that:
-//    f(0) = Y0 / dX           f'(0) = Ydot0
-//    f(1) = (Y0 + dY) / dX    f'(1) = Ydot1
-//
-// This is equivalent to taking a cubic polynomial g such that:
-//    g(0) = Y0          g'(0) = Ydot0
-//    g(dX) = Y0 + dY    g'(1) = Ydot1
-// and isotropically scaling it (scale both axes) by a factor of 1/dX
-CubicPolynomial MakeCubic(double dX, double Y0, double dY,
-                          double Ydot0, double Ydot1) {
-  return CubicPolynomial(Y0 / dX,
-                         Ydot0,
-                         (3. * dY / dX) - (2. * Ydot0) - Ydot1,
-                         Ydot0 + Ydot1 - (2. * dY / dX));
-}
-
 // Determine the heading (in xy-plane) along the centerline when
 // travelling towards/into the lane, from the specified end.
 double HeadingIntoLane(const api::Lane* const lane,
@@ -199,56 +144,6 @@ Lane* Builder::BuildConnection(
   api::LaneId lane_id{std::string("l:") + conn->id()};
 
   switch (conn->type()) {
-    case Connection::kLine: {
-      const V2 xy0(conn->start().xy().x(),
-                   conn->start().xy().y());
-      const V2 dxy(conn->end().xy().x() - xy0.x(),
-                   conn->end().xy().y() - xy0.y());
-      const CubicPolynomial elevation(MakeCubic(
-          dxy.norm(),
-          conn->start().z().z(),
-          conn->end().z().z() - conn->start().z().z(),
-          conn->start().z().z_dot(),
-          conn->end().z().z_dot()));
-      const CubicPolynomial superelevation(MakeCubic(
-          dxy.norm(),
-          conn->start().z().theta(),
-          conn->end().z().theta() - conn->start().z().theta(),
-          conn->start().z().theta_dot(),
-          conn->end().z().theta_dot()));
-
-      lane = segment->NewLineLane(lane_id,
-                                  xy0, dxy,
-                                  lane_bounds_, driveable_bounds_,
-                                  elevation, superelevation);
-      break;
-    }
-    case Connection::kArc: {
-      const V2 center(conn->cx(), conn->cy());
-      const double radius = conn->radius();
-      const double theta0 = std::atan2(conn->start().xy().y() - center.y(),
-                                       conn->start().xy().x() - center.x());
-      const double d_theta = conn->d_theta();
-      const double arc_length = radius * std::abs(d_theta);
-      const CubicPolynomial elevation(MakeCubic(
-          arc_length,
-          conn->start().z().z(),
-          conn->end().z().z() - conn->start().z().z(),
-          conn->start().z().z_dot(),
-          conn->end().z().z_dot()));
-      const CubicPolynomial superelevation(MakeCubic(
-          arc_length,
-          conn->start().z().theta(),
-          conn->end().z().theta() - conn->start().z().theta(),
-          conn->start().z().theta_dot(),
-          conn->end().z().theta_dot()));
-
-      lane = segment->NewArcLane(lane_id,
-                                 center, radius, theta0, d_theta,
-                                 lane_bounds_, driveable_bounds_,
-                                 elevation, superelevation);
-      break;
-    }
     case Connection::kSpline: {
 
       std::vector<Point2> points;

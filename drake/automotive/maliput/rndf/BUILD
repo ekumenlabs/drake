@@ -13,7 +13,6 @@ drake_cc_library(
     deps = [
         ":builder",
         ":lanes",
-        ":loader",
     ],
     copts = [
         "-I/usr/include/ignition/math2",
@@ -77,20 +76,6 @@ drake_cc_library(
     ],
     linkopts = [
         "-lignition-math2",
-    ],
-)
-
-drake_cc_library(
-    name = "loader",
-    srcs = [
-        "loader.cc",
-    ],
-    hdrs = [
-        "loader.h",
-    ],
-    deps = [
-        ":builder",
-        "@yaml_cpp//:lib",
     ],
 )
 
