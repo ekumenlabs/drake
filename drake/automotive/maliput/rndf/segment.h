@@ -31,23 +31,6 @@ class Segment : public api::Segment {
   Segment(const api::SegmentId& id, api::Junction* junction)
       : id_(id), junction_(junction) {}
 
-  /// Gives the segment a newly constructed LineLane.
-  LineLane* NewLineLane(api::LaneId id,
-                        const V2& xy0, const V2& dxy,
-                        const api::RBounds& lane_bounds,
-                        const api::RBounds& driveable_bounds,
-                        const CubicPolynomial& elevation,
-                        const CubicPolynomial& superelevation);
-
-  /// Gives the segment a newly constructed ArcLane.
-  ArcLane* NewArcLane(api::LaneId id,
-                      const V2& center, const double radius,
-                      const double theta0, const double d_theta,
-                      const api::RBounds& lane_bounds,
-                      const api::RBounds& driveable_bounds,
-                      const CubicPolynomial& elevation,
-                      const CubicPolynomial& superelevation);
-
   /// Gives the segment a newly constructed SplineLane.
   SplineLane* NewSplineLane(const api::LaneId& id,
                       const std::vector<Point2> &control_points,

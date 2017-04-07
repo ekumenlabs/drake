@@ -51,7 +51,13 @@ V2 SplineLane::xy_of_p(const double p) const {
 
 V2 SplineLane::xy_dot_of_p(const double p) const {
   double p1 = module_p(p);
-  double p2 = module_p(p + 0.001);
+  double p2;
+  if (p1 < 1.0) {
+    p2 = module_p(p + 0.001);
+  } else {
+    p2 = module_p(p1 - 0.001);
+    std::swap(p1, p2);
+  }
 
   const auto& point_p1 = spline_.Interpolate(p1);
   const auto& point_p2 = spline_.Interpolate(p2);
