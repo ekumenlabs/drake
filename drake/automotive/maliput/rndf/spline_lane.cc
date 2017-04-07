@@ -27,18 +27,6 @@ SplineLane::SplineLane(const api::LaneId& id, const api::Segment* segment,
           superelevation),
       control_points_(Points22IgnitionVector3ds(control_points)) {
 
-  //ComputeLength(control_points_, &lengths_);
-  /*
-  std::vector<ignition::math::Vector3d> points;
-  points = InterpolateRoad(control_points_, 0.1);
-  // Create the spline and calculate all the tangents.
-  spline_.Tension(0.0);
-  spline_.AutoCalculate(false);
-  for (const auto &point : points) {
-    spline_.AddPoint(point);
-  }
-  spline_.RecalcTangents();
-  */
   // Create the spline and calculate all the tangents.
   spline_.Tension(0.0);
   spline_.AutoCalculate(false);
@@ -62,8 +50,8 @@ V2 SplineLane::xy_of_p(const double p) const {
 }
 
 V2 SplineLane::xy_dot_of_p(const double p) const {
-  auto p1 = module_p(p);
-  auto p2 = module_p(p + 0.001);
+  double p1 = module_p(p);
+  double p2 = module_p(p + 0.001);
 
   const auto& point_p1 = spline_.Interpolate(p1);
   const auto& point_p2 = spline_.Interpolate(p2);
@@ -83,9 +71,9 @@ double SplineLane::heading_dot_of_p(const double p) const {
 }
 
 double SplineLane::module_p(const double _p) const {
-    double p = std::min(0.0, _p);
-    p = std::max(1.0, p);
-    return p;
+  double p = std::max(0.0, _p);
+  p = std::min(1.0, p);
+  return p;
 }
 
 Point2 SplineLane::IgnitionVector3d2Point2(
@@ -134,45 +122,6 @@ double SplineLane::ComputeLength(
   }
   return length;
 }
-
-/*
-std::vector<ignition::math::Vector3d> SplineLane::InterpolateRoad(
-  const std::vector<ignition::math::Vector3d> &_points,
-  const double distance_threshold) {
-  ignition::math::Spline spline;
-  spline.AutoCalculate(true);
-  std::vector<ignition::math::Vector3d> new_points;
-
-  // Add all the control points
-  for (const auto &point : _points) {
-    spline.AddPoint(point);
-  }
-
-  double distance;
-  for (uint i = 0; i < (_points.size()-1); i++) {
-    new_points.push_back(_points[i]);
-    distance = _points[i].Distance(_points[i+1]);
-    if (distance > distance_threshold) {
-      ignition::math::Vector3d new_point = spline.Interpolate(i, 0.5);
-      new_points.push_back(new_point);
-    }
-  }
-  new_points.push_back(_points.back());
-
-  bool distance_check = true;
-  for (uint i = 0; i < new_points.size()-1; i++) {
-    distance = new_points[i].Distance(new_points[i+1]);
-    if (distance > distance_threshold) {
-      distance_check = false;
-      break;
-    }
-  }
-  if (distance_check == false) {
-    return InterpolateRoad(new_points, distance_threshold);
-  }
-  return new_points;
-}
-*/
 
 }  // namespace rndf
 }  // namespace maliput
