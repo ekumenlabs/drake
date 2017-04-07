@@ -26,21 +26,17 @@ drake_cc_library(
 drake_cc_library(
     name = "lanes",
     srcs = [
-        "arc_lane.cc",
         "branch_point.cc",
         "junction.cc",
         "lane.cc",
-        "line_lane.cc",
         "road_geometry.cc",
         "segment.cc",
         "spline_lane.cc",
     ],
     hdrs = [
-        "arc_lane.h",
         "branch_point.h",
         "junction.h",
         "lane.h",
-        "line_lane.h",
         "road_geometry.h",
         "segment.h",
         "spline_lane.h",
