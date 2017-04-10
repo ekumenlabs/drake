@@ -6,8 +6,6 @@
 
 #include "drake/common/drake_assert.h"
 
-#include <ignition/math.hh>
-
 namespace drake {
 namespace maliput {
 namespace rndf {
