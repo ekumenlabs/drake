@@ -7,6 +7,7 @@
 #include <sstream>
 #include <string>
 #include <map>
+#include <algorithm>
 
 #include <ignition/math.hh>
 
@@ -63,6 +64,10 @@ class Waypoint {
     return std::to_string(segment_id_) + "_" +
       std::to_string(lane_id_) + "_" +
       std::to_string(id_);
+  }
+
+  bool MatchId(const std::string &id) const {
+    return IdStr() == id;
   }
 
   uint Id() const {
@@ -168,7 +173,8 @@ class RNDFTBuilder {
 
   /// Implements a custom RNDF map
   std::unique_ptr<const maliput::api::RoadGeometry> Build(
-    const std::string &rndf_description);
+    const std::string &road_waypoints,
+    const std::string &connections);
 
  private:
   void BuildWaypointMap(
@@ -179,6 +185,19 @@ class RNDFTBuilder {
     maliput::rndf::Builder &builder,
     const uint segment_id,
     const std::vector<Waypoint> &waypoints);
+
+  void BuildConnection(
+    maliput::rndf::Builder &builder,
+    const Waypoint *exit,
+    const Waypoint *entry);
+
+  void BuildConnectionsTupleList(
+    const std::string &connections,
+    std::vector<std::tuple<std::string, std::string>> &conn_vector);
+
+  const Waypoint* FindWaypointById(
+    const std::map<uint, std::vector<Waypoint>> &waypoints_map,
+    const std::string &wpId);
 
   /// Tolerances for monolane's Builder.
   const double linear_tolerance_  = 0.01;
