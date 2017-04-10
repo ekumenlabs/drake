@@ -9,7 +9,8 @@
 #include <map>
 #include <algorithm>
 
-#include <ignition/math.hh>
+#include "ignition/math/Vector3.hh"
+#include "ignition/math/SphericalCoordinates.hh"
 
 #include "drake/automotive/maliput/api/road_geometry.h"
 #include "drake/automotive/maliput/rndf/builder.h"
