@@ -19,6 +19,7 @@ SplineLane::SplineLane(const api::LaneId& id, const api::Segment* segment,
     ignition::math::Vector3d>> &control_points,
   const api::RBounds& lane_bounds,
   const api::RBounds& driveable_bounds):
+
     Lane(id,
       segment,
       lane_bounds,

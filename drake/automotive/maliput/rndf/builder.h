@@ -61,7 +61,6 @@ class DirectedWaypoint {
       (const DirectedWaypoint&)>(&DirectedWaypoint::operator=);
   }
 
-<<<<<<< HEAD
   DirectedWaypoint(
     const ignition::rndf::UniqueId &id,
     const ignition::math::Vector3d &position,
@@ -88,21 +87,6 @@ class DirectedWaypoint {
   ignition::math::Vector3d tangent_;
 };
 
-=======
-  /// Returns the subset of parameters pertaining to the xy ground-plane.
-  const EndpointXy& xy() const { return xy_; }
-
-  /// Returns the subset of parameters pertaining to out-of-ground-plane
-  /// aspects.
-  const EndpointZ& z() const { return z_; }
-
- private:
-  EndpointXy xy_;
-  EndpointZ z_;
-};
-
-
->>>>>>> Removed unused code from the builders and from the loader.
 /// Representation of a reference path connecting two endpoints.
 ///
 /// Upon building the RoadGeometry, a Connection yields a Segment
@@ -119,7 +103,6 @@ class Connection {
  public:
   DRAKE_NO_COPY_NO_MOVE_NO_ASSIGN(Connection)
 
-<<<<<<< HEAD
   /// Possible connection geometries: splines
   enum Type { kSpline };
 
@@ -134,11 +117,6 @@ class Connection {
       waypoints_(waypoints) {
     DRAKE_DEMAND(waypoints_.size() >= 2);
   }
-=======
-  /// Possible connection geometries:  line- or arc-segment.
-  enum Type { kSpline };
-
->>>>>>> Removed unused code from the builders and from the loader.
 
   /// Constructs a spline-segment connection joining @p points[0] to @p points[size-1].
   Connection(const std::string& id,
@@ -158,7 +136,6 @@ class Connection {
   DirectedWaypoint& start() { return start_; }
 
   /// Returns the parameters of the endpoint.
-<<<<<<< HEAD
   const DirectedWaypoint& end() const { return end_; }
   DirectedWaypoint& end() { return end_; }
 
@@ -166,33 +143,6 @@ class Connection {
     DRAKE_DEMAND(type_ == kSpline);
     return waypoints_;
   }
-=======
-  const Endpoint& end() const { return end_; }
-
-  // /// Returns the x-component of the arc center (for arc connections only).
-  // double cx() const {
-  //   DRAKE_DEMAND(type_ == kArc);
-  //   return cx_;
-  // }
-
-  // /// Returns the y-component of the arc center (for arc connections only).
-  // double cy() const {
-  //   DRAKE_DEMAND(type_ == kArc);
-  //   return cy_;
-  // }
-
-  // /// Returns the radius of the arc (for arc connections only).
-  // double radius() const {
-  //   DRAKE_DEMAND(type_ == kArc);
-  //   return radius_;
-  // }
-
-  // /// Returns the angle of the arc (for arc connections only).
-  // double d_theta() const {
-  //   DRAKE_DEMAND(type_ == kArc);
-  //   return d_theta_;
-  // }
->>>>>>> Removed unused code from the builders and from the loader.
 
   const std::vector<Endpoint> &points() const {
     DRAKE_DEMAND(type_ == kSpline);
@@ -202,57 +152,9 @@ class Connection {
  private:
   Type type_{};
   std::string id_;
-<<<<<<< HEAD
   DirectedWaypoint start_;
   DirectedWaypoint end_;
   std::vector<DirectedWaypoint> waypoints_;
-=======
-  Endpoint start_;
-  Endpoint end_;
-  std::vector<Endpoint> points_;
-
-  // // Bits specific to type_ == kArc:
-  // double cx_{};
-  // double cy_{};
-  // double radius_{};
-  // double d_theta_{};
-};
-
-
-/// A group of Connections.
-///
-/// Upon building the RoadGeometry, a Group yields a Junction containing the
-/// corresponding Segments specified by all the Connections in the Group.
-class Group {
- public:
-  DRAKE_NO_COPY_NO_MOVE_NO_ASSIGN(Group)
-
-  /// Constructs an empty Group with the specified @p id.
-  explicit Group(const std::string& id) : id_(id) {}
-
-  /// Constructs a Group with @p id, populated by @p connections.
-  Group(const std::string& id,
-        const std::vector<const Connection*>& connections)
-      : id_(id), connections_(connections.begin(), connections.end()) {}
-
-  /// Adds a Connection.
-  void Add(const Connection* connection) {
-    auto result = connections_.insert(connection);
-    DRAKE_DEMAND(result.second);
-  }
-
-  /// Returns the ID string.
-  const std::string& id() const { return id_; }
-
-  /// Returns the grouped Connections.
-  const std::set<const Connection*>& connections() const {
-    return connections_;
-  }
-
- private:
-  std::string id_;
-  std::set<const Connection*> connections_;
->>>>>>> Removed unused code from the builders and from the loader.
 };
 
 
@@ -273,7 +175,6 @@ class Builder {
           const double linear_tolerance,
           const double angular_tolerance);
 
-<<<<<<< HEAD
   void CreateLaneConnections(
     const uint segment_id,
     const uint lane_id,
@@ -284,30 +185,6 @@ class Builder {
     const api::RBounds& driveable_bounds,
     const ignition::rndf::UniqueId &exit,
     const ignition::rndf::UniqueId &entry);
-=======
-  const Connection* Connect(
-      const std::string& id,
-      const std::vector<Endpoint> &points);
-
-  /// Sets the default branch for one end of a connection.
-  ///
-  /// The default branch for the @p in_end of connection @p in will set to be
-  /// @p out_end of connection @p out.  The specified connections must
-  /// actually be joined at the specified ends (i.e., the Endpoint's for
-  /// those ends must be coincident and (anti)parallel within the tolerances
-  /// for the Builder).
-  void SetDefaultBranch(
-      const Connection* in, const api::LaneEnd::Which in_end,
-      const Connection* out, const api::LaneEnd::Which out_end);
-
-  /// Creates a new empty connection group with ID string @p id.
-  Group* MakeGroup(const std::string& id);
-
-  /// Creates a new connection group with ID @p id, populated with the
-  /// given @p connections.
-  Group* MakeGroup(const std::string& id,
-                   const std::vector<const Connection*>& connections);
->>>>>>> Removed unused code from the builders and from the loader.
 
   /// Produces a RoadGeometry, with the ID @p id.
   std::unique_ptr<const api::RoadGeometry> Build(

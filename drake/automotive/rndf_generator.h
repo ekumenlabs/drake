@@ -7,8 +7,10 @@
 #include <sstream>
 #include <string>
 #include <map>
+#include <algorithm>
 
-#include <ignition/math.hh>
+#include "ignition/math/Vector3.hh"
+#include "ignition/math/SphericalCoordinates.hh"
 
 #include "drake/automotive/maliput/api/road_geometry.h"
 #include "drake/automotive/maliput/rndf/builder.h"
@@ -65,6 +67,10 @@ class Waypoint {
       std::to_string(id_);
   }
 
+  bool MatchId(const std::string &id) const {
+    return IdStr() == id;
+  }
+
   uint Id() const {
     return id_;
   }
@@ -80,7 +86,7 @@ class Waypoint {
       std::to_string(longitude_);
   }
 
-  std::tuple<double, double> ToGlobalCoordinates(
+  ignition::math::Vector3d ToGlobalCoordinates(
     const double latitude_origin,
     const double longitude_origin) const {
     const auto origin =
@@ -91,11 +97,15 @@ class Waypoint {
       position_spherical.LatitudeReference().Radian(),
       position_spherical.LongitudeReference().Radian(),
       position_spherical.ElevationReference());
-    const auto position = origin.PositionTransform(
+    return origin.PositionTransform(
       position_vector,
       ignition::math::SphericalCoordinates::SPHERICAL,
       ignition::math::SphericalCoordinates::GLOBAL);
-    return std::make_tuple(position.X(), position.Y());
+    /*const auto position = origin.PositionTransform(
+      position_vector,
+      ignition::math::SphericalCoordinates::SPHERICAL,
+      ignition::math::SphericalCoordinates::GLOBAL);
+    return std::make_tuple(position.X(), position.Y()); */
   }
 
   static std::vector<std::string> Split(
@@ -168,7 +178,8 @@ class RNDFTBuilder {
 
   /// Implements a custom RNDF map
   std::unique_ptr<const maliput::api::RoadGeometry> Build(
-    const std::string &rndf_description);
+    const std::string &road_waypoints,
+    const std::string &connections);
 
  private:
   void BuildWaypointMap(
@@ -179,6 +190,19 @@ class RNDFTBuilder {
     maliput::rndf::Builder &builder,
     const uint segment_id,
     const std::vector<Waypoint> &waypoints);
+
+  void BuildConnection(
+    maliput::rndf::Builder &builder,
+    const Waypoint *exit,
+    const Waypoint *entry);
+
+  void BuildConnectionsTupleList(
+    const std::string &connections,
+    std::vector<std::tuple<std::string, std::string>> &conn_vector);
+
+  const Waypoint* FindWaypointById(
+    const std::map<uint, std::vector<Waypoint>> &waypoints_map,
+    const std::string &wpId);
 
   /// Tolerances for monolane's Builder.
   const double linear_tolerance_  = 0.01;

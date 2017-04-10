@@ -13,7 +13,6 @@
 
 #include "ignition/math/Spline.hh"
 
-
 namespace drake {
 namespace maliput {
 namespace rndf {
@@ -36,13 +35,7 @@ class SplineLane : public Lane {
     const std::vector<std::tuple<ignition::math::Vector3d,
     ignition::math::Vector3d>> &points);
 
-<<<<<<< HEAD
   static double Tension() { return kTension; }
-=======
-  /*static std::vector<ignition::math::Vector3d> InterpolateRoad(
-    const std::vector<ignition::math::Vector3d> &_points,
-    const double distance_threshold);*/
->>>>>>> Made some changes to spline lane to remove unused code. Detected 90 degree roads issue when visualizing.
 
  private:
   api::LanePosition DoToLanePosition(
@@ -77,6 +70,7 @@ class SplineLane : public Lane {
 
   static const double kSplinesSamples;
   static const double kTension;
+
 };
 
 }  // namespace rndf
