@@ -47,5 +47,56 @@ class RNDFTBuilder {
   const RNDFRoadCharacteristics rc_;
 };
 
+class Waypoint {
+ public:
+  Waypoint (const uint segment_id,
+    const uint lane_id,
+    const uint id,
+    const double latitude,
+    const double longitude) :
+      segment_id_(segment_id),
+      lane_id_(lane_id),
+      id_(id),
+      latitude_(latitude),
+      longitude_(longitude) {}
+
+  Waypoint (const std::string &wp_str) {}
+
+  std::string Id() const {
+    return std::to_string(segment_id_) + "_" +
+      std::to_string(lane_id) + "_" +
+      std::to_string(id_);
+  }
+
+  std::pair<double, double> ToGlobalCoordinates(
+    const double latitude_origin,
+    const double longitude_origin) const {
+    const auto origin =
+      BuildSphericalCoordinates(latitude_origin, longitude_origin);
+    const auto position = origin.positionTransform(
+      BuildSphericalCoordinates(latitude_, longitude_),
+      ignition::math::SphericalCoordinates::SPHERICAL,
+      ignition::math::SphericalCoordinates::GLOBAL);
+    return std::pair<double, double> (position.X(), position.Y());
+  }
+
+ private:
+  ignition::math::SphericalCoordinates BuildSphericalCoordinates(
+    const double latitude, const double longitude) {
+    return ignition::math::SphericalCoordinates origin(
+      ignition::math::SphericalCoordinates::EARTH_WGS84,
+      ignition::math::Angle(latitude / 180.0 * M_PI),
+      ignition::math::Angle(longitude / 180.0 * M_PI),
+      0.0,
+      ignition::math::Angle(0.0));
+  }
+
+  uint segment_id_;
+  uint lane_id_;
+  uint id_;
+  double latitude_;
+  double longitude_;
+};
+
 }  // namespace automotive
 }  // namespace drake
