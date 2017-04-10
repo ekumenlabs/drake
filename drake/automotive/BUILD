@@ -215,13 +215,7 @@ drake_cc_library(
     deps = [
         "//drake/automotive/maliput/api",
         "//drake/automotive/maliput/rndf",
-    ],
-    copts = [
-        "-I/usr/include/ignition/math2",
-        "-std=c++11"
-    ],
-    linkopts = [
-        "-lignition-math2",
+        "@ignition_math",
     ],
 )
 
@@ -393,13 +387,7 @@ drake_cc_binary(
         ":rndf_generator",
         "//drake/automotive/maliput/dragway",
         "//drake/common:text_logging_gflags",
-    ],
-    copts = [
-        "-I/usr/include/ignition/math2",
-        "-std=c++11"
-    ],
-    linkopts = [
-        "-lignition-math2",
+        "@ignition_math",
     ],
 )
 

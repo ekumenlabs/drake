@@ -14,13 +14,6 @@ drake_cc_library(
         ":builder",
         ":lanes",
     ],
-    copts = [
-        "-I/usr/include/ignition/math2",
-        "-std=c++11"
-    ],
-    linkopts = [
-        "-lignition-math2",
-    ],
 )
 
 drake_cc_library(
@@ -41,17 +34,11 @@ drake_cc_library(
         "segment.h",
         "spline_lane.h",
     ],
-    copts = [
-        "-I/usr/include/ignition/math2",
-        "-std=c++11"
-    ],
-    linkopts = [
-        "-lignition-math2",
-    ],
     deps = [
         "//drake/automotive/maliput/api",
         "//drake/common",
         "//drake/math:geometric_transform",
+        "@ignition_math",
     ],
 )
 
@@ -65,13 +52,7 @@ drake_cc_library(
     ],
     deps = [
         ":lanes",
-    ],
-    copts = [
-        "-I/usr/include/ignition/math2",
-        "-std=c++11"
-    ],
-    linkopts = [
-        "-lignition-math2",
+        "@ignition_math",
     ],
 )
 
@@ -82,5 +63,13 @@ filegroup(
 
 # === test/ ===
 
+
+drake_cc_googletest(
+    name = "ignition_math_test",
+    srcs = ["test/ignition_math_test.cc"],
+    deps = [
+        "@ignition_math",
+    ],
+)
 
 cpplint()
