@@ -41,12 +41,7 @@ class SplineLane : public Lane {
   	const std::vector<ignition::math::Vector3d> &points);
 
   static double ComputeLength(
-    const std::vector<ignition::math::Vector3d> &points,
-    std::vector<double> *lengths);
-
-  /*static std::vector<ignition::math::Vector3d> InterpolateRoad(
-    const std::vector<ignition::math::Vector3d> &_points,
-    const double distance_threshold);*/
+    const std::vector<ignition::math::Vector3d> &points);
 
  private:
   api::LanePosition DoToLanePosition(
@@ -61,8 +56,6 @@ class SplineLane : public Lane {
 
   double module_p(const double _p) const;
 
-  std::vector<ignition::math::Vector3d> control_points_;
-  // std::vector<double> lengths_;
   ignition::math::Spline spline_;
 };
 
