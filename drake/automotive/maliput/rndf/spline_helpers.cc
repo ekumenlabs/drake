@@ -41,6 +41,7 @@ double InverseArcLengthInterpolator::InterpolateMthDerivative(
 
   // Search s(t) function tabulation for lower bound index
   auto it = std::lower_bound(this->s_t_.begin(), this->s_t_.end(), __s);
+
   if (it != this->s_t_.begin()) it--;
   int index = it - this->s_t_.begin();
 
@@ -86,6 +87,7 @@ ArcLengthParameterizedSpline::InterpolateMthDerivative(
   double t_prime_s = this->t_s_.InterpolateMthDerivative(1, _s);
   ignition::math::Vector3d q_prime_t =
     this->q_t_->InterpolateMthDerivative(1, t_s);
+
   if (_mth < 2) {
     // M = 1 => P'(s) = Q'(t(s)) * t'(s)
     return q_prime_t * t_prime_s;

@@ -27,6 +27,7 @@ SplineLane::SplineLane(const api::LaneId& id, const api::Segment* segment,
       ComputeLength(control_points)) {
   std::unique_ptr<ignition::math::Spline> spline =
     std::make_unique<ignition::math::Spline>();
+<<<<<<< HEAD
   spline->Tension(kTension);
   spline->AutoCalculate(true);
   for (const auto &point : control_points) {

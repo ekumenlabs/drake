@@ -218,6 +218,17 @@ class Builder {
     Junction *junction,
     const Connection *connection);
 
+  std::string BuildName(const uint segment_id,
+    const uint lane_id) const;
+
+  std::string BuildName(const uint segment_id,
+    const uint lane_id,
+    const uint waypoint_id) const;
+
+  Endpoint ConvertIntoEndpoint(
+    const std::tuple<ignition::math::Vector3d,
+      ignition::math::Vector3d> &pose);
+
   api::RBounds lane_bounds_;
   api::RBounds driveable_bounds_;
   double linear_tolerance_{};

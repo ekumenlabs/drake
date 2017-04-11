@@ -13,6 +13,8 @@
 
 #include "ignition/math/Spline.hh"
 
+#include "spline_helpers.h"
+
 namespace drake {
 namespace maliput {
 namespace rndf {
@@ -70,7 +72,6 @@ class SplineLane : public Lane {
 
   static const double kSplinesSamples;
   static const double kTension;
-
 };
 
 }  // namespace rndf

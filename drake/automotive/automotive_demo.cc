@@ -105,7 +105,7 @@ enum class RoadNetworkType {
   onramp = 2,
 };
 
-/*
+
 std::string MakeChannelName(const std::string& name) {
   const std::string default_prefix{"DRIVING_COMMAND"};
   if (name.empty()) {
@@ -113,7 +113,6 @@ std::string MakeChannelName(const std::string& name) {
   }
   return default_prefix + "_" + name;
 }
-*/
 
 
 // Adds a MaliputRailcar to the simulation involving a dragway. It throws a
@@ -324,6 +323,7 @@ const maliput::api::RoadGeometry* AddDragway(
           FLAGS_dragway_shoulder_width);
   return simulator->SetRoadGeometry(std::move(road_geometry));
 }
+
 
 // Adds a monolane-based onramp road network to the provided `simulator`.
 const maliput::api::RoadGeometry* AddOnramp(
