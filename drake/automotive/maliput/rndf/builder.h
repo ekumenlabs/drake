@@ -9,6 +9,9 @@
 #include <vector>
 #include <iostream>
 
+#include "ignition/math/Vector3.hh"
+#include "ignition/math/Spline.hh"
+
 #include "drake/automotive/maliput/api/lane_data.h"
 #include "drake/automotive/maliput/rndf/junction.h"
 #include "drake/common/drake_assert.h"
@@ -60,13 +63,14 @@ class EndpointXy {
   // Constructs an EndpointXy with all zero parameters.
   EndpointXy() = default;
 
-  EndpointXy(double x, double y, double heading)
-      : x_(x), y_(y), heading_(heading) {}
+  EndpointXy(double x, double y, double heading, double heading_mod)
+      : x_(x), y_(y), heading_(heading), heading_mod_(heading_mod) {}
 
   /// Returns an EndpointXy with reversed direction.
   EndpointXy reverse() const {
     return EndpointXy(x_, y_,
-                      std::atan2(-std::sin(heading_), -std::cos(heading_)));
+                      std::atan2(-std::sin(heading_), -std::cos(heading_)),
+                      heading_mod_);
   }
 
   double x() const { return x_; }
@@ -75,10 +79,13 @@ class EndpointXy {
 
   double heading() const { return heading_; }
 
+  double heading_mod() const { return heading_mod_; }
+
  private:
   double x_{};
   double y_{};
   double heading_{};
+  double heading_mod_{};
 };
 
 
@@ -195,30 +202,6 @@ class Connection {
   /// Returns the parameters of the endpoint.
   const Endpoint& end() const { return end_; }
 
-  // /// Returns the x-component of the arc center (for arc connections only).
-  // double cx() const {
-  //   DRAKE_DEMAND(type_ == kArc);
-  //   return cx_;
-  // }
-
-  // /// Returns the y-component of the arc center (for arc connections only).
-  // double cy() const {
-  //   DRAKE_DEMAND(type_ == kArc);
-  //   return cy_;
-  // }
-
-  // /// Returns the radius of the arc (for arc connections only).
-  // double radius() const {
-  //   DRAKE_DEMAND(type_ == kArc);
-  //   return radius_;
-  // }
-
-  // /// Returns the angle of the arc (for arc connections only).
-  // double d_theta() const {
-  //   DRAKE_DEMAND(type_ == kArc);
-  //   return d_theta_;
-  // }
-
   const std::vector<Endpoint> &points() const {
     DRAKE_DEMAND(type_ == kSpline);
     return points_;
@@ -230,14 +213,7 @@ class Connection {
   Endpoint start_;
   Endpoint end_;
   std::vector<Endpoint> points_;
-
-  // // Bits specific to type_ == kArc:
-  // double cx_{};
-  // double cy_{};
-  // double radius_{};
-  // double d_theta_{};
 };
-
 
 /// A group of Connections.
 ///
@@ -296,6 +272,15 @@ class Builder {
       const std::string& id,
       const std::vector<Endpoint> &points);
 
+  void CreateLaneConnections(
+    const uint segment_id,
+    const uint lane_id,
+    const std::vector<ignition::math::Vector3d> &points);
+
+  void CreateLaneToLaneConnection(
+    const std::string &exit_id,
+    const std::string &entry_id);
+
   /// Sets the default branch for one end of a connection.
   ///
   /// The default branch for the @p in_end of connection @p in will set to be
@@ -314,6 +299,7 @@ class Builder {
   /// given @p connections.
   Group* MakeGroup(const std::string& id,
                    const std::vector<const Connection*>& connections);
+
 
   /// Produces a RoadGeometry, with the ID @p id.
   std::unique_ptr<const api::RoadGeometry> Build(
@@ -402,12 +388,26 @@ class Builder {
       RoadGeometry* rg,
       std::map<Endpoint, BranchPoint*, EndpointFuzzyOrder>* bp_map) const;
 
+  std::string BuildName(const uint segment_id,
+    const uint lane_id) const;
+
+  std::string BuildName(const uint segment_id,
+    const uint lane_id,
+    const uint waypoint_id) const;
+
+  Endpoint ConvertIntoEndpoint(
+    const std::tuple<ignition::math::Vector3d,
+      ignition::math::Vector3d> &pose);
+
   api::RBounds lane_bounds_;
   api::RBounds driveable_bounds_;
   double linear_tolerance_{};
   double angular_tolerance_{};
   std::vector<std::unique_ptr<Connection>> connections_;
   std::vector<DefaultBranch> default_branches_;
+  std::map<
+    std::string,
+    std::tuple<ignition::math::Vector3d, ignition::math::Vector3d>> waypoints;
   std::vector<std::unique_ptr<Group>> groups_;
 };
 

@@ -1,12 +1,16 @@
 #pragma once
 
 #include <memory>
+#include <vector>
+#include <tuple>
 
 #include "drake/automotive/maliput/api/junction.h"
 #include "drake/automotive/maliput/api/lane.h"
 #include "drake/automotive/maliput/api/segment.h"
 #include "drake/automotive/maliput/rndf/lane.h"
 #include "drake/common/drake_copyable.h"
+
+#include "ignition/math/Vector3.hh"
 
 namespace drake {
 namespace maliput {
@@ -33,7 +37,8 @@ class Segment : public api::Segment {
 
   /// Gives the segment a newly constructed SplineLane.
   SplineLane* NewSplineLane(const api::LaneId& id,
-                      const std::vector<Point2> &control_points,
+                      const std::vector<std::tuple<ignition::math::Vector3d,
+                        ignition::math::Vector3d>> &control_points,
                       const api::RBounds& lane_bounds,
                       const api::RBounds& driveable_bounds,
                       const CubicPolynomial& elevation,

@@ -98,6 +98,8 @@ DEFINE_string(lane_names, "",
   "A comma-separated list (e.g. 'lane_1,lane_2,lane_3' that generates a path "
   "for the car to follow.");
 
+DEFINE_bool(build_T, false, "Build RNDF T example. It overrides the RNDF file.");
+
 namespace drake {
 
 using maliput::api::Lane;
@@ -343,6 +345,10 @@ const maliput::api::RoadGeometry* AddDragway(
 const maliput::api::RoadGeometry* AddRNDF(
     AutomotiveSimulator<double>* simulator) {
   auto onramp_generator = std::make_unique<RNDFTBuilder>();
+  if (FLAGS_build_T) {
+    return simulator->SetRoadGeometry(
+      onramp_generator->Build());
+  } else {
   const std::string road_waypoints =
 "1.1.1\t9.999982 65.000912\n"
 "1.1.2\t10.000045 65.000912\n"
@@ -529,9 +535,9 @@ const maliput::api::RoadGeometry* AddRNDF(
 "12.1.5 4.1.2\n"
 "12.1.6 7.1.2\n"
 "12.1.6 9.1.2\n";
-
   return simulator->SetRoadGeometry(
     onramp_generator->Build(road_waypoints, connections));
+  }
 }
 
 // Adds a monolane-based onramp road network to the provided `simulator`.
