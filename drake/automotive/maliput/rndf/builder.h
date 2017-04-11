@@ -241,7 +241,7 @@ class Connection {
   // double d_theta_{};
 };
 
-
+/*
 /// A group of Connections.
 ///
 /// Upon building the RoadGeometry, a Group yields a Junction containing the
@@ -276,7 +276,7 @@ class Group {
   std::string id_;
   std::set<const Connection*> connections_;
 };
-
+*/
 
 // N.B. The Builder class overview documentation lives at the top of this file.
 class Builder {
@@ -314,6 +314,7 @@ class Builder {
       const Connection* in, const api::LaneEnd::Which in_end,
       const Connection* out, const api::LaneEnd::Which out_end);
 
+  /*
   /// Creates a new empty connection group with ID string @p id.
   Group* MakeGroup(const std::string& id);
 
@@ -321,6 +322,7 @@ class Builder {
   /// given @p connections.
   Group* MakeGroup(const std::string& id,
                    const std::vector<const Connection*>& connections);
+  */
 
   /// Produces a RoadGeometry, with the ID @p id.
   std::unique_ptr<const api::RoadGeometry> Build(
@@ -415,7 +417,7 @@ class Builder {
   double angular_tolerance_{};
   std::vector<std::unique_ptr<Connection>> connections_;
   std::vector<DefaultBranch> default_branches_;
-  std::vector<std::unique_ptr<Group>> groups_;
+  //std::vector<std::unique_ptr<Group>> groups_;
 };
 
 }  // namespace rndf

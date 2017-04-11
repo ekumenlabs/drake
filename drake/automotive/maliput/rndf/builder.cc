@@ -89,7 +89,7 @@ void Builder::SetDefaultBranch(
   default_branches_.push_back({in, in_end, out, out_end});
 }
 
-
+/*
 Group* Builder::MakeGroup(const std::string& id) {
   groups_.push_back(std::make_unique<Group>(id));
   return groups_.back().get();
@@ -101,7 +101,7 @@ Group* Builder::MakeGroup(const std::string& id,
   groups_.push_back(std::make_unique<Group>(id, connections));
   return groups_.back().get();
 }
-
+*/
 
 namespace {
 // Determine the heading (in xy-plane) along the centerline when
@@ -235,6 +235,7 @@ std::unique_ptr<const api::RoadGeometry> Builder::Build(
     remaining_connections.insert(connection.get());
   }
 
+  /*
   for (const std::unique_ptr<Group>& group : groups_) {
     Junction* junction =
         road_geometry->NewJunction({std::string("j:") + group->id()});
@@ -248,6 +249,7 @@ std::unique_ptr<const api::RoadGeometry> Builder::Build(
           connection, junction, road_geometry.get(), &bp_map);
     }
   }
+  */
 
   for (const Connection* const connection : remaining_connections) {
     Junction* junction =
