@@ -156,30 +156,9 @@ void RNDFTBuilder::BuildSegment(
   maliput::rndf::Builder &builder,
   const uint segment_id,
   const std::vector<Waypoint> &waypoints) {
-
-  //const rndf::EndpointZ kFlatZ{0., 0., 0., 0.};
-  //std::vector<rndf::Endpoint> endpoints;
   std::vector<ignition::math::Vector3d> endpoints;
-
-/*
-  for (uint i = 0; i < (waypoints.size() - 1); i++) {
-    const auto &position_1 = waypoints[i].ToGlobalCoordinates(10., 65.);
-    const auto &position_2 = waypoints[i + 1].ToGlobalCoordinates(10., 65.);
-    endpoints.push_back(rndf::Endpoint(
-      rndf::EndpointXy(std::get<0>(position_1), std::get<1>(position_1), 0.0),
-      kFlatZ));
-    endpoints.push_back(rndf::Endpoint(
-      rndf::EndpointXy(std::get<0>(position_2), std::get<1>(position_2), 0.0),
-      kFlatZ));
-    builder.Connect(
-      waypoints[i].IdStr() + "-" + waypoints[i + 1].IdStr(),
-      endpoints);
-    endpoints.clear();
-  }
-*/
-  // We convert all the points to endpoints
+  // We convert all the waypoints locations in spherical to global
   for (const auto &waypoint : waypoints) {
-    // const auto &location = waypoint.ToGlobalCoordinates(10., 65.);
     endpoints.push_back(waypoint.ToGlobalCoordinates(10., 65.));
   }
   const auto &base_name = std::to_string(segment_id) + "_" +

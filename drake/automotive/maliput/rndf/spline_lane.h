@@ -20,7 +20,8 @@ class SplineLane : public Lane {
 
 
   SplineLane(const api::LaneId& id, const api::Segment* segment,
-          const std::vector<Point2> &control_points,
+          const std::vector<std::tuple<ignition::math::Vector3d,
+            ignition::math::Vector3d>> &control_points,
           const api::RBounds& lane_bounds,
           const api::RBounds& driveable_bounds,
           const CubicPolynomial& elevation,
@@ -28,20 +29,9 @@ class SplineLane : public Lane {
 
   ~SplineLane() override = default;
 
-  static Point2 IgnitionVector3d2Point2(
-  	const ignition::math::Vector3d &point);
-
-  static ignition::math::Vector3d Point22IgnitionVector3d(
-    const Point2 &point);
-
-  static std::vector<ignition::math::Vector3d> Points22IgnitionVector3ds(
-    const std::vector<Point2> &points);
-
-  static std::vector<Point2> IgnitionVector3ds2Points(
-  	const std::vector<ignition::math::Vector3d> &points);
-
   static double ComputeLength(
-    const std::vector<ignition::math::Vector3d> &points);
+    const std::vector<std::tuple<ignition::math::Vector3d,
+    ignition::math::Vector3d>> &points);
 
  private:
   api::LanePosition DoToLanePosition(

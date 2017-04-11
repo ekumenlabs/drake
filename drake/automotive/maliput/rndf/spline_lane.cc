@@ -1,6 +1,7 @@
 #include "drake/automotive/maliput/rndf/spline_lane.h"
 
 #include <algorithm>
+#include <tuple>
 #include <cmath>
 #include <limits>
 
@@ -12,7 +13,8 @@ namespace rndf {
 
 
 SplineLane::SplineLane(const api::LaneId& id, const api::Segment* segment,
-  const std::vector<Point2> &control_points,
+  const std::vector<std::tuple<ignition::math::Vector3d,
+    ignition::math::Vector3d>> &control_points,
   const api::RBounds& lane_bounds,
   const api::RBounds& driveable_bounds,
   const CubicPolynomial& elevation,
@@ -21,18 +23,16 @@ SplineLane::SplineLane(const api::LaneId& id, const api::Segment* segment,
       segment,
       lane_bounds,
       driveable_bounds,
-      ComputeLength(Points22IgnitionVector3ds(control_points)),
+      ComputeLength(control_points),
       elevation,
       superelevation) {
   spline_.Tension(0.0);
   spline_.AutoCalculate(true);
-  const auto& points = Points22IgnitionVector3ds(control_points);
-  for (const auto &point : points) {
-    spline_.AddPoint(point);
+  std::cout << this->id().id << std::endl;
+  for (const auto &point : control_points) {
+    spline_.AddPoint(std::get<0>(point), std::get<1>(point));
   }
 }
-
-
 
 api::LanePosition SplineLane::DoToLanePosition(
   const api::GeoPosition&,
@@ -69,42 +69,14 @@ double SplineLane::module_p(const double _p) const {
   return p;
 }
 
-Point2 SplineLane::IgnitionVector3d2Point2(
-  const ignition::math::Vector3d &point) {
-  return Point2{point.X(), point.Y()};
-}
-ignition::math::Vector3d Point22IgnitionVector3d(
-  const Point2 &point) {
-  return ignition::math::Vector3d(point.x(), point.y(), 0.0);
-}
-
-std::vector<ignition::math::Vector3d> SplineLane::Points22IgnitionVector3ds(
-  const std::vector<Point2> &points) {
-  std::vector<ignition::math::Vector3d> ignition_points;
-  for(const auto& point : points) {
-    ignition_points.push_back(
-      ignition::math::Vector3d(point.x(), point.y(), 0.0));
-  }
-  return ignition_points;
-}
-
-std::vector<Point2> SplineLane::IgnitionVector3ds2Points(
-  const std::vector<ignition::math::Vector3d> &points) {
-  std::vector<Point2> ignition_points;
-  for(const auto& point : points) {
-    ignition_points.push_back(
-      Point2{point.X(), point.Y()});
-  }
-  return ignition_points;
-}
-
 double SplineLane::ComputeLength(
-  const std::vector<ignition::math::Vector3d> &points) {
+  const std::vector<std::tuple<ignition::math::Vector3d,
+    ignition::math::Vector3d>> &points) {
   ignition::math::Spline spline;
   spline.Tension(0.0);
   spline.AutoCalculate(true);
   for (const auto &point : points) {
-    spline.AddPoint(point);
+    spline.AddPoint(std::get<0>(point), std::get<1>(point));
   }
   return spline.ArcLength();
 }

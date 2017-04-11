@@ -192,15 +192,21 @@ Lane* Builder::BuildConnection(
 
   switch (conn->type()) {
     case Connection::kSpline: {
-
-      std::vector<Point2> points;
-      for (const auto& point : conn->points()) {
-        points.push_back(Point2{point.xy().x(), point.xy().y()});
+      std::vector<std::tuple<
+        ignition::math::Vector3d,
+        ignition::math::Vector3d>> points_tangents;
+      for (const auto& endpoint : conn->points()) {
+        const auto &point = ignition::math::Vector3d(endpoint.xy().x(), endpoint.xy().y(), 0.);
+        const auto &tangent = ignition::math::Vector3d(1., std::tan(endpoint.xy().heading()), 0.).
+            Normalize();
+        points_tangents.push_back(std::make_tuple(point, tangent));
       }
       lane = segment->NewSplineLane(lane_id,
-                                  points,
-                                  lane_bounds_, driveable_bounds_,
-                                  CubicPolynomial(), CubicPolynomial());
+        points_tangents,
+        lane_bounds_,
+        driveable_bounds_,
+        CubicPolynomial(),
+        CubicPolynomial());
       break;
     }
     default: {
