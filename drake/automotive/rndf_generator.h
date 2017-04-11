@@ -86,7 +86,7 @@ class Waypoint {
       std::to_string(longitude_);
   }
 
-  std::tuple<double, double> ToGlobalCoordinates(
+  ignition::math::Vector3d ToGlobalCoordinates(
     const double latitude_origin,
     const double longitude_origin) const {
     const auto origin =
@@ -97,11 +97,15 @@ class Waypoint {
       position_spherical.LatitudeReference().Radian(),
       position_spherical.LongitudeReference().Radian(),
       position_spherical.ElevationReference());
-    const auto position = origin.PositionTransform(
+    return origin.PositionTransform(
       position_vector,
       ignition::math::SphericalCoordinates::SPHERICAL,
       ignition::math::SphericalCoordinates::GLOBAL);
-    return std::make_tuple(position.X(), position.Y());
+    /*const auto position = origin.PositionTransform(
+      position_vector,
+      ignition::math::SphericalCoordinates::SPHERICAL,
+      ignition::math::SphericalCoordinates::GLOBAL);
+    return std::make_tuple(position.X(), position.Y()); */
   }
 
   static std::vector<std::string> Split(
