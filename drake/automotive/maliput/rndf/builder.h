@@ -9,6 +9,9 @@
 #include <vector>
 #include <iostream>
 
+#include "ignition/math/Vector3.hh"
+#include "ignition/math/Spline.hh"
+
 #include "drake/automotive/maliput/api/lane_data.h"
 #include "drake/automotive/maliput/rndf/junction.h"
 #include "drake/common/drake_assert.h"
@@ -295,6 +298,10 @@ class Builder {
   const Connection* Connect(
       const std::string& id,
       const std::vector<Endpoint> &points);
+
+  void CreateLaneConnections(
+    const std::string &base_name,
+    const std::vector<ignition::math::Vector3d> &points);
 
   /// Sets the default branch for one end of a connection.
   ///
