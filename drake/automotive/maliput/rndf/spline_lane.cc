@@ -12,57 +12,43 @@ namespace rndf {
 
 
 SplineLane::SplineLane(const api::LaneId& id, const api::Segment* segment,
-                      const std::vector<Point2> &control_points,
-                      const api::RBounds& lane_bounds,
-                      const api::RBounds& driveable_bounds,
-                      const CubicPolynomial& elevation,
-                      const CubicPolynomial& superelevation)
-    : Lane(id,
-          segment,
-          lane_bounds, driveable_bounds,
-          ComputeLength(Points22IgnitionVector3ds(control_points), nullptr),
-          elevation,
-          superelevation),
-      control_points_(Points22IgnitionVector3ds(control_points)) {
-
-  // Create the spline and calculate all the tangents.
+  const std::vector<Point2> &control_points,
+  const api::RBounds& lane_bounds,
+  const api::RBounds& driveable_bounds,
+  const CubicPolynomial& elevation,
+  const CubicPolynomial& superelevation):
+    Lane(id,
+      segment,
+      lane_bounds,
+      driveable_bounds,
+      ComputeLength(Points22IgnitionVector3ds(control_points)),
+      elevation,
+      superelevation) {
   spline_.Tension(0.0);
   spline_.AutoCalculate(true);
-  // std::cout << this->id().id << " | Control points" << std::endl;
-  for (const auto &point : control_points_) {
-    // std::cout << '\t' << point << std::endl;
+  const auto& points = Points22IgnitionVector3ds(control_points);
+  for (const auto &point : points) {
     spline_.AddPoint(point);
   }
-  //spline_.RecalcTangents();
 }
 
 
 
-api::LanePosition SplineLane::DoToLanePosition(const api::GeoPosition&,
-                                            api::GeoPosition*,
-                                            double*) const {
-  DRAKE_ABORT();  // TODO(maddog@tri.global) Implement me.
+api::LanePosition SplineLane::DoToLanePosition(
+  const api::GeoPosition&,
+  api::GeoPosition*,
+  double*) const {
+    DRAKE_ABORT();
 }
 
 V2 SplineLane::xy_of_p(const double p) const {
   const auto point = spline_.Interpolate(p);
-  //std::cout << id().id << " | xy_of_p: " << p << " | point: " << point << std::endl;
   return {point.X(), point.Y()};
 }
 
 V2 SplineLane::xy_dot_of_p(const double p) const {
-  double p1 = module_p(p);
-  double p2;
-  if (p1 < 1.0) {
-    p2 = module_p(p + 0.001);
-  } else {
-    p2 = module_p(p1 - 0.001);
-    std::swap(p1, p2);
-  }
-
-  const auto& point_p1 = spline_.Interpolate(p1);
-  const auto& point_p2 = spline_.Interpolate(p2);
-  const auto tangent = (point_p2 - point_p1) * 0.5;
+  double _p = module_p(p);
+  const auto& tangent = spline_.InterpolateTangent(_p);
   return {tangent.X(), tangent.Y()};
 }
 
@@ -113,21 +99,14 @@ std::vector<Point2> SplineLane::IgnitionVector3ds2Points(
 }
 
 double SplineLane::ComputeLength(
-  const std::vector<ignition::math::Vector3d> &points,
-  std::vector<double> *lengths) {
-  double length = 0.0;
-  if (lengths == nullptr) {
-    for (uint i = 0; i < points.size() - 1; i++) {
-      length += (points[i].Distance(points[i+1]));
-    }
+  const std::vector<ignition::math::Vector3d> &points) {
+  ignition::math::Spline spline;
+  spline.Tension(0.0);
+  spline.AutoCalculate(true);
+  for (const auto &point : points) {
+    spline.AddPoint(point);
   }
-  else {
-    for (uint i = 0; i < points.size() - 1; i++) {
-      length += (points[i].Distance(points[i+1]));
-      lengths->push_back(length);
-    }
-  }
-  return length;
+  return spline.ArcLength();
 }
 
 }  // namespace rndf
