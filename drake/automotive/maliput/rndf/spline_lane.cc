@@ -27,11 +27,13 @@ SplineLane::SplineLane(const api::LaneId& id, const api::Segment* segment,
 
   // Create the spline and calculate all the tangents.
   spline_.Tension(0.0);
-  spline_.AutoCalculate(false);
+  spline_.AutoCalculate(true);
+  // std::cout << this->id().id << " | Control points" << std::endl;
   for (const auto &point : control_points_) {
+    // std::cout << '\t' << point << std::endl;
     spline_.AddPoint(point);
   }
-  spline_.RecalcTangents();
+  //spline_.RecalcTangents();
 }
 
 
@@ -44,6 +46,7 @@ api::LanePosition SplineLane::DoToLanePosition(const api::GeoPosition&,
 
 V2 SplineLane::xy_of_p(const double p) const {
   const auto point = spline_.Interpolate(p);
+  //std::cout << id().id << " | xy_of_p: " << p << " | point: " << point << std::endl;
   return {point.X(), point.Y()};
 }
 
