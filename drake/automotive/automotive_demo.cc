@@ -157,7 +157,6 @@ void AddVehicles(RoadNetworkType road_network_type,
         dynamic_cast<const maliput::rndf::RoadGeometry*>(road_geometry);
     DRAKE_DEMAND(rndf_road_geometry != nullptr);
 
-    /*
     std::vector<std::string> lane_name_paths;
     std::string testStr(FLAGS_lane_names);
     std::istringstream simple_lane_name_stream(FLAGS_lane_names);
@@ -171,7 +170,6 @@ void AddVehicles(RoadNetworkType road_network_type,
       std::get<0>(params),
       std::get<1>(params),
       std::get<2>(params));
-    */
 
   } else if (road_network_type == RoadNetworkType::onramp) {
     DRAKE_DEMAND(road_geometry != nullptr);

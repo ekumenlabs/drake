@@ -411,7 +411,7 @@ py_binary(
     ],
     args = [
         "-with_rndf",
-        "-lane_names=s1l1,s1l1tos3l1,s3l1",
+        "-lane_names=1_1_1-1_1_2,1_1_2-1_1_3,1_1_3-4_1_4,4_1_4-4_1_5,4_1_5-4_1_6,4_1_6-4_1_7",
         "-rndf_base_speed=5"
     ],
 )
