@@ -259,21 +259,17 @@ void AddVehicles(RoadNetworkType road_network_type,
     DRAKE_DEMAND(rndf_road_geometry != nullptr);
 
     std::vector<std::string> lane_name_paths;
-//s1l1,s1l1tos3l1,s3l1,s3l1tos4l1,s4l1
-//s5l1
-      std::string testStr(FLAGS_lane_names);
-      std::istringstream simple_lane_name_stream(FLAGS_lane_names);
-      std::string lane_name;
-      while (getline(simple_lane_name_stream, lane_name, ',')) {
-        lane_name_paths.push_back(lane_name);
-      }
-      const auto& params = CreateTrajectoryParamsForRndf(
-          *rndf_road_geometry, lane_name_paths, FLAGS_rndf_base_speed, FLAGS_rndf_delay);
-      simulator->AddPriusTrajectoryCar(std::get<0>(params),
-                                       std::get<1>(params),
-                                       std::get<2>(params));
+    std::string testStr(FLAGS_lane_names);
+    std::istringstream simple_lane_name_stream(FLAGS_lane_names);
+    std::string lane_name;
+    while (getline(simple_lane_name_stream, lane_name, ',')) {
+      lane_name_paths.push_back(lane_name);
     }
-    /*
+    const auto& params = CreateTrajectoryParamsForRndf(
+        *rndf_road_geometry, lane_name_paths, FLAGS_rndf_base_speed, FLAGS_rndf_delay);
+    simulator->AddPriusTrajectoryCar(std::get<0>(params),
+                                     std::get<1>(params),
+                                     std::get<2>(params));
   } else if (road_network_type == RoadNetworkType::onramp) {
     DRAKE_DEMAND(road_geometry != nullptr);
     for (int i = 0; i < FLAGS_num_maliput_railcar; ++i) {
@@ -302,7 +298,6 @@ void AddVehicles(RoadNetworkType road_network_type,
                                        std::get<2>(params));
     }
   }
-  */
 }
 /*
 // Adds a flat terrain to the provided `simulator`.
