@@ -14,7 +14,8 @@ const api::Junction* Segment::do_junction() const {
 }
 
 SplineLane* Segment::NewSplineLane(const api::LaneId& id,
-                      const std::vector<Point2> &control_points,
+                      const std::vector<std::tuple<ignition::math::Vector3d,
+                        ignition::math::Vector3d>> &control_points,
                       const api::RBounds& lane_bounds,
                       const api::RBounds& driveable_bounds,
                       const CubicPolynomial& elevation,
