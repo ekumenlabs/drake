@@ -285,9 +285,9 @@ new_local_repository(
 bitbucket_archive(
     name = "ignition_math",
     repository = "ekumen/ign-math",
-    commit = "spline_improvements",
-    sha256 = "ddf3ff361b581ab8c7c65b868d30b6677c84a2ed88dd296bb78c0c65fae6b0a0",
+    commit = "ign-math3-spline-improvements",
+    sha256 = "",
     build_file = "tools/ignition_math.BUILD",
-    strip_prefix = "ekumen-ign-math-a5314ce4bea1",
+    strip_prefix = "ekumen-ign-math-9173541264e3",
 )
 
