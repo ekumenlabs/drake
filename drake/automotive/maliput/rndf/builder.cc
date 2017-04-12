@@ -34,9 +34,12 @@ const Connection* Builder::Connect(
 }
 
 void Builder::CreateLaneConnections(
-  const std::string &base_name,
+  const uint segment_id,
+  const uint lane_id,
   const std::vector<ignition::math::Vector3d> &points) {
   DRAKE_DEMAND(points.size() >= 2);
+  // Build the base name
+  const auto &base_name = BuildName(segment_id, lane_id);
   // We first get the initial and final tangents from the
   // heading of the initial and last point.
   const auto &initial_tangent =
@@ -59,27 +62,49 @@ void Builder::CreateLaneConnections(
   for(uint i = 0; i < (points.size() - 1); i++) {
     // Get the points with their respective tangent.
     const auto init_pose =
-      std::make_tuple(spline.Point(i), spline.Tangent(i));
+      std::make_tuple(spline.Point(i),
+        spline.Tangent(i).Normalize());
     const auto end_pose =
-      std::make_tuple(spline.Point(i + 1), spline.Tangent(i + 1));
+      std::make_tuple(spline.Point(i + 1),
+        spline.Tangent(i + 1).Normalize());
     // Generate the name for the new connection
     const auto &name = base_name + std::to_string(i + 1) +
       "-" + base_name + std::to_string(i + 2);
+
+    // Add the waypoints to the map so as to use them later
+    // for connections
+    if (i == 0) {
+      waypoints[BuildName(segment_id, lane_id, i + 1)] = init_pose;
+    }
+    waypoints[BuildName(segment_id, lane_id, i + 2)] = end_pose;
+
     // Convert those points into endpoints
     std::vector<Endpoint> endpoints;
-    endpoints.push_back(Endpoint(
-      EndpointXy(std::get<0>(init_pose).X(),
-        std::get<0>(init_pose).Y(),
-        std::atan2(std::get<1>(init_pose).Y(), std::get<1>(init_pose).X())),
-      EndpointZ()));
-    endpoints.push_back(Endpoint(
-      EndpointXy(std::get<0>(end_pose).X(),
-        std::get<0>(end_pose).Y(),
-        std::atan2(std::get<1>(end_pose).Y(), std::get<1>(end_pose).X())),
-      EndpointZ()));
+    endpoints.push_back(ConvertIntoEndpoint(init_pose));
+    endpoints.push_back(ConvertIntoEndpoint(end_pose));
     // Create a connection
     Connect(name, endpoints);
   }
+}
+
+void Builder::CreateLaneToLaneConnection(
+  const std::string &exit_id,
+  const std::string &entry_id) {
+  auto exit_pose = waypoints.find(exit_id);
+  auto entry_pose = waypoints.find(entry_id);
+  // Checks
+  DRAKE_DEMAND(exit_pose != waypoints.end());
+  DRAKE_DEMAND(entry_pose != waypoints.end());
+
+  std::cout << "Connection: " << exit_id + "-" + entry_id << std::endl;
+  std::cout << "\t" << std::get<1>(exit_pose->second) << std::endl;
+  std::cout << "\t" << std::get<1>(entry_pose->second) << std::endl;
+  // Convert those poses into endpoints
+  std::vector<Endpoint> endpoints;
+  endpoints.push_back(ConvertIntoEndpoint(exit_pose->second));
+  endpoints.push_back(ConvertIntoEndpoint(entry_pose->second));
+  // Generate the spline
+  Connect(exit_id + "-" + entry_id, endpoints);
 }
 
 
@@ -89,7 +114,6 @@ void Builder::SetDefaultBranch(
   default_branches_.push_back({in, in_end, out, out_end});
 }
 
-/*
 Group* Builder::MakeGroup(const std::string& id) {
   groups_.push_back(std::make_unique<Group>(id));
   return groups_.back().get();
@@ -101,7 +125,6 @@ Group* Builder::MakeGroup(const std::string& id,
   groups_.push_back(std::make_unique<Group>(id, connections));
   return groups_.back().get();
 }
-*/
 
 namespace {
 // Determine the heading (in xy-plane) along the centerline when
@@ -235,7 +258,6 @@ std::unique_ptr<const api::RoadGeometry> Builder::Build(
     remaining_connections.insert(connection.get());
   }
 
-  /*
   for (const std::unique_ptr<Group>& group : groups_) {
     Junction* junction =
         road_geometry->NewJunction({std::string("j:") + group->id()});
@@ -249,7 +271,6 @@ std::unique_ptr<const api::RoadGeometry> Builder::Build(
           connection, junction, road_geometry.get(), &bp_map);
     }
   }
-  */
 
   for (const Connection* const connection : remaining_connections) {
     Junction* junction =
@@ -281,6 +302,29 @@ std::unique_ptr<const api::RoadGeometry> Builder::Build(
   return std::move(road_geometry);
 }
 
+std::string Builder::BuildName(const uint segment_id,
+  const uint lane_id) const {
+  return std::to_string(segment_id) + "_" +
+    std::to_string(lane_id) + "_";
+}
+
+std::string Builder::BuildName(const uint segment_id,
+  const uint lane_id,
+  const uint waypoint_id) const {
+  return std::to_string(segment_id) + "_" +
+    std::to_string(lane_id) + "_" +
+    std::to_string(waypoint_id);
+}
+
+Endpoint Builder::ConvertIntoEndpoint(
+  const std::tuple<ignition::math::Vector3d,
+    ignition::math::Vector3d> &pose) {
+  return Endpoint(
+    EndpointXy(std::get<0>(pose).X(),
+      std::get<0>(pose).Y(),
+      std::atan2(std::get<1>(pose).Y(), std::get<1>(pose).X())),
+    EndpointZ());
+}
 
 }  // namespace rndf
 }  // namespace maliput
