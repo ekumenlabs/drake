@@ -17,7 +17,7 @@ namespace rndf {
 /// parameterization.
 class InverseArcLengthInterpolator {
  public:
-  DRAKE_NO_COPY_NO_MOVE_NO_ASSIGN(ArcLengthParameterizedSpline)
+  DRAKE_NO_COPY_NO_MOVE_NO_ASSIGN(InverseArcLengthInterpolator)
 
   /// Constructor that takes the number of segments to
   /// use for piecewise interpolation.
@@ -61,8 +61,9 @@ class ArcLengthParameterizedSpline {
   /// @param[in] _num_of_segments a positive integer describing
   /// the amount of segments to be used for piecewise interpolation.
   /// @throws whenever arguments constrains are not satisfied.
-  explicit ArcLengthParameterizedSpline(const std::unique_ptr<Spline>& _spline,
-                                        const int _num_of_segments);
+  explicit ArcLengthParameterizedSpline(
+    std::unique_ptr<ignition::math::Spline>& _spline,
+    const int _num_of_segments);
 
   /// Interpolates @f$ Q(s) @f$, that is, the spline parameterized
   /// by arc length.
@@ -70,16 +71,16 @@ class ArcLengthParameterizedSpline {
   /// the order of the function derivative to interpolate.
   /// @param[in] _s arc length to interpolate at, constrained.
   /// by the curve dimensions [0, arc_length].
-  /// @return the mth derivative Q^m(s) 
+  /// @return the mth derivative Q^m(s)
   /// @throws whenever arguments constrains are not satisfied.
   ignition::math::Vector3d InterpolateMthDerivative(
       const int _mth, const double _s) const;
 
   /// Returns a mutable pointer to the underlying spline
   inline ignition::math::Spline* BaseSpline() {
-    return this->spline_.get();
+    return this->q_t_.get();
   }
-  
+
  private:
   std::unique_ptr<ignition::math::Spline> q_t_; ///< Parameterized curve Q(t).
   InverseArcLengthInterpolator t_s_; ///< Inverse arc length function t(s).
