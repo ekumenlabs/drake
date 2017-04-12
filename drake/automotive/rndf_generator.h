@@ -189,7 +189,9 @@ class RNDFTBuilder {
   void BuildSegment(
     maliput::rndf::Builder &builder,
     const uint segment_id,
-    const std::vector<Waypoint> &waypoints);
+    const std::vector<Waypoint> &waypoints,
+    const double latitude,
+    const double longitude);
 
   void BuildConnection(
     maliput::rndf::Builder &builder,
