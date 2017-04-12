@@ -28,7 +28,7 @@ RNDFTBuilder::Build() {
   }
 
   for(const auto &kv: waypoints_map) {
-    BuildSegment(*builder, kv.first, kv.second);
+    BuildSegment(*builder, kv.first, kv.second, -34.584785, -58.446949);
   }
 
   builder->CreateLaneToLaneConnection("1_1_2", "2_1_2");
@@ -58,7 +58,7 @@ RNDFTBuilder::Build(
 
   // Build the segments
   for(const auto &kv: waypoints_map) {
-    BuildSegment(*builder, kv.first, kv.second);
+    BuildSegment(*builder, kv.first, kv.second, 10., 65.);
   }
 
   // Generate the connections
@@ -69,24 +69,10 @@ RNDFTBuilder::Build(
   for (const auto &connection : conn_vector) {
     std::string exitId = std::get<0>(connection);
     std::replace(exitId.begin(), exitId.end(), '.', '_');
-    /*
-    const Waypoint *exit = FindWaypointById(
-      waypoints_map,
-      exitId);
-    DRAKE_DEMAND(exit != nullptr);
-    */
-
     std::string entryId = std::get<1>(connection);
     std::replace(entryId.begin(), entryId.end(), '.', '_');
-    /*
-    const Waypoint *entry = FindWaypointById(
-      waypoints_map,
-      entryId);
-    DRAKE_DEMAND(entry != nullptr);
-    */
-    builder->CreateLaneToLaneConnection(exitId, entryId);
 
-    //BuildConnection(*builder, exit, entry);
+    builder->CreateLaneToLaneConnection(exitId, entryId);
   }
 
   return builder->Build({"SimpleCity"});
@@ -126,38 +112,18 @@ void RNDFTBuilder::BuildConnectionsTupleList(
 void RNDFTBuilder::BuildSegment(
   maliput::rndf::Builder &builder,
   const uint segment_id,
-  const std::vector<Waypoint> &waypoints) {
+  const std::vector<Waypoint> &waypoints,
+  const double latitude,
+  const double longitude) {
   std::vector<ignition::math::Vector3d> endpoints;
   // We convert all the waypoints locations in spherical to global
   for (const auto &waypoint : waypoints) {
-    endpoints.push_back(waypoint.ToGlobalCoordinates(-34.584785, -58.446949/*10., 65.*/));
+    endpoints.push_back(waypoint.ToGlobalCoordinates(latitude, longitude));
   }
   builder.CreateLaneConnections(segment_id,
     waypoints.front().LaneId(),
     endpoints);
 }
-/*
-void RNDFTBuilder::BuildConnection(
-  maliput::rndf::Builder &builder,
-  const Waypoint *exit,
-  const Waypoint *entry) {
-
-  const rndf::EndpointZ kFlatZ{0., 0., 0., 0.};
-  std::vector<rndf::Endpoint> endpoints;
-
-  const auto &position_exit = exit->ToGlobalCoordinates(10., 65.);
-  const auto &position_entry = entry->ToGlobalCoordinates(10., 65.);
-  endpoints.push_back(rndf::Endpoint(
-    rndf::EndpointXy(std::get<0>(position_exit), std::get<1>(position_exit), 0.0),
-    kFlatZ));
-  endpoints.push_back(rndf::Endpoint(
-    rndf::EndpointXy(std::get<0>(position_entry), std::get<1>(position_entry), 0.0),
-    kFlatZ));
-  builder.Connect(
-    exit->IdStr() + "-" + entry->IdStr(),
-    endpoints);
-}
-*/
 
 const Waypoint* RNDFTBuilder::FindWaypointById(
   const std::map<uint, std::vector<Waypoint>> &waypoints_map,
