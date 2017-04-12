@@ -25,6 +25,7 @@ drake_cc_library(
         "road_geometry.cc",
         "segment.cc",
         "spline_lane.cc",
+        "spline_helpers.cc"
     ],
     hdrs = [
         "branch_point.h",
@@ -33,6 +34,7 @@ drake_cc_library(
         "road_geometry.h",
         "segment.h",
         "spline_lane.h",
+        "spline_helpers.h"
     ],
     deps = [
         "//drake/automotive/maliput/api",
