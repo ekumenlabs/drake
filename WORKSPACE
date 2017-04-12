@@ -279,6 +279,6 @@ bitbucket_archive(
     commit = "ign-math3-spline-improvements",
     sha256 = "",
     build_file = "tools/ignition_math.BUILD",
-    strip_prefix = "ekumen-ign-math-9173541264e3",
+    strip_prefix = "ekumen-ign-math-05b158f23b53",
 )
 

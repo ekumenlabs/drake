@@ -22,8 +22,8 @@ RNDFTBuilder::Build() {
   }
   {
     std::vector<Waypoint> wps;
-    wps.push_back(Waypoint(2u, 1u, 2u, -34.584525, -58.444780));
     wps.push_back(Waypoint(2u, 1u, 1u, -34.583812, -58.446382));
+    wps.push_back(Waypoint(2u, 1u, 2u, -34.584525, -58.444780));
     waypoints_map[2] = wps;
   }
 
@@ -31,7 +31,7 @@ RNDFTBuilder::Build() {
     BuildSegment(*builder, kv.first, kv.second, -34.584785, -58.446949);
   }
 
-  builder->CreateLaneToLaneConnection("1_1_2", "2_1_2");
+  builder->CreateLaneToLaneConnection("1_1_2", "2_1_1");
   return builder->Build({"RNDF-T-example"});
 }
 
