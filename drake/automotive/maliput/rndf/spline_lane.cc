@@ -26,12 +26,16 @@ SplineLane::SplineLane(const api::LaneId& id, const api::Segment* segment,
       ComputeLength(control_points),
       elevation,
       superelevation) {
-  //spline_.Tension(0.0);
-  spline_.AutoCalculate(true);
+  std::unique_ptr<ignition::math::Spline> spline =
+    std::make_unique<ignition::math::Spline>();
+  //spline_->Tension(0.0);
+  spline->AutoCalculate(true);
   for (const auto &point : control_points) {
-    std::cout << std::atan2(std::get<1>(point).Y(), std::get<1>(point).X()) << std::endl;
-    spline_.AddPoint(std::get<0>(point), std::get<1>(point));
+    //std::cout << std::atan2(std::get<1>(point).Y(), std::get<1>(point).X()) << std::endl;
+    spline->AddPoint(std::get<0>(point), std::get<1>(point));
   }
+  spline_ = std::make_unique<ArcLengthParameterizedSpline>(
+    spline, control_points.size() - 1);
 }
 
 api::LanePosition SplineLane::DoToLanePosition(
@@ -45,14 +49,14 @@ V2 SplineLane::xy_of_p(const double p) const {
   // xy_of_p it's called L which is a function
   // R --> R^2. We discard z component right now. We can say
   // L = f(p) = (x(p) ; y(p))
-  const auto point = spline_.InterpolateMthDerivative(0, p);
+  const auto point = spline_->InterpolateMthDerivative(0, p * spline_->BaseSpline()->ArcLength());
   return {point.X(), point.Y()};
 }
 
 V2 SplineLane::xy_dot_of_p(const double p) const {
   // We get here the tangent, which is the first derivative of
   // L --> dL(p) / dp
-  const auto& tangent = spline_.InterpolateMthDerivative(1, p);
+  const auto& tangent = spline_->InterpolateMthDerivative(1, p * spline_->BaseSpline()->ArcLength());
   return {tangent.X(), tangent.Y()};
 }
 
@@ -75,8 +79,8 @@ double SplineLane::heading_dot_of_p(const double p) const {
   // Where y and x are the components of the L' and, x' and y' are
   // the components of L'' as they are independant.
   const double heading = heading_of_p(p);
-  const auto first_derivative = spline_.InterpolateMthDerivative(1, p);
-  const auto second_derivative = spline_.InterpolateMthDerivative(2, p);
+  const auto first_derivative = spline_->InterpolateMthDerivative(1, p * spline_->BaseSpline()->ArcLength());
+  const auto second_derivative = spline_->InterpolateMthDerivative(2, p * spline_->BaseSpline()->ArcLength());
   const double m =
     ( second_derivative.Y() * first_derivative.X() -
       first_derivative.Y() * second_derivative.X() ) /

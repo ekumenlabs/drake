@@ -8,6 +8,8 @@
 
 #include "ignition/math/Spline.hh"
 
+#include "spline_helpers.h"
+
 namespace drake {
 namespace maliput {
 namespace rndf {
@@ -46,7 +48,8 @@ class SplineLane : public Lane {
 
   double module_p(const double _p) const;
 
-  ignition::math::Spline spline_;
+  // ignition::math::Spline spline_;
+  std::unique_ptr<ArcLengthParameterizedSpline> spline_;
 };
 
 }  // namespace rndf
