@@ -198,30 +198,6 @@ class Connection {
   /// Returns the parameters of the endpoint.
   const Endpoint& end() const { return end_; }
 
-  // /// Returns the x-component of the arc center (for arc connections only).
-  // double cx() const {
-  //   DRAKE_DEMAND(type_ == kArc);
-  //   return cx_;
-  // }
-
-  // /// Returns the y-component of the arc center (for arc connections only).
-  // double cy() const {
-  //   DRAKE_DEMAND(type_ == kArc);
-  //   return cy_;
-  // }
-
-  // /// Returns the radius of the arc (for arc connections only).
-  // double radius() const {
-  //   DRAKE_DEMAND(type_ == kArc);
-  //   return radius_;
-  // }
-
-  // /// Returns the angle of the arc (for arc connections only).
-  // double d_theta() const {
-  //   DRAKE_DEMAND(type_ == kArc);
-  //   return d_theta_;
-  // }
-
   const std::vector<Endpoint> &points() const {
     DRAKE_DEMAND(type_ == kSpline);
     return points_;
@@ -233,15 +209,8 @@ class Connection {
   Endpoint start_;
   Endpoint end_;
   std::vector<Endpoint> points_;
-
-  // // Bits specific to type_ == kArc:
-  // double cx_{};
-  // double cy_{};
-  // double radius_{};
-  // double d_theta_{};
 };
 
-/*
 /// A group of Connections.
 ///
 /// Upon building the RoadGeometry, a Group yields a Junction containing the
@@ -276,7 +245,7 @@ class Group {
   std::string id_;
   std::set<const Connection*> connections_;
 };
-*/
+
 
 // N.B. The Builder class overview documentation lives at the top of this file.
 class Builder {
@@ -300,8 +269,13 @@ class Builder {
       const std::vector<Endpoint> &points);
 
   void CreateLaneConnections(
-    const std::string &base_name,
+    const uint segment_id,
+    const uint lane_id,
     const std::vector<ignition::math::Vector3d> &points);
+
+  void CreateLaneToLaneConnection(
+    const std::string &exit_id,
+    const std::string &entry_id);
 
   /// Sets the default branch for one end of a connection.
   ///
@@ -314,7 +288,6 @@ class Builder {
       const Connection* in, const api::LaneEnd::Which in_end,
       const Connection* out, const api::LaneEnd::Which out_end);
 
-  /*
   /// Creates a new empty connection group with ID string @p id.
   Group* MakeGroup(const std::string& id);
 
@@ -322,7 +295,7 @@ class Builder {
   /// given @p connections.
   Group* MakeGroup(const std::string& id,
                    const std::vector<const Connection*>& connections);
-  */
+
 
   /// Produces a RoadGeometry, with the ID @p id.
   std::unique_ptr<const api::RoadGeometry> Build(
@@ -411,13 +384,27 @@ class Builder {
       RoadGeometry* rg,
       std::map<Endpoint, BranchPoint*, EndpointFuzzyOrder>* bp_map) const;
 
+  std::string BuildName(const uint segment_id,
+    const uint lane_id) const;
+
+  std::string BuildName(const uint segment_id,
+    const uint lane_id,
+    const uint waypoint_id) const;
+
+  Endpoint ConvertIntoEndpoint(
+    const std::tuple<ignition::math::Vector3d,
+      ignition::math::Vector3d> &pose);
+
   api::RBounds lane_bounds_;
   api::RBounds driveable_bounds_;
   double linear_tolerance_{};
   double angular_tolerance_{};
   std::vector<std::unique_ptr<Connection>> connections_;
   std::vector<DefaultBranch> default_branches_;
-  //std::vector<std::unique_ptr<Group>> groups_;
+  std::map<
+    std::string,
+    std::tuple<ignition::math::Vector3d, ignition::math::Vector3d>> waypoints;
+  std::vector<std::unique_ptr<Group>> groups_;
 };
 
 }  // namespace rndf

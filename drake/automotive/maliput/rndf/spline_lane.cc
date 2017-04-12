@@ -28,7 +28,6 @@ SplineLane::SplineLane(const api::LaneId& id, const api::Segment* segment,
       superelevation) {
   spline_.Tension(0.0);
   spline_.AutoCalculate(true);
-  std::cout << this->id().id << std::endl;
   for (const auto &point : control_points) {
     spline_.AddPoint(std::get<0>(point), std::get<1>(point));
   }

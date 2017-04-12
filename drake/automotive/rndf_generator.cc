@@ -9,64 +9,30 @@ namespace rndf = maliput::rndf;
 
 std::unique_ptr<const maliput::api::RoadGeometry>
 RNDFTBuilder::Build() {
-  std::unique_ptr<maliput::rndf::Builder> rb(
+  std::unique_ptr<maliput::rndf::Builder> builder(
       new maliput::rndf::Builder(rc_.lane_bounds, rc_.driveable_bounds,
                                      linear_tolerance_, angular_tolerance_));
-  const rndf::EndpointZ kFlatZ{0., 0., 0., 0.};
-  std::vector<rndf::Endpoint> endpoints;
+  std::map<uint, std::vector<Waypoint>> waypoints_map;
+  {
+    std::vector<Waypoint> wps;
+    wps.push_back(Waypoint(1u, 1u, 1u, -34.584785, -58.446949));
+    wps.push_back(Waypoint(1u, 1u, 2u, -34.583838, -58.446475));
+    wps.push_back(Waypoint(1u, 1u, 3u, -34.582599, -58.445783));
+    waypoints_map[1] = wps;
+  }
+  {
+    std::vector<Waypoint> wps;
+    wps.push_back(Waypoint(2u, 1u, 2u, -34.584525, -58.444780));
+    wps.push_back(Waypoint(2u, 1u, 1u, -34.583812, -58.446382));
+    waypoints_map[2] = wps;
+  }
 
-  // |
-  endpoints.push_back(rndf::Endpoint(
-    rndf::EndpointXy(0.0, 0.0, 0.0),
-    kFlatZ));
-  endpoints.push_back(rndf::Endpoint(
-    rndf::EndpointXy(50.0, 0.0, 0.0),
-    kFlatZ));
-  rb->Connect("s1l1", endpoints);
-  endpoints.clear();
+  for(const auto &kv: waypoints_map) {
+    BuildSegment(*builder, kv.first, kv.second);
+  }
 
-  // |
-  // |
-  endpoints.push_back(rndf::Endpoint(
-    rndf::EndpointXy(50.0, 0.0, 0.0),
-    kFlatZ));
-  endpoints.push_back(rndf::Endpoint(
-    rndf::EndpointXy(100.0, 0.0, 0.0),
-    kFlatZ));
-  rb->Connect("s2l1", endpoints);
-  endpoints.clear();
-
-  // |
-  //  -
-  // |
-  endpoints.push_back(rndf::Endpoint(
-    rndf::EndpointXy(50.0, 0.0, 0.0),
-    kFlatZ));
-  endpoints.push_back(rndf::Endpoint(
-    rndf::EndpointXy(55, 1.34, 30),
-    kFlatZ));
-  endpoints.push_back(rndf::Endpoint(
-    rndf::EndpointXy(58.66, 5.0, 60),
-    kFlatZ));
-  endpoints.push_back(rndf::Endpoint(
-    rndf::EndpointXy(60.0, 10.0, 90),
-    kFlatZ));
-  rb->Connect("s1l1tos3l1", endpoints);
-  endpoints.clear();
-
-  // |
-  //  - --
-  // |
-  endpoints.push_back(rndf::Endpoint(
-    rndf::EndpointXy(60.0, 10.0, 90.0),
-    kFlatZ));
-  endpoints.push_back(rndf::Endpoint(
-    rndf::EndpointXy(60.0, 60.0, 90.0),
-    kFlatZ));
-  rb->Connect("s3l1", endpoints);
-  endpoints.clear();
-
-  return rb->Build({"rndf-T-example"});
+  builder->CreateLaneToLaneConnection("1_1_2", "2_1_2");
+  return builder->Build({"RNDF-T-example"});
 }
 
 std::unique_ptr<const maliput::api::RoadGeometry>
@@ -94,7 +60,7 @@ RNDFTBuilder::Build(
   for(const auto &kv: waypoints_map) {
     BuildSegment(*builder, kv.first, kv.second);
   }
-/*
+
   // Generate the connections
   std::vector<std::tuple<std::string, std::string>> conn_vector;
   BuildConnectionsTupleList(connections, conn_vector);
@@ -103,21 +69,26 @@ RNDFTBuilder::Build(
   for (const auto &connection : conn_vector) {
     std::string exitId = std::get<0>(connection);
     std::replace(exitId.begin(), exitId.end(), '.', '_');
+    /*
     const Waypoint *exit = FindWaypointById(
       waypoints_map,
       exitId);
     DRAKE_DEMAND(exit != nullptr);
+    */
 
     std::string entryId = std::get<1>(connection);
     std::replace(entryId.begin(), entryId.end(), '.', '_');
+    /*
     const Waypoint *entry = FindWaypointById(
       waypoints_map,
       entryId);
     DRAKE_DEMAND(entry != nullptr);
+    */
+    builder->CreateLaneToLaneConnection(exitId, entryId);
 
-    BuildConnection(*builder, exit, entry);
+    //BuildConnection(*builder, exit, entry);
   }
-*/
+
   return builder->Build({"SimpleCity"});
 }
 
@@ -159,11 +130,11 @@ void RNDFTBuilder::BuildSegment(
   std::vector<ignition::math::Vector3d> endpoints;
   // We convert all the waypoints locations in spherical to global
   for (const auto &waypoint : waypoints) {
-    endpoints.push_back(waypoint.ToGlobalCoordinates(10., 65.));
+    endpoints.push_back(waypoint.ToGlobalCoordinates(-34.584785, -58.446949/*10., 65.*/));
   }
-  const auto &base_name = std::to_string(segment_id) + "_" +
-    std::to_string(waypoints.front().LaneId()) + "_";
-  builder.CreateLaneConnections(base_name, endpoints);
+  builder.CreateLaneConnections(segment_id,
+    waypoints.front().LaneId(),
+    endpoints);
 }
 /*
 void RNDFTBuilder::BuildConnection(
