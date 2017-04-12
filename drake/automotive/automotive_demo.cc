@@ -267,9 +267,11 @@ void AddVehicles(RoadNetworkType road_network_type,
     }
     const auto& params = CreateTrajectoryParamsForRndf(
         *rndf_road_geometry, lane_name_paths, FLAGS_rndf_base_speed, FLAGS_rndf_delay);
-    simulator->AddPriusTrajectoryCar(std::get<0>(params),
-                                     std::get<1>(params),
-                                     std::get<2>(params));
+    simulator->AddPriusTrajectoryCar("RNDFCar",
+      std::get<0>(params),
+      std::get<1>(params),
+      std::get<2>(params));
+
   } else if (road_network_type == RoadNetworkType::onramp) {
     DRAKE_DEMAND(road_geometry != nullptr);
     for (int i = 0; i < FLAGS_num_maliput_railcar; ++i) {
@@ -336,7 +338,7 @@ const maliput::api::RoadGeometry* AddDragway(
 // flags.
 const maliput::api::RoadGeometry* AddRNDF(
     AutomotiveSimulator<double>* simulator) {
-  auto onramp_generator = std::make_unique<RNDFTBuilder>();
+  auto onramp_generator = std::make_unique<RNDFTBuilder>();/*
   const std::string road_waypoints =
 "1.1.1\t9.999982 65.000912\n"
 "1.1.2\t10.000045 65.000912\n"
@@ -525,7 +527,10 @@ const maliput::api::RoadGeometry* AddRNDF(
 "12.1.6 9.1.2\n";
 
   return simulator->SetRoadGeometry(
-    onramp_generator->Build(road_waypoints, connections));
+    onramp_generator->Build(road_waypoints, connections));*/
+
+  return simulator->SetRoadGeometry(
+    onramp_generator->Build());
 }
 
 /*
