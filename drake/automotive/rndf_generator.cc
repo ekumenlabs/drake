@@ -47,7 +47,7 @@ RNDFTBuilder::Build() {
     waypoints_map[1] = wps;
   }
   for(const auto &kv: waypoints_map) {
-    BuildSegment(*builder, kv.first, kv.second, -34.584785, -58.446949);
+    BuildSegment(*builder, kv.first, kv.second, -34.587094, -58.462872);
   }
 
   return builder->Build({"RNDF-T-example"});
