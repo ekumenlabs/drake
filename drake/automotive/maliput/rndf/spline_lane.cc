@@ -26,10 +26,10 @@ SplineLane::SplineLane(const api::LaneId& id, const api::Segment* segment,
       ComputeLength(control_points),
       elevation,
       superelevation) {
-  // spline_.Tension(0.0);
-  spline_.Tension(0.5);
+  //spline_.Tension(0.0);
   spline_.AutoCalculate(true);
   for (const auto &point : control_points) {
+    std::cout << std::atan2(std::get<1>(point).Y(), std::get<1>(point).X()) << std::endl;
     spline_.AddPoint(std::get<0>(point), std::get<1>(point));
   }
 }
@@ -45,7 +45,7 @@ V2 SplineLane::xy_of_p(const double p) const {
   // xy_of_p it's called L which is a function
   // R --> R^2. We discard z component right now. We can say
   // L = f(p) = (x(p) ; y(p))
-  const auto point = spline_.Interpolate(p);
+  const auto point = spline_.InterpolateMthDerivative(0, p);
   return {point.X(), point.Y()};
 }
 
@@ -81,7 +81,7 @@ double SplineLane::heading_dot_of_p(const double p) const {
     ( second_derivative.Y() * first_derivative.X() -
       first_derivative.Y() * second_derivative.X() ) /
     (first_derivative.X() * first_derivative.X());
-  std::cout << "p: " << p << " h: " << heading << " h_dot " << (1.0 / (1.0 + heading * heading) * m) << std::endl;
+  // std::cout << "p: " << p << " h: " << heading << " h_dot " << (1.0 / (1.0 + heading * heading) * m) << std::endl;
   return (1.0 / (1.0 + heading * heading) * m);
 }
 
@@ -95,7 +95,6 @@ double SplineLane::ComputeLength(
   const std::vector<std::tuple<ignition::math::Vector3d,
     ignition::math::Vector3d>> &points) {
   ignition::math::Spline spline;
-  spline.Tension(0.0);
   spline.AutoCalculate(true);
   for (const auto &point : points) {
     spline.AddPoint(std::get<0>(point), std::get<1>(point));
