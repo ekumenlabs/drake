@@ -44,6 +44,8 @@ void Builder::CreateLaneConnections(
   // heading of the initial and last point.
   const auto &initial_tangent = (points[1] - points[0]);
   const auto &end_tangent = points[points.size() - 2] - points.back();
+
+
   // We generate the spline
   ignition::math::Spline spline;
   spline.AutoCalculate(true);
@@ -58,21 +60,18 @@ void Builder::CreateLaneConnections(
   // We move the spline to connections
   for(uint i = 0; i < (points.size() - 1); i++) {
     // Get the points with their respective tangent.
+
     const auto init_pose =
-      std::make_tuple(spline.Point(i),
-        spline.Tangent(i));
+      std::make_tuple(spline.Point(i), spline.Tangent(i));
     const auto end_pose =
-      std::make_tuple(spline.Point(i + 1),
-        spline.Tangent(i + 1));
+      std::make_tuple(spline.Point(i + 1), spline.Tangent(i + 1));
     // Generate the name for the new connection
     const auto &name = base_name + std::to_string(i + 1) +
       "-" + base_name + std::to_string(i + 2);
 
     // Add the waypoints to the map so as to use them later
     // for connections
-    if (i == 0) {
-      waypoints[BuildName(segment_id, lane_id, i + 1)] = init_pose;
-    }
+    waypoints[BuildName(segment_id, lane_id, i + 1)] = init_pose;
     waypoints[BuildName(segment_id, lane_id, i + 2)] = end_pose;
 
     // Convert those points into endpoints
@@ -217,8 +216,10 @@ Lane* Builder::BuildConnection(
         ignition::math::Vector3d,
         ignition::math::Vector3d>> points_tangents;
       for (const auto& endpoint : conn->points()) {
-        const auto &point = ignition::math::Vector3d(endpoint.xy().x(), endpoint.xy().y(), 0.);
-        const auto &tangent = ignition::math::Vector3d(1., std::tan(endpoint.xy().heading()), 0.) *
+        const auto &point =
+          ignition::math::Vector3d(endpoint.xy().x(), endpoint.xy().y(), 0.);
+        const auto &tangent =
+          ignition::math::Vector3d(1., std::tan(endpoint.xy().heading()), 0.).Normalize() *
           endpoint.xy().heading_mod();
         points_tangents.push_back(std::make_tuple(point, tangent));
       }
