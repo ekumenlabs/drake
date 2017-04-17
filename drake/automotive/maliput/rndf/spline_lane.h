@@ -48,6 +48,8 @@ class SplineLane : public Lane {
 
   double module_p(const double _p) const;
 
+  void do_test() const;
+
   // ignition::math::Spline spline_;
   std::unique_ptr<ArcLengthParameterizedSpline> spline_;
 };

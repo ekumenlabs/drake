@@ -63,13 +63,14 @@ class EndpointXy {
   // Constructs an EndpointXy with all zero parameters.
   EndpointXy() = default;
 
-  EndpointXy(double x, double y, double heading)
-      : x_(x), y_(y), heading_(heading) {}
+  EndpointXy(double x, double y, double heading, double heading_mod)
+      : x_(x), y_(y), heading_(heading), heading_mod_(heading_mod) {}
 
   /// Returns an EndpointXy with reversed direction.
   EndpointXy reverse() const {
     return EndpointXy(x_, y_,
-                      std::atan2(-std::sin(heading_), -std::cos(heading_)));
+                      std::atan2(-std::sin(heading_), -std::cos(heading_)),
+                      heading_mod_);
   }
 
   double x() const { return x_; }
@@ -78,10 +79,13 @@ class EndpointXy {
 
   double heading() const { return heading_; }
 
+  double heading_mod() const { return heading_mod_; }
+
  private:
   double x_{};
   double y_{};
   double heading_{};
+  double heading_mod_{};
 };
 
 
