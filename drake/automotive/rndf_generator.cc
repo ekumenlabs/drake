@@ -80,7 +80,7 @@ RNDFTBuilder::Build(
   for(const auto &kv : waypoints_map) {
     std::cout << kv.first << std::endl;
     for (const auto &wp : kv.second) {
-      std::cout << "\t" << wp.IdStr() << std::endl;
+      std::cout << "\t" << wp.IdStr() << "\t" << kv.second << std::endl;
     }
   }
 
