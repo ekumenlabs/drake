@@ -55,12 +55,6 @@ void Builder::CreateLaneConnections(
   }
   spline.AddPoint(points.back(), end_tangent);
 
-  for (double s = 0; s <= 1.0; s += 0.01) {
-    /*std::cout << "t: " << s << " | " << spline.Interpolate(s) << " | " <<
-      spline.InterpolateTangent(s) << std::endl;*/
-  }
-  std::cout << "------------------" << std::endl;
-
   // We move the spline to connections
   for(uint i = 0; i < (points.size() - 1); i++) {
     // Get the points with their respective tangent.
@@ -76,12 +70,11 @@ void Builder::CreateLaneConnections(
 
     // Add the waypoints to the map so as to use them later
     // for connections
-    waypoints[BuildName(segment_id, lane_id, i + 1)] = init_pose;
+    if (i == 0) {
+      waypoints[BuildName(segment_id, lane_id, i + 1)] = init_pose;
+    }
     waypoints[BuildName(segment_id, lane_id, i + 2)] = end_pose;
-    /*
-    std::cout << BuildName(segment_id, lane_id, i + 1) << " " << spline.Tangent(i) << std::endl;
-    std::cout << BuildName(segment_id, lane_id, i + 2) << " " << spline.Tangent(i + 1) << std::endl;
-    */
+
     // Convert those points into endpoints
     std::vector<Endpoint> endpoints;
     endpoints.push_back(ConvertIntoEndpoint(init_pose));
@@ -99,10 +92,11 @@ void Builder::CreateLaneToLaneConnection(
   // Checks
   DRAKE_DEMAND(exit_pose != waypoints.end());
   DRAKE_DEMAND(entry_pose != waypoints.end());
-
+/*
   std::cout << "Connection: " << exit_id + "-" + entry_id << std::endl;
   std::cout << "\t" << std::get<1>(exit_pose->second) << std::endl;
   std::cout << "\t" << std::get<1>(entry_pose->second) << std::endl;
+*/
   // Convert those poses into endpoints
   std::vector<Endpoint> endpoints;
   endpoints.push_back(ConvertIntoEndpoint(exit_pose->second));
