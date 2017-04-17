@@ -363,7 +363,7 @@ const maliput::api::RoadGeometry* AddRNDF(
 "12.1.6\t10.000045 64.999982\n"
 "12.1.7\t9.999982 64.999982\n";
 
-  const std::string connections = "";/*
+  const std::string connections =
 "1.1.3 4.1.4\n"
 "1.1.3 7.1.4\n"
 "1.1.5 5.1.4\n"
@@ -427,7 +427,7 @@ const maliput::api::RoadGeometry* AddRNDF(
 "12.1.4 5.1.2\n"
 "12.1.5 4.1.2\n"
 "12.1.6 7.1.2\n"
-"12.1.6 9.1.2\n";*/
+"12.1.6 9.1.2\n";
   return simulator->SetRoadGeometry(
     onramp_generator->Build(road_waypoints, connections));
   }
