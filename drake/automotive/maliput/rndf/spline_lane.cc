@@ -28,14 +28,25 @@ SplineLane::SplineLane(const api::LaneId& id, const api::Segment* segment,
       superelevation) {
   std::unique_ptr<ignition::math::Spline> spline =
     std::make_unique<ignition::math::Spline>();
-  //spline_->Tension(0.0);
+  spline->Tension(0.0);
   spline->AutoCalculate(true);
   for (const auto &point : control_points) {
-    //std::cout << std::atan2(std::get<1>(point).Y(), std::get<1>(point).X()) << std::endl;
+    //std::cout << std::get<0>(point) << " | " << std::get<1>(point) << std::endl;
     spline->AddPoint(std::get<0>(point), std::get<1>(point));
   }
   spline_ = std::make_unique<ArcLengthParameterizedSpline>(
     spline, control_points.size() - 1);
+
+  /*
+  if (this->id().id == "l:1_1_1-1_1_2")
+    do_test();
+  */
+  /*
+  for (double s = 0; s <= 1.0; s += 0.01) {
+    std::cout << "t: " << s << " | " << spline_->BaseSpline()->Interpolate(s) << " | " <<
+      spline_->BaseSpline()->InterpolateTangent(s) << std::endl;
+  }
+  */
 }
 
 api::LanePosition SplineLane::DoToLanePosition(
@@ -49,14 +60,16 @@ V2 SplineLane::xy_of_p(const double p) const {
   // xy_of_p it's called L which is a function
   // R --> R^2. We discard z component right now. We can say
   // L = f(p) = (x(p) ; y(p))
-  const auto point = spline_->InterpolateMthDerivative(0, p * spline_->BaseSpline()->ArcLength());
+  //const auto point = spline_->InterpolateMthDerivative(0, p * spline_->BaseSpline()->ArcLength());
+  const auto point = spline_->BaseSpline()->Interpolate(p);
   return {point.X(), point.Y()};
 }
 
 V2 SplineLane::xy_dot_of_p(const double p) const {
   // We get here the tangent, which is the first derivative of
   // L --> dL(p) / dp
-  const auto& tangent = spline_->InterpolateMthDerivative(1, p * spline_->BaseSpline()->ArcLength());
+  //const auto& tangent = spline_->InterpolateMthDerivative(1, p * spline_->BaseSpline()->ArcLength());
+  const auto& tangent = spline_->BaseSpline()->InterpolateTangent(p);
   return {tangent.X(), tangent.Y()};
 }
 
@@ -79,7 +92,8 @@ double SplineLane::heading_dot_of_p(const double p) const {
   // Where y and x are the components of the L' and, x' and y' are
   // the components of L'' as they are independant.
   const double heading = heading_of_p(p);
-  const auto first_derivative = spline_->InterpolateMthDerivative(1, p * spline_->BaseSpline()->ArcLength());
+  //const auto first_derivative = spline_->InterpolateMthDerivative(1, p * spline_->BaseSpline()->ArcLength());
+  const auto& first_derivative = spline_->BaseSpline()->InterpolateTangent(p);
   const auto second_derivative = spline_->InterpolateMthDerivative(2, p * spline_->BaseSpline()->ArcLength());
   const double m =
     ( second_derivative.Y() * first_derivative.X() -
@@ -100,10 +114,174 @@ double SplineLane::ComputeLength(
     ignition::math::Vector3d>> &points) {
   ignition::math::Spline spline;
   spline.AutoCalculate(true);
+  spline.Tension(0.0);
   for (const auto &point : points) {
     spline.AddPoint(std::get<0>(point), std::get<1>(point));
   }
   return spline.ArcLength();
+}
+
+void SplineLane::do_test() const {
+/*
+  // 2 points, over x-axis. 90° difference orientation
+{
+  std::unique_ptr<ignition::math::Spline> spline =
+    std::make_unique<ignition::math::Spline>();
+
+  spline->AutoCalculate(true);
+  spline->AddPoint(ignition::math::Vector3d(0.0, 0.0, 0.0), ignition::math::Vector3d(0.0, 1.0, 0.0));
+  spline->AddPoint(ignition::math::Vector3d(10.0, 0.0, 0.0), ignition::math::Vector3d(1.0, 0.0, 0.0));
+  std::cout << "s_tot: " << spline->ArcLength() << std::endl;
+  for (double s = 0.; s <= 1.0; s += 0.01) {
+    std::cout << "t: " << s << " | " << spline->Interpolate(s) << " | " << spline->InterpolateTangent(s) << std::endl;
+  }
+}
+std::cout << "-----------------" << std::endl;
+*/
+  /*
+  // 2 points, over x-axis. 90° difference orientation
+{
+  std::unique_ptr<ignition::math::Spline> spline =
+    std::make_unique<ignition::math::Spline>();
+
+  spline->AutoCalculate(true);
+  spline->AddPoint(ignition::math::Vector3d(0.0, 0.0, 0.0), ignition::math::Vector3d(0.0, 1.0, 0.0));
+  spline->AddPoint(ignition::math::Vector3d(10.0, 10.0, 0.0), ignition::math::Vector3d(1.0, 0.0, 0.0));
+  std::cout << "s_tot: " << spline->ArcLength() << std::endl;
+  for (double s = 0.; s <= 1.0; s += 0.01) {
+    std::cout << "t: " << s << " | " << spline->Interpolate(s) << " | " << spline->InterpolateTangent(s) << std::endl;
+  }
+}
+std::cout << "-----------------" << std::endl;
+*/
+  /*
+  // 2 points, over x-axis. 0° difference orientation
+{
+  std::unique_ptr<ignition::math::Spline> spline =
+    std::make_unique<ignition::math::Spline>();
+
+  spline->AutoCalculate(true);
+  spline->AddPoint(ignition::math::Vector3d(0.0, 0.0, 0.0), ignition::math::Vector3d(0.0, 1.0, 0.0));
+  spline->AddPoint(ignition::math::Vector3d(10.0, 0.0, 0.0), ignition::math::Vector3d(0.0, 1.0, 0.0));
+  std::cout << "s_tot: " << spline->ArcLength() << std::endl;
+  for (double s = 0.; s <= 1.0; s += 0.01) {
+    std::cout << "t: " << s << " | " << spline->Interpolate(s) << " | " << spline->InterpolateTangent(s) << std::endl;
+  }
+}
+std::cout << "-----------------" << std::endl;
+*/
+
+/*
+  // 2 points, over 45°-axis. 0° difference orientation
+{
+  std::unique_ptr<ignition::math::Spline> spline =
+    std::make_unique<ignition::math::Spline>();
+
+  spline->AutoCalculate(true);
+  spline->AddPoint(ignition::math::Vector3d(0.0, 0.0, 0.0), ignition::math::Vector3d(std::sqrt(2)/2, std::sqrt(2)/2, 0.0));
+  spline->AddPoint(ignition::math::Vector3d(10.0, 10.0, 0.0), ignition::math::Vector3d(std::sqrt(2)/2, std::sqrt(2)/2, 0.0));
+  std::cout << "s_tot: " << spline->ArcLength() << std::endl;
+  for (double s = 0.; s < 1.0; s += 0.01) {
+    std::cout << "t: " << s << " | " << spline->Interpolate(s) << " | " << spline->InterpolateTangent(s) << std::endl;
+  }
+}
+std::cout << "-----------------" << std::endl;
+*/
+/*
+  // 2 points, over 45°-axis. 90° difference orientation
+{
+  std::unique_ptr<ignition::math::Spline> spline =
+    std::make_unique<ignition::math::Spline>();
+
+  spline->AutoCalculate(true);
+  spline->AddPoint(ignition::math::Vector3d(0.0, 0.0, 0.0), ignition::math::Vector3d(0.0, 1.0, 0.0));
+  spline->AddPoint(ignition::math::Vector3d(10.0, 10.0, 0.0), ignition::math::Vector3d(1.0, 0.0, 0.0));
+  std::cout << "s_tot: " << spline->ArcLength() << std::endl;
+  for (double s = 0.; s < 1.0; s += 0.1) {
+    std::cout << "t: " << s << " | " << spline->Interpolate(s) << " | " << spline->InterpolateTangent(s) << std::endl;
+  }
+}
+std::cout << "-----------------" << std::endl;
+*/
+
+/*
+  // 2 points, over 45°-axis. 90° difference orientation
+{
+  std::unique_ptr<ignition::math::Spline> spline =
+    std::make_unique<ignition::math::Spline>();
+
+  spline->AutoCalculate(true);
+  spline->Tension(1.0);
+  spline->AddPoint(ignition::math::Vector3d(0.0, 0.0, 0.0), ignition::math::Vector3d(0.0, 10.0, 0.0));
+  spline->AddPoint(ignition::math::Vector3d(10.0, 10.0, 0.0));
+  spline->AddPoint(ignition::math::Vector3d(20.0, 0.0, 0.0), ignition::math::Vector3d(0.0, -10.0, 0.0));
+  std::cout << "s_tot: " << spline->ArcLength() << std::endl;
+  for (double s = 0.; s < 1.0; s += 0.01) {
+    std::cout << "t: " << s << " | " << spline->Interpolate(s) << " | " << spline->InterpolateTangent(s) << std::endl;
+  }
+}
+std::cout << "-----------------" << std::endl;
+{
+  std::unique_ptr<ignition::math::Spline> spline =
+    std::make_unique<ignition::math::Spline>();
+
+  spline->AutoCalculate(true);
+  spline->Tension(0.5);
+  spline->AddPoint(ignition::math::Vector3d(0.0, 0.0, 0.0), ignition::math::Vector3d(0.0, 10.0, 0.0));
+  spline->AddPoint(ignition::math::Vector3d(10.0, 10.0, 0.0));
+  spline->AddPoint(ignition::math::Vector3d(20.0, 0.0, 0.0), ignition::math::Vector3d(0.0, -10.0, 0.0));
+  std::cout << "s_tot: " << spline->ArcLength() << std::endl;
+  for (double s = 0.; s < 1.0; s += 0.01) {
+    std::cout << "t: " << s << " | " << spline->Interpolate(s) << " | " << spline->InterpolateTangent(s) << std::endl;
+  }
+}
+std::cout << "-----------------" << std::endl;
+{
+  std::unique_ptr<ignition::math::Spline> spline =
+    std::make_unique<ignition::math::Spline>();
+
+  spline->AutoCalculate(true);
+  spline->Tension(0.0);
+  spline->AddPoint(ignition::math::Vector3d(0.0, 0.0, 0.0), ignition::math::Vector3d(0.0, 10.0, 0.0));
+  spline->AddPoint(ignition::math::Vector3d(10.0, 10.0, 0.0));
+  spline->AddPoint(ignition::math::Vector3d(20.0, 0.0, 0.0), ignition::math::Vector3d(0.0, -10.0, 0.0));
+  std::cout << "s_tot: " << spline->ArcLength() << std::endl;
+  for (double s = 0.; s < 1.0; s += 0.01) {
+    std::cout << "t: " << s << " | " << spline->Interpolate(s) << " | " << spline->InterpolateTangent(s) << std::endl;
+  }
+}
+std::cout << "-----------------" << std::endl;
+*/
+  /*
+{
+  std::unique_ptr<ignition::math::Spline> spline =
+    std::make_unique<ignition::math::Spline>();
+
+  const ignition::math::Vector3d p1(0,0,0);
+  const ignition::math::Vector3d p2(47.8908,52.9149,-0.0004);
+  const ignition::math::Vector3d p3(287.807,156.855,-0.008422);
+  const ignition::math::Vector3d p4(314.413,143.875,-0.00937);
+
+  spline->AutoCalculate(true);
+  spline->Tension(0.0);
+  spline->AddPoint(ignition::math::Vector3d(0,0,0), (p2 - p1) * 0.5);
+  spline->AddPoint(ignition::math::Vector3d(47.8908,52.9149,-0.0004));
+  spline->AddPoint(ignition::math::Vector3d(69.0841,74.103,-0.000806));
+  spline->AddPoint(ignition::math::Vector3d(105.782,104.498,-0.001735));
+  spline->AddPoint(ignition::math::Vector3d(144.866,128.016,-0.002933));
+  spline->AddPoint(ignition::math::Vector3d(188.905,144.655,-0.004441));
+  spline->AddPoint(ignition::math::Vector3d(196.244,145.098,-0.004672));
+  spline->AddPoint(ignition::math::Vector3d(232.668,155.414,-0.006139));
+  spline->AddPoint(ignition::math::Vector3d(287.807,156.855,-0.008422));
+  spline->AddPoint(ignition::math::Vector3d(314.413,143.875,-0.00937), (p3 - p4) * 0.5);
+  std::cout << "s_tot: " << spline->ArcLength() << std::endl;
+  for (double s = 0.; s < 1.0; s += 0.01) {
+    std::cout << "t: " << s << " | " << spline->Interpolate(s) << " | " << spline->InterpolateTangent(s) << std::endl;
+  }
+}
+std::cout << "-----------------" << std::endl;
+*/
+
 }
 
 }  // namespace rndf
