@@ -14,6 +14,7 @@
 #include "ignition/math/Spline.hh"
 
 #include "spline_helpers.h"
+#include "parameters.h"
 
 namespace drake {
 namespace maliput {

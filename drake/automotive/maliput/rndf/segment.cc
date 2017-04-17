@@ -40,9 +40,7 @@ SplineLane* Segment::NewSplineLane(const api::LaneId& id,
       id, this,
       control_points,
       lane_bounds,
-      driveable_bounds,
-      elevation,
-      superelevation);
+      driveable_bounds);
   SplineLane* result = lane.get();
   lane_ = std::move(lane);
   return result;

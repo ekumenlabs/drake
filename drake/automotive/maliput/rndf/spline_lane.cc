@@ -19,7 +19,6 @@ SplineLane::SplineLane(const api::LaneId& id, const api::Segment* segment,
     ignition::math::Vector3d>> &control_points,
   const api::RBounds& lane_bounds,
   const api::RBounds& driveable_bounds):
-
     Lane(id,
       segment,
       lane_bounds,
@@ -27,7 +26,6 @@ SplineLane::SplineLane(const api::LaneId& id, const api::Segment* segment,
       ComputeLength(control_points)) {
   std::unique_ptr<ignition::math::Spline> spline =
     std::make_unique<ignition::math::Spline>();
-<<<<<<< HEAD
   spline->Tension(kTension);
   spline->AutoCalculate(true);
   for (const auto &point : control_points) {
@@ -189,7 +187,6 @@ double SplineLane::ComputeLength(
   }
   return spline.ArcLength();
 }
-
 
 }  // namespace rndf
 }  // namespace maliput

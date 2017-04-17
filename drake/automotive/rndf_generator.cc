@@ -9,11 +9,6 @@ namespace rndf = maliput::rndf;
 
 std::unique_ptr<const maliput::api::RoadGeometry>
 RNDFTBuilder::Build() {
-  /*
-  std::unique_ptr<maliput::rndf::Builder> builder(
-      new maliput::rndf::Builder(rc_.lane_bounds, rc_.driveable_bounds,
-                                     linear_tolerance_, angular_tolerance_));
-  */
   std::unique_ptr<maliput::rndf::Builder> builder =
     std::make_unique<maliput::rndf::Builder>(
       rc_.lane_bounds,
@@ -26,16 +21,18 @@ RNDFTBuilder::Build() {
   {
     std::vector<Waypoint> wps;
     wps.push_back(Waypoint(1u, 1u, 1u, -34.584502, -58.444782));
-    wps.push_back(Waypoint(1u, 1u, 2u, -34.583814, -58.446374));
+    wps.push_back(Waypoint(1u, 1u, 2u, -34.583823, -58.446346));
     wps.push_back(Waypoint(1u, 1u, 3u, -34.583287, -58.447599));
     waypoints_map[1] = wps;
   }
+
   {
     std::vector<Waypoint> wps;
     wps.push_back(Waypoint(2u, 1u, 1u, -34.583726, -58.446402));
     wps.push_back(Waypoint(2u, 1u, 2u, -34.583104, -58.446062));
     waypoints_map[2] = wps;
   }
+
 
   for(const auto &kv: waypoints_map) {
     BuildSegment(*builder, kv.first, kv.second, -34.584502, -58.444782);
@@ -45,6 +42,7 @@ RNDFTBuilder::Build() {
   std::string exitId = "1_1_2";
   std::string entryId = "2_1_1";
   builder->CreateLaneToLaneConnection(exitId, entryId);
+
 
 
   /*
@@ -66,6 +64,7 @@ RNDFTBuilder::Build() {
     BuildSegment(*builder, kv.first, kv.second, -34.587094, -58.462872);
   }
   */
+
   return builder->Build({"RNDF-T-example"});
 }
 
@@ -73,18 +72,7 @@ std::unique_ptr<const maliput::api::RoadGeometry>
 RNDFTBuilder::Build(
   const std::string &road_waypoints,
   const std::string &connections) {
-  std::map<uint, std::vector<Waypoint>> waypoints_map;
-  BuildWaypointMap(road_waypoints, waypoints_map);
 
-  // Print the map to see if everything is OK
-  for(const auto &kv : waypoints_map) {
-    std::cout << kv.first << std::endl;
-    for (const auto &wp : kv.second) {
-      std::cout << "\t" << wp.IdStr() << "\t" << kv.second << std::endl;
-    }
-  }
-
-  // Create the builder
   std::unique_ptr<maliput::rndf::Builder> builder =
     std::make_unique<maliput::rndf::Builder>(
       rc_.lane_bounds,
@@ -92,11 +80,24 @@ RNDFTBuilder::Build(
       linear_tolerance_,
       angular_tolerance_);
 
+  std::map<uint, std::vector<Waypoint>> waypoints_map;
+  BuildWaypointMap(road_waypoints, waypoints_map);
+
+  // Print the map to see if everything is OK
+  /*
+  for(const auto &kv : waypoints_map) {
+    std::cout << kv.first << std::endl;
+    for (const auto &wp : kv.second) {
+      std::cout << "\t" << wp.IdStr() << std::endl;
+    }
+  }
+  */
+
   // Build the segments
   for(const auto &kv: waypoints_map) {
-    BuildSegment(*builder, kv.first, kv.second, 10., 65.);
+    BuildSegment(*builder, kv.first, kv.second, 10.0, 65.0);
   }
-/*
+
   // Generate the connections
   std::vector<std::tuple<std::string, std::string>> conn_vector;
   BuildConnectionsTupleList(connections, conn_vector);
@@ -110,7 +111,6 @@ RNDFTBuilder::Build(
 
     builder->CreateLaneToLaneConnection(exitId, entryId);
   }
-  */
 
   return builder->Build({"SimpleCity"});
 }
@@ -154,11 +154,9 @@ void RNDFTBuilder::BuildSegment(
   const double longitude) {
   std::vector<ignition::math::Vector3d> endpoints;
   // We convert all the waypoints locations in spherical to global
-  std::cout << "Conversion of lat-long " << std::endl;
   for (const auto &waypoint : waypoints) {
     endpoints.push_back(waypoint.ToGlobalCoordinates(latitude, longitude));
   }
-  std::cout << "Creating connections " << std::endl;
   builder.CreateLaneConnections(segment_id,
     waypoints.front().LaneId(),
     endpoints);

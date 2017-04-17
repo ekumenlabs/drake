@@ -26,7 +26,6 @@ void InverseArcLengthInterpolator::Fit(const ignition::math::Spline &_spline) {
 
 double InverseArcLengthInterpolator::InterpolateMthDerivative(
     const int _mth, const double _s) const {
-
   double __s = std::max(this->s_t_.front(), _s);
   __s = std::min(this->s_t_.back(), __s);
 
