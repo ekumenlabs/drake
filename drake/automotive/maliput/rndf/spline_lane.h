@@ -35,6 +35,7 @@ class SplineLane : public Lane {
     const std::vector<std::tuple<ignition::math::Vector3d,
     ignition::math::Vector3d>> &points);
 
+
  private:
   api::LanePosition DoToLanePosition(
       const api::GeoPosition& geo_pos,
