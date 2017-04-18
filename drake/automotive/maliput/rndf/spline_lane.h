@@ -47,11 +47,6 @@ class SplineLane : public Lane {
       const api::LanePosition& position,
       const api::IsoLaneVelocity& velocity) const override;
 
-  V2 xy_of_p(const double p) const override;
-  V2 xy_dot_of_p(const double p) const override;
-  double heading_of_p(const double p) const override;
-  double heading_dot_of_p(const double p) const override;
-
   V2 xy_of_s(const double s) const;
   V2 xy_dot_of_s(const double s) const;
   double heading_of_s(const double s) const;
@@ -62,7 +57,7 @@ class SplineLane : public Lane {
   V3 W_prime_of_srh(const double s, const double r, const double h,
                         const Rot3& Rabg) const;
 
-
+  double do_length() const override { return spline_->BaseSpline()->ArcLength(); }
 
   double module_p(const double _p) const;
 
