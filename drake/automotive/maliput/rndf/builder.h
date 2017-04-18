@@ -215,42 +215,6 @@ class Connection {
   std::vector<Endpoint> points_;
 };
 
-/// A group of Connections.
-///
-/// Upon building the RoadGeometry, a Group yields a Junction containing the
-/// corresponding Segments specified by all the Connections in the Group.
-class Group {
- public:
-  DRAKE_NO_COPY_NO_MOVE_NO_ASSIGN(Group)
-
-  /// Constructs an empty Group with the specified @p id.
-  explicit Group(const std::string& id) : id_(id) {}
-
-  /// Constructs a Group with @p id, populated by @p connections.
-  Group(const std::string& id,
-        const std::vector<const Connection*>& connections)
-      : id_(id), connections_(connections.begin(), connections.end()) {}
-
-  /// Adds a Connection.
-  void Add(const Connection* connection) {
-    auto result = connections_.insert(connection);
-    DRAKE_DEMAND(result.second);
-  }
-
-  /// Returns the ID string.
-  const std::string& id() const { return id_; }
-
-  /// Returns the grouped Connections.
-  const std::set<const Connection*>& connections() const {
-    return connections_;
-  }
-
- private:
-  std::string id_;
-  std::set<const Connection*> connections_;
-};
-
-
 // N.B. The Builder class overview documentation lives at the top of this file.
 class Builder {
  public:
@@ -291,15 +255,6 @@ class Builder {
   void SetDefaultBranch(
       const Connection* in, const api::LaneEnd::Which in_end,
       const Connection* out, const api::LaneEnd::Which out_end);
-
-  /// Creates a new empty connection group with ID string @p id.
-  Group* MakeGroup(const std::string& id);
-
-  /// Creates a new connection group with ID @p id, populated with the
-  /// given @p connections.
-  Group* MakeGroup(const std::string& id,
-                   const std::vector<const Connection*>& connections);
-
 
   /// Produces a RoadGeometry, with the ID @p id.
   std::unique_ptr<const api::RoadGeometry> Build(
@@ -408,7 +363,6 @@ class Builder {
   std::map<
     std::string,
     std::tuple<ignition::math::Vector3d, ignition::math::Vector3d>> waypoints;
-  std::vector<std::unique_ptr<Group>> groups_;
 };
 
 }  // namespace rndf
