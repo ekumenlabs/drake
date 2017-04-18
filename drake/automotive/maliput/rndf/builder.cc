@@ -42,14 +42,14 @@ void Builder::CreateLaneConnections(
   const auto &base_name = BuildName(segment_id, lane_id);
   // We first get the initial and final tangents from the
   // heading of the initial and last point.
-  const auto &initial_tangent = (points[1] - points[0]);
-  const auto &end_tangent = points[points.size() - 2] - points.back();
+  const auto &initial_tangent = (points[1] - points[0]) * 0.5;
+  const auto &end_tangent = (points[points.size() - 2] - points.back())* 0.5;
 
 
   // We generate the spline
   ignition::math::Spline spline;
   spline.AutoCalculate(true);
-  spline.Tension(0.0);
+  spline.Tension(1.0);
 
   spline.AddPoint(points.front(), initial_tangent);
   for(uint i = 1; i < points.size() - 1; i++) {
@@ -91,11 +91,6 @@ void Builder::CreateLaneToLaneConnection(
   // Checks
   DRAKE_DEMAND(exit_pose != waypoints.end());
   DRAKE_DEMAND(entry_pose != waypoints.end());
-/*
-  std::cout << "Connection: " << exit_id + "-" + entry_id << std::endl;
-  std::cout << "\t" << std::get<1>(exit_pose->second) << std::endl;
-  std::cout << "\t" << std::get<1>(entry_pose->second) << std::endl;
-*/
   // Convert those poses into endpoints
   std::vector<Endpoint> endpoints;
   endpoints.push_back(ConvertIntoEndpoint(exit_pose->second));
@@ -318,11 +313,13 @@ std::string Builder::BuildName(const uint segment_id,
 Endpoint Builder::ConvertIntoEndpoint(
   const std::tuple<ignition::math::Vector3d,
     ignition::math::Vector3d> &pose) {
+  const auto &point = std::get<0>(pose);
+  const auto &tangent = std::get<1>(pose);
   return Endpoint(
-    EndpointXy(std::get<0>(pose).X(),
-      std::get<0>(pose).Y(),
-      std::atan2(std::get<1>(pose).Y(), std::get<1>(pose).X()),
-      std::get<1>(pose).Length()),
+    EndpointXy(point.X(),
+      point.Y(),
+      std::atan2(tangent.Y(), tangent.X()),
+      tangent.Length()),
     EndpointZ());
 }
 
