@@ -17,17 +17,13 @@ SplineLane* Segment::NewSplineLane(const api::LaneId& id,
                       const std::vector<std::tuple<ignition::math::Vector3d,
                         ignition::math::Vector3d>> &control_points,
                       const api::RBounds& lane_bounds,
-                      const api::RBounds& driveable_bounds,
-                      const CubicPolynomial& elevation,
-                      const CubicPolynomial& superelevation) {
+                      const api::RBounds& driveable_bounds) {
   DRAKE_DEMAND(lane_.get() == nullptr);
   std::unique_ptr<SplineLane> lane = std::make_unique<SplineLane>(
       id, this,
       control_points,
       lane_bounds,
-      driveable_bounds,
-      elevation,
-      superelevation);
+      driveable_bounds);
   SplineLane* result = lane.get();
   lane_ = std::move(lane);
   return result;

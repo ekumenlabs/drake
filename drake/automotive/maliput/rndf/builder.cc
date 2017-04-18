@@ -42,21 +42,25 @@ void Builder::CreateLaneConnections(
   const auto &base_name = BuildName(segment_id, lane_id);
   // We first get the initial and final tangents from the
   // heading of the initial and last point.
-  const auto &initial_tangent = (points[1] - points[0]) * 0.5;
-  const auto &end_tangent = (points[points.size() - 2] - points.back())* 0.5;
-
+  const auto &initial_tangent = (points[1] - points[0]).Normalize()/** 0.5*/;
+  const auto &end_tangent = (points.back() - points[points.size() - 2]).Normalize()/** 0.5*/;
 
   // We generate the spline
   ignition::math::Spline spline;
   spline.AutoCalculate(true);
-  spline.Tension(1.0);
+  spline.Tension(SPLINE_TENSION);
 
-  spline.AddPoint(points.front(), initial_tangent);
+  spline.AddPoint(ignition::math::Vector3d(points.front().X(), points.front().Y(), 0.),
+    ignition::math::Vector3d(initial_tangent.X(), initial_tangent.Y(), 0.0));
   for(uint i = 1; i < points.size() - 1; i++) {
-    spline.AddPoint(points[i]);
+    spline.AddPoint(ignition::math::Vector3d(points[i].X(), points[i].Y(), 0.));
   }
-  spline.AddPoint(points.back(), end_tangent);
+  spline.AddPoint(ignition::math::Vector3d(points.back().X(), points.back().Y(), 0.),
+    ignition::math::Vector3d(end_tangent.X(), end_tangent.Y(), 0.0));
 
+  for (uint i  = 0; i < points.size(); i++) {
+    std::cout << "ID: " << segment_id << " h: " << std::atan2(spline.Tangent(i).Y(), spline.Tangent(i).X()) << " p: " << spline.Point(i) << " t: " << spline.Tangent(i) << std::endl;
+  }
   // We move the spline to connections
   for(uint i = 0; i < (points.size() - 1); i++) {
     // Get the points with their respective tangent.
@@ -68,7 +72,6 @@ void Builder::CreateLaneConnections(
     // Generate the name for the new connection
     const auto &name = base_name + std::to_string(i + 1) +
       "-" + base_name + std::to_string(i + 2);
-
     // Add the waypoints to the map so as to use them later
     // for connections
     waypoints[BuildName(segment_id, lane_id, i + 1)] = init_pose;
@@ -78,6 +81,7 @@ void Builder::CreateLaneConnections(
     std::vector<Endpoint> endpoints;
     endpoints.push_back(ConvertIntoEndpoint(init_pose));
     endpoints.push_back(ConvertIntoEndpoint(end_pose));
+
     // Create a connection
     Connect(name, endpoints);
   }
@@ -104,18 +108,6 @@ void Builder::SetDefaultBranch(
     const Connection* in, const api::LaneEnd::Which in_end,
     const Connection* out, const api::LaneEnd::Which out_end) {
   default_branches_.push_back({in, in_end, out, out_end});
-}
-
-Group* Builder::MakeGroup(const std::string& id) {
-  groups_.push_back(std::make_unique<Group>(id));
-  return groups_.back().get();
-}
-
-
-Group* Builder::MakeGroup(const std::string& id,
-                          const std::vector<const Connection*>& connections) {
-  groups_.push_back(std::make_unique<Group>(id, connections));
-  return groups_.back().get();
 }
 
 namespace {
@@ -214,16 +206,14 @@ Lane* Builder::BuildConnection(
         const auto &point =
           ignition::math::Vector3d(endpoint.xy().x(), endpoint.xy().y(), 0.);
         const auto &tangent =
-          ignition::math::Vector3d(1., std::tan(endpoint.xy().heading()), 0.).Normalize() *
+          ignition::math::Vector3d(std::cos(endpoint.xy().heading()), std::sin(endpoint.xy().heading()), 0.).Normalize() *
           endpoint.xy().heading_mod();
         points_tangents.push_back(std::make_tuple(point, tangent));
       }
       lane = segment->NewSplineLane(lane_id,
         points_tangents,
         lane_bounds_,
-        driveable_bounds_,
-        CubicPolynomial(),
-        CubicPolynomial());
+        driveable_bounds_);
       break;
     }
     default: {
@@ -250,20 +240,6 @@ std::unique_ptr<const api::RoadGeometry> Builder::Build(
 
   for (const std::unique_ptr<Connection>& connection : connections_) {
     remaining_connections.insert(connection.get());
-  }
-
-  for (const std::unique_ptr<Group>& group : groups_) {
-    Junction* junction =
-        road_geometry->NewJunction({std::string("j:") + group->id()});
-    drake::log()->debug("junction: {}", junction->id().id);
-    for (auto& connection : group->connections()) {
-      drake::log()->debug("connection: {}", connection->id());
-      // Remove connection from remaining_connections, and ensure that it
-      // was indeed in there.
-      DRAKE_DEMAND(remaining_connections.erase(connection) == 1);
-      lane_map[connection] = BuildConnection(
-          connection, junction, road_geometry.get(), &bp_map);
-    }
   }
 
   for (const Connection* const connection : remaining_connections) {

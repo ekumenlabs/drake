@@ -11,9 +11,12 @@
 
 #include "ignition/math/Vector3.hh"
 #include "ignition/math/SphericalCoordinates.hh"
+#include "ignition/rndf/RNDF.hh"
 
 #include "drake/automotive/maliput/api/road_geometry.h"
 #include "drake/automotive/maliput/rndf/builder.h"
+
+#include "drake/common/drake_assert.h"
 
 namespace drake {
 namespace automotive {
@@ -181,6 +184,9 @@ class RNDFTBuilder {
     const std::string &road_waypoints,
     const std::string &connections);
 
+  std::unique_ptr<const maliput::api::RoadGeometry> Build(
+    const std::string &file_name);
+
  private:
   void BuildWaypointMap(
     const std::string &rndf_description,
@@ -208,7 +214,8 @@ class RNDFTBuilder {
 
   /// Tolerances for monolane's Builder.
   const double linear_tolerance_  = 0.01;
-  const double angular_tolerance_ = 2.0 * M_PI;//0.01 * M_PI;
+  const double angular_tolerance_ = 2.0 * M_PI;
+  //const double angular_tolerance_ = 0.01 * M_PI;
 
   const RNDFRoadCharacteristics rc_;
 };

@@ -29,17 +29,20 @@ void InverseArcLengthInterpolator::Fit(const ignition::math::Spline &_spline)
 double InverseArcLengthInterpolator::InterpolateMthDerivative(
     const int _mth, const double _s) const
 {
+  double __s = std::max(this->s_t_.front(), _s);
+  __s = std::min(this->s_t_.back(), __s);
+
   // Make sure that the derivative order is a positive integer.
   DRAKE_THROW_UNLESS(_mth >= 0);
   // Make sure that the arc length requested is not below
   // s(t) image interval low bound.
-  DRAKE_THROW_UNLESS(this->s_t_.front() <= _s);
+  DRAKE_THROW_UNLESS(this->s_t_.front() <= __s);
   // Make sure that the arc length requested is not below
   // s(t) image interval upper bound.
-  DRAKE_THROW_UNLESS(this->s_t_.back() >= _s);
+  DRAKE_THROW_UNLESS(this->s_t_.back() >= __s);
 
   // Search s(t) function tabulation for lower bound index
-  auto it = std::lower_bound(this->s_t_.begin(), this->s_t_.end(), _s);
+  auto it = std::lower_bound(this->s_t_.begin(), this->s_t_.end(), __s);
   if (it != this->s_t_.begin()) it--;
   int index = it - this->s_t_.begin();
 
@@ -49,13 +52,13 @@ double InverseArcLengthInterpolator::InterpolateMthDerivative(
 
   double ds = this->s_t_[index + 1] - this->s_t_[index];
 
-  // Return t'(s) at _s.
+  // Return t'(s) at __s.
   if (_mth == 1) return this->dt_ / ds;
 
   double t_0 = index * this->dt_;
 
-  // Return t(s) at _s.
-  return t_0 + (this->dt_ / ds) * (_s - this->s_t_[index]);
+  // Return t(s) at __s.
+  return t_0 + (this->dt_ / ds) * (__s - this->s_t_[index]);
 }
 
 ArcLengthParameterizedSpline::ArcLengthParameterizedSpline(

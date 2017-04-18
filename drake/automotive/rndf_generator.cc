@@ -115,6 +115,23 @@ RNDFTBuilder::Build(
   return builder->Build({"SimpleCity"});
 }
 
+std::unique_ptr<const maliput::api::RoadGeometry>
+RNDFTBuilder::Build(const std::string &file_name) {
+  std::unique_ptr<maliput::rndf::Builder> builder =
+    std::make_unique<maliput::rndf::Builder>(
+      rc_.lane_bounds,
+      rc_.driveable_bounds,
+      linear_tolerance_,
+      angular_tolerance_);
+
+  std::unique_ptr<ignition::rndf::RNDF> rndfInfo =
+    std::make_unique<ignition::rndf::RNDF>(file_name);
+  DRAKE_DEMAND(rndfInfo->Valid());
+
+  return builder->Build({rndfInfo->Name()});
+}
+
+
 void RNDFTBuilder::BuildWaypointMap(
   const std::string &road_waypoints,
   std::map<uint, std::vector<Waypoint>> &waypoints_map) {

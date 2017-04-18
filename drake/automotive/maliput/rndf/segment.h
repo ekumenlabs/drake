@@ -40,9 +40,7 @@ class Segment : public api::Segment {
                       const std::vector<std::tuple<ignition::math::Vector3d,
                         ignition::math::Vector3d>> &control_points,
                       const api::RBounds& lane_bounds,
-                      const api::RBounds& driveable_bounds,
-                      const CubicPolynomial& elevation,
-                      const CubicPolynomial& superelevation);
+                      const api::RBounds& driveable_bounds);
 
   ~Segment() override = default;
 
