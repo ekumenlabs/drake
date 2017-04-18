@@ -17,7 +17,7 @@ RNDFTBuilder::Build() {
       angular_tolerance_);
 
   std::map<uint, std::vector<Waypoint>> waypoints_map;
-/*
+
   {
     std::vector<Waypoint> wps;
     wps.push_back(Waypoint(1u, 1u, 1u, -34.584502, -58.444782));
@@ -42,10 +42,10 @@ RNDFTBuilder::Build() {
   std::string exitId = "1_1_2";
   std::string entryId = "2_1_1";
   builder->CreateLaneToLaneConnection(exitId, entryId);
-*/
 
 
 
+  /*
   {
     std::vector<Waypoint> wps;
     wps.push_back(Waypoint(1u, 1u, 1u, -34.587094, -58.462872));
@@ -63,6 +63,7 @@ RNDFTBuilder::Build() {
   for(const auto &kv: waypoints_map) {
     BuildSegment(*builder, kv.first, kv.second, -34.587094, -58.462872);
   }
+  */
 
   return builder->Build({"RNDF-T-example"});
 }
@@ -81,7 +82,6 @@ RNDFTBuilder::Build(
 
   std::map<uint, std::vector<Waypoint>> waypoints_map;
   BuildWaypointMap(road_waypoints, waypoints_map);
-
 
   // Print the map to see if everything is OK
   /*
@@ -112,10 +112,7 @@ RNDFTBuilder::Build(
     builder->CreateLaneToLaneConnection(exitId, entryId);
   }
 
-  std::cout << "Building..." << std::endl << std::endl;
-  auto city = builder->Build({"SimpleCity"});
-  std::cout << "Finished!" << std::endl << std::endl;
-  return city;
+  return builder->Build({"SimpleCity"});
 }
 
 void RNDFTBuilder::BuildWaypointMap(
