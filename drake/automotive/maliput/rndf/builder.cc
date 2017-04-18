@@ -221,9 +221,7 @@ Lane* Builder::BuildConnection(
       lane = segment->NewSplineLane(lane_id,
         points_tangents,
         lane_bounds_,
-        driveable_bounds_,
-        CubicPolynomial(),
-        CubicPolynomial());
+        driveable_bounds_);
       break;
     }
     default: {
