@@ -16,16 +16,14 @@ SplineLane::SplineLane(const api::LaneId& id, const api::Segment* segment,
   const std::vector<std::tuple<ignition::math::Vector3d,
     ignition::math::Vector3d>> &control_points,
   const api::RBounds& lane_bounds,
-  const api::RBounds& driveable_bounds,
-  const CubicPolynomial& elevation,
-  const CubicPolynomial& superelevation):
+  const api::RBounds& driveable_bounds):
     Lane(id,
       segment,
       lane_bounds,
       driveable_bounds,
       ComputeLength(control_points),
-      elevation,
-      superelevation) {
+      elevation(CubicPolynomial()),
+      superelevation(CubicPolynomial())) {
   std::unique_ptr<ignition::math::Spline> spline =
     std::make_unique<ignition::math::Spline>();
   spline->Tension(1.0);
