@@ -114,7 +114,6 @@ std::string MakeChannelName(const std::string& name) {
   return default_prefix + "_" + name;
 }
 
-
 // Adds a MaliputRailcar to the simulation involving a dragway. It throws a
 // std::runtime_error if there is insufficient lane length for adding the
 // vehicle.
