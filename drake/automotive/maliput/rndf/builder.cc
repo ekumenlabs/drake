@@ -104,18 +104,6 @@ void Builder::SetDefaultBranch(
   default_branches_.push_back({in, in_end, out, out_end});
 }
 
-Group* Builder::MakeGroup(const std::string& id) {
-  groups_.push_back(std::make_unique<Group>(id));
-  return groups_.back().get();
-}
-
-
-Group* Builder::MakeGroup(const std::string& id,
-                          const std::vector<const Connection*>& connections) {
-  groups_.push_back(std::make_unique<Group>(id, connections));
-  return groups_.back().get();
-}
-
 namespace {
 // Determine the heading (in xy-plane) along the centerline when
 // travelling towards/into the lane, from the specified end.
@@ -246,20 +234,6 @@ std::unique_ptr<const api::RoadGeometry> Builder::Build(
 
   for (const std::unique_ptr<Connection>& connection : connections_) {
     remaining_connections.insert(connection.get());
-  }
-
-  for (const std::unique_ptr<Group>& group : groups_) {
-    Junction* junction =
-        road_geometry->NewJunction({std::string("j:") + group->id()});
-    drake::log()->debug("junction: {}", junction->id().id);
-    for (auto& connection : group->connections()) {
-      drake::log()->debug("connection: {}", connection->id());
-      // Remove connection from remaining_connections, and ensure that it
-      // was indeed in there.
-      DRAKE_DEMAND(remaining_connections.erase(connection) == 1);
-      lane_map[connection] = BuildConnection(
-          connection, junction, road_geometry.get(), &bp_map);
-    }
   }
 
   for (const Connection* const connection : remaining_connections) {
