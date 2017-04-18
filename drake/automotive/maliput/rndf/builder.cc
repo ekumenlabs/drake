@@ -56,6 +56,9 @@ void Builder::CreateLaneConnections(
   }
   spline.AddPoint(points.back(), end_tangent);
 
+  for (uint i  = 0; i < points.size(); i++) {
+    std::cout << "ID: " << segment_id << " p: " << spline.Point(i) << " t: " << spline.Tangent(i) << std::endl;
+  }
   // We move the spline to connections
   for(uint i = 0; i < (points.size() - 1); i++) {
     // Get the points with their respective tangent.
