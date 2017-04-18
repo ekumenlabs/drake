@@ -399,8 +399,6 @@ py_binary(
     ],
     args = [
         "-load_custom_monolane",
-        #"-lane_names=RingRoad1_1_2-RingRoad1_1_3,RingRoad1_1_3-street_2_1_2,street_2_1_2-street_2_1_3,street_2_1_3-street_8_1_4,street_8_1_4-street_8_1_5,street_8_1_5-street_9_1_9,street_9_1_9-street_9_1_10,street_9_1_10-street_9_1_11,street_9_1_11-street_4_1_6,street_4_1_6-street_4_1_7",
-        #"-monolane_filepath=drake/automotive/maliput/monolane/city_monolane.yaml",
         "-lane_names=a1_1-a1_2,a1_2-a1_3,a1_3-a1_4,a1_4-a1_5,a1_5-b4_10,b4_10-b4_11,b4_11-a4_1,a4_1-a4_2,a4_2-b2_8,b2_8-b2_9,b2_9-c21_1,c21_1-c21_2,c22_1-d2_4,d2_4-d2_5,d2_5-d2_6,d2_6-d2_7,d2_7-d2_8,d2_8-d2_1,d2_1-d2_2,d2_2-d2_3,d2_3-d2_4,d2_4-d2_5,d2_5-c20_1,c20_1-c20_2,c20_2-c25_?,",
         "-monolane_filepath=drake/automotive/maliput/monolane/mcity_monolane.yaml",
     ],

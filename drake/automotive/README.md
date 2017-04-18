@@ -59,7 +59,7 @@ The following demos are available:
    ```
 
  * Loading a custom monolane file. Right now, ```BUILD``` file is configured so as to load
-   ```maliput/monolane/city_monolane.yaml``` monolane road network and sets a path showing
+   ```maliput/monolane/mcity_monolane.yaml``` monolane road network and sets a path showing
    different steering angles. To run it:
 
    ```
