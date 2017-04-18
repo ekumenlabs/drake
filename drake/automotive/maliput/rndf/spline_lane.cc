@@ -28,10 +28,10 @@ SplineLane::SplineLane(const api::LaneId& id, const api::Segment* segment,
       superelevation) {
   std::unique_ptr<ignition::math::Spline> spline =
     std::make_unique<ignition::math::Spline>();
-  spline->Tension(0.0);
+  spline->Tension(1.0);
   spline->AutoCalculate(true);
   for (const auto &point : control_points) {
-    spline->AddPoint(std::get<0>(point));
+    spline->AddPoint(std::get<0>(point), std::get<1>(point));
   }
   spline_ = std::make_unique<ArcLengthParameterizedSpline>(
     spline, control_points.size() - 1);
@@ -48,14 +48,16 @@ V2 SplineLane::xy_of_p(const double p) const {
   // xy_of_p it's called L which is a function
   // R --> R^2. We discard z component right now. We can say
   // L = f(p) = (x(p) ; y(p))
-  const auto point = spline_->InterpolateMthDerivative(0, p * spline_->BaseSpline()->ArcLength());
+  //const auto &point = spline_->InterpolateMthDerivative(0, p * spline_->BaseSpline()->ArcLength());
+  const auto &point = spline_->BaseSpline()->Interpolate(p);
   return {point.X(), point.Y()};
 }
 
 V2 SplineLane::xy_dot_of_p(const double p) const {
   // We get here the tangent, which is the first derivative of
   // L --> dL(p) / dp
-  const auto& tangent = spline_->InterpolateMthDerivative(1, p * spline_->BaseSpline()->ArcLength());
+  //const auto& tangent = spline_->InterpolateMthDerivative(1, p * spline_->BaseSpline()->ArcLength());
+  const auto &tangent = spline_->BaseSpline()->InterpolateTangent(p);
   return {tangent.X(), tangent.Y()};
 }
 
@@ -78,7 +80,9 @@ double SplineLane::heading_dot_of_p(const double p) const {
   // Where y and x are the components of the L' and, x' and y' are
   // the components of L'' as they are independant.
   const double heading = heading_of_p(p);
-  const auto first_derivative = spline_->InterpolateMthDerivative(1, p * spline_->BaseSpline()->ArcLength());
+  // const auto first_derivative = spline_->InterpolateMthDerivative(1, p * spline_->BaseSpline()->ArcLength());
+  // const auto second_derivative = spline_->InterpolateMthDerivative(2, p * spline_->BaseSpline()->ArcLength());
+  const auto &first_derivative = spline_->BaseSpline()->InterpolateTangent(p);
   const auto second_derivative = spline_->InterpolateMthDerivative(2, p * spline_->BaseSpline()->ArcLength());
   const double m =
     ( second_derivative.Y() * first_derivative.X() -
@@ -98,7 +102,7 @@ double SplineLane::ComputeLength(
     ignition::math::Vector3d>> &points) {
   ignition::math::Spline spline;
   spline.AutoCalculate(true);
-  spline.Tension(0.0);
+  spline.Tension(1.0);
   for (const auto &point : points) {
     spline.AddPoint(std::get<0>(point), std::get<1>(point));
   }
