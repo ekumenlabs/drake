@@ -43,7 +43,7 @@ void Builder::CreateLaneConnections(
   // We first get the initial and final tangents from the
   // heading of the initial and last point.
   const auto &initial_tangent = (points[1] - points[0]).Normalize()/** 0.5*/;
-  const auto &end_tangent = (points[points.size() - 2] - points.back()).Normalize()/** 0.5*/;
+  const auto &end_tangent = (points.back() - points[points.size() - 2]).Normalize()/** 0.5*/;
 
   // We generate the spline
   ignition::math::Spline spline;
@@ -76,6 +76,7 @@ void Builder::CreateLaneConnections(
     std::vector<Endpoint> endpoints;
     endpoints.push_back(ConvertIntoEndpoint(init_pose));
     endpoints.push_back(ConvertIntoEndpoint(end_pose));
+
     // Create a connection
     Connect(name, endpoints);
   }
@@ -200,7 +201,7 @@ Lane* Builder::BuildConnection(
         const auto &point =
           ignition::math::Vector3d(endpoint.xy().x(), endpoint.xy().y(), 0.);
         const auto &tangent =
-          ignition::math::Vector3d(1., std::tan(endpoint.xy().heading()), 0.).Normalize() *
+          ignition::math::Vector3d(std::cos(endpoint.xy().heading()), std::sin(endpoint.xy().heading()), 0.).Normalize() *
           endpoint.xy().heading_mod();
         points_tangents.push_back(std::make_tuple(point, tangent));
       }

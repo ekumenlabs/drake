@@ -30,7 +30,7 @@ SplineLane::SplineLane(const api::LaneId& id, const api::Segment* segment,
     spline->AddPoint(std::get<0>(point), std::get<1>(point));
   }
   spline_ = std::make_unique<ArcLengthParameterizedSpline>(
-    spline, control_points.size() - 1);
+    spline, 100/*control_points.size() - 1*/);
 }
 
 api::LanePosition SplineLane::DoToLanePosition(
@@ -57,13 +57,13 @@ api::GeoPosition SplineLane::DoToGeoPosition(
 api::Rotation SplineLane::DoGetOrientation(const api::LanePosition& lane_pos) const {
   // Recover linear parameter p from arc-length position s.
   const double s = lane_pos.s;
-  const double r = lane_pos.r;
-  const double h = lane_pos.h;
+  // const double r = lane_pos.r;
+  // const double h = lane_pos.h;
   // Calculate orientation of (s,r,h) basis at (s,0,0).
   const Rot3 Rabg = Rabg_of_s(s);
 
   // Calculate s,r basis vectors at (s,r,h)...
-  const V3 s_hat = s_hat_of_srh(s, r, h, Rabg);
+  //const V3 s_hat = s_hat_of_srh(s, r, h, Rabg);
   // ...and then derive orientation from those basis vectors.
   //
   // (s_hat  r_hat  h_hat) is an orthonormal basis, obtained by rotating the
@@ -77,14 +77,15 @@ api::Rotation SplineLane::DoGetOrientation(const api::LanePosition& lane_pos) co
   //   s_hat = (cb * cg, cb * sg, - sb)
   //   r_hat = (- ca * sg + sa * sb * cg, ca * cg + sa * sb * sg, sa * cb)
   // We solve the above for a, b, g.
-  const double gamma = std::atan2(s_hat.y(),
-                                  s_hat.x());
-  return api::Rotation(0.0, 0.0, gamma);
+  /*const double gamma = std::atan2(s_hat.y(),
+                                  s_hat.x());*/
+  return api::Rotation(0.0, 0.0, Rabg.yaw());
 }
 
 api::LanePosition SplineLane::DoEvalMotionDerivatives(
     const api::LanePosition& position,
     const api::IsoLaneVelocity& velocity) const {
+  /*
   const double s = position.s;
   const double r = position.r;
   const double h = position.h;
@@ -96,8 +97,8 @@ api::LanePosition SplineLane::DoEvalMotionDerivatives(
   // Similarly, path-length s along the road at r = 0 is related to the
   // elevation by ds = p_scale * sqrt(1 + g'^2) dp.  Chaining yields ds/dσ:
   const double ds_dsigma = p_scale_ / W_prime.norm();
-
-  return api::LanePosition(ds_dsigma * velocity.sigma_v,
+*/
+  return api::LanePosition(velocity.sigma_v,
                            velocity.rho_v,
                            velocity.eta_v);
 }
@@ -116,7 +117,7 @@ V3 SplineLane::W_prime_of_srh(const double s, const double r, const double h,
   const double beta = R.pitch();
   const double gamma = R.yaw();
 
-  const double ca = 1.0;
+  const double ca = std::cos(alpha);
   const double cb = std::cos(beta);
   const double cg = std::cos(gamma);
   const double sa = std::sin(alpha);
