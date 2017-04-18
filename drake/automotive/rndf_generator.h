@@ -11,9 +11,12 @@
 
 #include "ignition/math/Vector3.hh"
 #include "ignition/math/SphericalCoordinates.hh"
+#include "ignition/rndf/RNDF.hh"
 
 #include "drake/automotive/maliput/api/road_geometry.h"
 #include "drake/automotive/maliput/rndf/builder.h"
+
+#include "drake/common/drake_assert.h"
 
 namespace drake {
 namespace automotive {
@@ -180,6 +183,9 @@ class RNDFTBuilder {
   std::unique_ptr<const maliput::api::RoadGeometry> Build(
     const std::string &road_waypoints,
     const std::string &connections);
+
+  std::unique_ptr<const maliput::api::RoadGeometry> Build(
+    const std::string &file_name);
 
  private:
   void BuildWaypointMap(

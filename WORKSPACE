@@ -291,3 +291,12 @@ bitbucket_archive(
     strip_prefix = "ekumen-ign-math-3d730f872289",
 )
 
+bitbucket_archive(
+    name = "ignition_rndf",
+    repository = "ignitionrobotics/ign-rndf",
+    commit = "default",
+    sha256 = "",
+    build_file = "tools/ignition_rndf.BUILD",
+    strip_prefix = "ignitionrobotics-ign-rndf-d61b75c45075",
+)
+
