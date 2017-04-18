@@ -9,6 +9,7 @@
 #include "ignition/math/Spline.hh"
 
 #include "spline_helpers.h"
+#include "parameters.h"
 
 namespace drake {
 namespace maliput {
@@ -33,17 +34,35 @@ class SplineLane : public Lane {
     const std::vector<std::tuple<ignition::math::Vector3d,
     ignition::math::Vector3d>> &points);
 
-
  private:
   api::LanePosition DoToLanePosition(
       const api::GeoPosition& geo_pos,
       api::GeoPosition* nearest_point,
       double* distance) const override;
+  api::GeoPosition DoToGeoPosition(
+      const api::LanePosition& lane_pos) const override;
+  api::Rotation DoGetOrientation(
+      const api::LanePosition& lane_pos) const override;
+  api::LanePosition DoEvalMotionDerivatives(
+      const api::LanePosition& position,
+      const api::IsoLaneVelocity& velocity) const override;
 
   V2 xy_of_p(const double p) const override;
   V2 xy_dot_of_p(const double p) const override;
   double heading_of_p(const double p) const override;
   double heading_dot_of_p(const double p) const override;
+
+  V2 xy_of_s(const double s) const;
+  V2 xy_dot_of_s(const double s) const;
+  double heading_of_s(const double s) const;
+  double heading_dot_of_s(const double s) const;
+  Rot3 Rabg_of_s(const double s) const;
+  V3 s_hat_of_srh(const double s, const double r, const double h,
+                      const Rot3& Rabg) const;
+  V3 W_prime_of_srh(const double s, const double r, const double h,
+                        const Rot3& Rabg) const;
+
+
 
   double module_p(const double _p) const;
 

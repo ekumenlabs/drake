@@ -42,14 +42,13 @@ void Builder::CreateLaneConnections(
   const auto &base_name = BuildName(segment_id, lane_id);
   // We first get the initial and final tangents from the
   // heading of the initial and last point.
-  const auto &initial_tangent = (points[1] - points[0]) * 0.5;
-  const auto &end_tangent = (points[points.size() - 2] - points.back())* 0.5;
-
+  const auto &initial_tangent = (points[1] - points[0]).Normalize() /** 0.5*/;
+  const auto &end_tangent = (points[points.size() - 2] - points.back()).Normalize() /** 0.5*/;
 
   // We generate the spline
   ignition::math::Spline spline;
   spline.AutoCalculate(true);
-  spline.Tension(1.0);
+  spline.Tension(SPLINE_TENSION);
 
   spline.AddPoint(points.front(), initial_tangent);
   for(uint i = 1; i < points.size() - 1; i++) {
@@ -68,7 +67,6 @@ void Builder::CreateLaneConnections(
     // Generate the name for the new connection
     const auto &name = base_name + std::to_string(i + 1) +
       "-" + base_name + std::to_string(i + 2);
-
     // Add the waypoints to the map so as to use them later
     // for connections
     waypoints[BuildName(segment_id, lane_id, i + 1)] = init_pose;
