@@ -22,8 +22,8 @@ SplineLane::SplineLane(const api::LaneId& id, const api::Segment* segment,
       lane_bounds,
       driveable_bounds,
       ComputeLength(control_points),
-      elevation(CubicPolynomial()),
-      superelevation(CubicPolynomial())) {
+      CubicPolynomial(),
+      CubicPolynomial()) {
   std::unique_ptr<ignition::math::Spline> spline =
     std::make_unique<ignition::math::Spline>();
   spline->Tension(1.0);
