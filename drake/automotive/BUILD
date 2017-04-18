@@ -216,6 +216,7 @@ drake_cc_library(
         "//drake/automotive/maliput/api",
         "//drake/automotive/maliput/rndf",
         "@ignition_math",
+        "@ignition_rndf",
     ],
 )
 
