@@ -50,11 +50,13 @@ void Builder::CreateLaneConnections(
   spline.AutoCalculate(true);
   spline.Tension(SPLINE_TENSION);
 
-  spline.AddPoint(points.front(), initial_tangent);
+  spline.AddPoint(ignition::math::Vector3d(points.front().X(), points.front().Y(), 0.),
+    ignition::math::Vector3d(initial_tangent.X(), initial_tangent.Y(), 0.0));
   for(uint i = 1; i < points.size() - 1; i++) {
-    spline.AddPoint(points[i]);
+    spline.AddPoint(ignition::math::Vector3d(points[i].X(), points[i].Y(), 0.));
   }
-  spline.AddPoint(points.back(), end_tangent);
+  spline.AddPoint(ignition::math::Vector3d(points.back().X(), points.back().Y(), 0.),
+    ignition::math::Vector3d(end_tangent.X(), end_tangent.Y(), 0.0));
 
   for (uint i  = 0; i < points.size(); i++) {
     std::cout << "ID: " << segment_id << " p: " << spline.Point(i) << " t: " << spline.Tangent(i) << std::endl;
