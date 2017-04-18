@@ -42,8 +42,8 @@ void Builder::CreateLaneConnections(
   const auto &base_name = BuildName(segment_id, lane_id);
   // We first get the initial and final tangents from the
   // heading of the initial and last point.
-  const auto &initial_tangent = (points[1] - points[0]).Normalize() /** 0.5*/;
-  const auto &end_tangent = (points[points.size() - 2] - points.back()).Normalize() /** 0.5*/;
+  const auto &initial_tangent = (points[1] - points[0]).Normalize()/** 0.5*/;
+  const auto &end_tangent = (points[points.size() - 2] - points.back()).Normalize()/** 0.5*/;
 
   // We generate the spline
   ignition::math::Spline spline;
