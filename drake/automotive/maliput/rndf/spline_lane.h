@@ -25,9 +25,7 @@ class SplineLane : public Lane {
           const std::vector<std::tuple<ignition::math::Vector3d,
             ignition::math::Vector3d>> &control_points,
           const api::RBounds& lane_bounds,
-          const api::RBounds& driveable_bounds,
-          const CubicPolynomial& elevation,
-          const CubicPolynomial& superelevation);
+          const api::RBounds& driveable_bounds);
 
   ~SplineLane() override = default;
 
@@ -48,8 +46,6 @@ class SplineLane : public Lane {
   double heading_dot_of_p(const double p) const override;
 
   double module_p(const double _p) const;
-
-  void do_test() const;
 
   // ignition::math::Spline spline_;
   std::unique_ptr<ArcLengthParameterizedSpline> spline_;
