@@ -12,6 +12,9 @@
 #include "ignition/math/Vector3.hh"
 #include "ignition/math/SphericalCoordinates.hh"
 #include "ignition/rndf/RNDF.hh"
+#include "ignition/rndf/Segment.hh"
+#include "ignition/rndf/Lane.hh"
+#include "ignition/rndf/Waypoint.hh"
 
 #include "drake/automotive/maliput/api/road_geometry.h"
 #include "drake/automotive/maliput/rndf/builder.h"
@@ -211,6 +214,10 @@ class RNDFTBuilder {
   const Waypoint* FindWaypointById(
     const std::map<uint, std::vector<Waypoint>> &waypoints_map,
     const std::string &wpId);
+
+  ignition::math::Vector3d ToGlobalCoordinates(
+    const ignition::math::Vector3d &origin,
+    const ignition::math::SphericalCoordinates &spherical_position) const;
 
   /// Tolerances for monolane's Builder.
   const double linear_tolerance_  = 0.01;

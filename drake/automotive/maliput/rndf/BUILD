@@ -60,8 +60,8 @@ drake_cc_library(
 )
 
 filegroup(
-    name = "yamls",
-    srcs = glob(["*.yaml"]),
+    name = "rndfs",
+    srcs = glob(["*.rndf"]),
 )
 
 # === test/ ===
