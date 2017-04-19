@@ -59,7 +59,7 @@ void Builder::CreateLaneConnections(
     ignition::math::Vector3d(end_tangent.X(), end_tangent.Y(), 0.0));
 
   for (uint i  = 0; i < points.size(); i++) {
-    std::cout << "ID: " << segment_id << " p: " << spline.Point(i) << " t: " << spline.Tangent(i) << std::endl;
+    std::cout << "ID: " << segment_id << " h: " << std::atan2(spline.Tangent(i).Y(), spline.Tangent(i).X()) << " p: " << spline.Point(i) << " t: " << spline.Tangent(i) << std::endl;
   }
   // We move the spline to connections
   for(uint i = 0; i < (points.size() - 1); i++) {
