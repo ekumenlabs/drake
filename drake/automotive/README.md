@@ -62,12 +62,18 @@ The following demos are available:
        --num_trajectory_car=12 \
        --num_maliput_railcar=1
    ```
- * A 'T' connection with a `TrajectoryCar` driving through the lanes. It
-   is based on Splines lanes with different control points. ```BUILD``` file
-   has the comma separated list of lanes to follow and the speed of the car:
+ * RNDF parsing and visualizing. You must set a file path to a map using
+ `rndf_file_path`. You can also add a `TrajetoryCar` and set the names of the lanes
+ based on waypoint connections as shown below:
 
    ```
-   bazel run //drake/automotive:rndf
+   bazel run drake/automotive:demo -- \
+      -with_rndf \
+      -lane_names=1_1_1-1_1_2,1_1_2-1_1_3,1_1_3-7_1_4,7_1_4-7_1_5,7_1_5-2_1_6,\
+        2_1_6-2_1_7,2_1_7-6_1_6,6_1_7-3_1_8,3_1_8-3_1_9 \
+      -rndf_base_speed=7 \
+      -rndf_delay=10 \
+      -rndf_file_path=drake/automotive/maliput/rndf/maps/simple_city.rndf
    ```
 
 Driving the Prius
