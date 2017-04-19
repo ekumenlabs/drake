@@ -165,7 +165,6 @@ V2 SplineLane::xy_of_s(const double s) const {
   // xy_of_p it's called L which is a function
   // R --> R^2. We discard z component right now. We can say
   // L = f(p) = (x(p) ; y(p))
-  //const auto &point = spline_->InterpolateMthDerivative(0, p * spline_->BaseSpline()->ArcLength());
   const auto &point = spline_->InterpolateMthDerivative(0, s);
   return {point.X(), point.Y()};
 }
