@@ -181,49 +181,14 @@ class RNDFTBuilder {
   /// Constructor for the example, using default RoadCharacteristics settings.
   RNDFTBuilder() : RNDFTBuilder(RNDFRoadCharacteristics{}) {}
 
-  /// Implements a T connection example.
-  std::unique_ptr<const maliput::api::RoadGeometry> Build();
-
-  /// Implements a custom RNDF map
-  std::unique_ptr<const maliput::api::RoadGeometry> Build(
-    const std::string &road_waypoints,
-    const std::string &connections);
-
   std::unique_ptr<const maliput::api::RoadGeometry> Build(
     const std::string &file_name);
 
  private:
-  void BuildWaypointMap(
-    const std::string &rndf_description,
-    std::map<uint, std::vector<Waypoint>> &waypoints_map);
-
-  void BuildSegment(
-    maliput::rndf::Builder &builder,
-    const uint segment_id,
-    const std::vector<Waypoint> &waypoints,
-    const double latitude,
-    const double longitude);
-
-  void BuildConnection(
-    maliput::rndf::Builder &builder,
-    const Waypoint *exit,
-    const Waypoint *entry);
-
-  void BuildConnectionsTupleList(
-    const std::string &connections,
-    std::vector<std::tuple<std::string, std::string>> &conn_vector);
-
-  const Waypoint* FindWaypointById(
-    const std::map<uint, std::vector<Waypoint>> &waypoints_map,
-    const std::string &wpId);
 
   ignition::math::Vector3d ToGlobalCoordinates(
     const ignition::math::Vector3d &origin,
     const ignition::math::SphericalCoordinates &spherical_position) const;
-
-  ignition::rndf::Waypoint& FindWaypointById(
-    std::vector<ignition::rndf::Segment> &segments,
-    const ignition::rndf::UniqueId& waypoint_id) const;
 
   void BuildSegments(
     maliput::rndf::Builder &builder,
