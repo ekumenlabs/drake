@@ -115,42 +115,6 @@ RNDFTBuilder::Build(
   return builder->Build({"SimpleCity"});
 }
 
-std::unique_ptr<const maliput::api::RoadGeometry>
-RNDFTBuilder::Build(const std::string &file_name) {
-  std::unique_ptr<maliput::rndf::Builder> builder =
-    std::make_unique<maliput::rndf::Builder>(
-      rc_.lane_bounds,
-      rc_.driveable_bounds,
-      linear_tolerance_,
-      angular_tolerance_);
-
-  std::unique_ptr<ignition::rndf::RNDF> rndfInfo =
-    std::make_unique<ignition::rndf::RNDF>(file_name);
-  DRAKE_DEMAND(rndfInfo->Valid());
-
-  const ignition::math::Vector3d origin(10.0, 65.0, 0.0);
-
-  std::vector<ignition::rndf::Segment> &segments =
-    rndfInfo->Segments();
-  for (auto &segment : segments) {
-    std::vector<ignition::rndf::Lane> &lanes =
-      segment.Lanes();
-    for (auto &lane : lanes) {
-      std::vector<ignition::math::Vector3d> waypoint_positions;
-      std::vector<ignition::rndf::Waypoint> &waypoints =
-        lane.Waypoints();
-      for (auto &waypoint : waypoints) {
-        waypoint_positions.push_back(
-          ToGlobalCoordinates(origin, waypoint.Location()));
-      }
-      builder->CreateLaneConnections(segment.Id(),
-        lane.Id(),
-        waypoint_positions);
-    }
-  }
-  return builder->Build({rndfInfo->Name()});
-}
-
 
 void RNDFTBuilder::BuildWaypointMap(
   const std::string &road_waypoints,
@@ -209,6 +173,81 @@ const Waypoint* RNDFTBuilder::FindWaypointById(
     }
   }
   return nullptr;
+}
+//-----------------------------------------------------------
+
+std::unique_ptr<const maliput::api::RoadGeometry>
+RNDFTBuilder::Build(const std::string &file_name) {
+  std::unique_ptr<maliput::rndf::Builder> builder =
+    std::make_unique<maliput::rndf::Builder>(
+      rc_.lane_bounds,
+      rc_.driveable_bounds,
+      linear_tolerance_,
+      angular_tolerance_);
+
+  std::unique_ptr<ignition::rndf::RNDF> rndfInfo =
+    std::make_unique<ignition::rndf::RNDF>(file_name);
+  DRAKE_DEMAND(rndfInfo->Valid());
+
+  const ignition::math::Vector3d origin(10.0, 65.0, 0.0);
+
+  std::vector<ignition::rndf::Segment> &segments =
+    rndfInfo->Segments();
+
+  BuildSegments(*builder, origin, segments);
+  BuildConnections(*builder, segments);
+
+  return builder->Build({rndfInfo->Name()});
+}
+
+void RNDFTBuilder::BuildSegments(
+  maliput::rndf::Builder &builder,
+  const ignition::math::Vector3d &origin,
+  std::vector<ignition::rndf::Segment> &segments) const{
+  for (auto &segment : segments) {
+    std::vector<ignition::rndf::Lane> &lanes =
+      segment.Lanes();
+    for (auto &lane : lanes) {
+      std::vector<ignition::math::Vector3d> waypoint_positions;
+      std::vector<ignition::rndf::Waypoint> &waypoints =
+        lane.Waypoints();
+      for (auto &waypoint : waypoints) {
+        waypoint_positions.push_back(
+          ToGlobalCoordinates(origin, waypoint.Location()));
+      }
+      builder.CreateLaneConnections(segment.Id(),
+        lane.Id(),
+        waypoint_positions);
+    }
+  }
+}
+
+void RNDFTBuilder::BuildConnections(
+  maliput::rndf::Builder &builder,
+  std::vector<ignition::rndf::Segment> &segments) const {
+
+  const auto unique_id_to_str = [] (
+    const ignition::rndf::UniqueId &id) {
+    return std::to_string(id.X()) + "_" +
+      std::to_string(id.Y()) + "_" +
+      std::to_string(id.Z());
+  };
+  for (auto &segment : segments) {
+    std::vector<ignition::rndf::Lane> &lanes =
+      segment.Lanes();
+    for (auto &lane : lanes) {
+      std::vector<ignition::math::Vector3d> waypoint_positions;
+      std::vector<ignition::rndf::Exit> &exits =
+        lane.Exits();
+      for (auto &exit : exits) {
+        const auto &exit_id = exit.ExitId();
+        const auto &entry_id = exit.EntryId();
+        builder.CreateLaneToLaneConnection(
+          unique_id_to_str(exit_id),
+          unique_id_to_str(entry_id));
+      }
+    }
+  }
 }
 
 ignition::math::Vector3d RNDFTBuilder::ToGlobalCoordinates(

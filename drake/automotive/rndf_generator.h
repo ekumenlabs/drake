@@ -15,6 +15,8 @@
 #include "ignition/rndf/Segment.hh"
 #include "ignition/rndf/Lane.hh"
 #include "ignition/rndf/Waypoint.hh"
+#include "ignition/rndf/UniqueId.hh"
+#include "ignition/rndf/Exit.hh"
 
 #include "drake/automotive/maliput/api/road_geometry.h"
 #include "drake/automotive/maliput/rndf/builder.h"
@@ -218,6 +220,19 @@ class RNDFTBuilder {
   ignition::math::Vector3d ToGlobalCoordinates(
     const ignition::math::Vector3d &origin,
     const ignition::math::SphericalCoordinates &spherical_position) const;
+
+  ignition::rndf::Waypoint& FindWaypointById(
+    std::vector<ignition::rndf::Segment> &segments,
+    const ignition::rndf::UniqueId& waypoint_id) const;
+
+  void BuildSegments(
+    maliput::rndf::Builder &builder,
+    const ignition::math::Vector3d &origin,
+    std::vector<ignition::rndf::Segment> &segments) const;
+
+  void BuildConnections(
+    maliput::rndf::Builder &builder,
+    std::vector<ignition::rndf::Segment> &segments) const;
 
   /// Tolerances for monolane's Builder.
   const double linear_tolerance_  = 0.01;
