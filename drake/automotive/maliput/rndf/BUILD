@@ -61,7 +61,7 @@ drake_cc_library(
 
 filegroup(
     name = "rndfs",
-    srcs = glob(["*.rndf"]),
+    srcs = glob(["maps/*.rndf"]),
 )
 
 # === test/ ===
