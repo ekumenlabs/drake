@@ -11,6 +11,8 @@ namespace drake {
 namespace maliput {
 namespace rndf {
 
+const double SplineLane::kSplinesSamples = 100.0;
+const double SplineLane::kTension = 0.8;
 
 SplineLane::SplineLane(const api::LaneId& id, const api::Segment* segment,
   const std::vector<std::tuple<ignition::math::Vector3d,
@@ -24,13 +26,13 @@ SplineLane::SplineLane(const api::LaneId& id, const api::Segment* segment,
       ComputeLength(control_points)) {
   std::unique_ptr<ignition::math::Spline> spline =
     std::make_unique<ignition::math::Spline>();
-  spline->Tension(SPLINE_TENSION);
+  spline->Tension(kTension);
   spline->AutoCalculate(true);
   for (const auto &point : control_points) {
     spline->AddPoint(std::get<0>(point), std::get<1>(point));
   }
   spline_ = std::make_unique<ArcLengthParameterizedSpline>(
-    spline, 100/*control_points.size() - 1*/);
+    spline, kSplinesSamples);
 }
 
 api::LanePosition SplineLane::DoToLanePosition(
@@ -214,7 +216,7 @@ double SplineLane::ComputeLength(
     ignition::math::Vector3d>> &points) {
   ignition::math::Spline spline;
   spline.AutoCalculate(true);
-  spline.Tension(SPLINE_TENSION);
+  spline.Tension(kTension);
   for (const auto &point : points) {
     spline.AddPoint(std::get<0>(point), std::get<1>(point));
   }
