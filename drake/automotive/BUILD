@@ -447,6 +447,7 @@ py_binary(
     ],
 )
 
+
 py_binary(
     name = "rndf",
     srcs = ["automotive_demo.py"],
@@ -457,6 +458,7 @@ py_binary(
         "@drake_visualizer//:drake-visualizer",
         "@lcm//:lcm-logger",
         "//drake/automotive/maliput/monolane:yamls",
+        "//drake/automotive/maliput/rndf:rndfs",
     ],
     main = "automotive_demo.py",
     deps = [
@@ -469,6 +471,7 @@ py_binary(
         #"-lane_names=1_1_1-1_1_2,1_1_2-1_1_3",
         "-rndf_base_speed=7",
         "-rndf_delay=10",
+        "-rndf_file_path=drake/automotive/maliput/rndf/simple_city.rndf",
     ],
 )
 
@@ -492,6 +495,8 @@ filegroup(
         "models/speed_bump/speed_bump.obj",
     ],
 )
+
+
 
 # === test/ ===
 

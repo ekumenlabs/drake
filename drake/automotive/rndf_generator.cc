@@ -128,6 +128,26 @@ RNDFTBuilder::Build(const std::string &file_name) {
     std::make_unique<ignition::rndf::RNDF>(file_name);
   DRAKE_DEMAND(rndfInfo->Valid());
 
+  const ignition::math::Vector3d origin(10.0, 65.0, 0.0);
+
+  std::vector<ignition::rndf::Segment> &segments =
+    rndfInfo->Segments();
+  for (auto &segment : segments) {
+    std::vector<ignition::rndf::Lane> &lanes =
+      segment.Lanes();
+    for (auto &lane : lanes) {
+      std::vector<ignition::math::Vector3d> waypoint_positions;
+      std::vector<ignition::rndf::Waypoint> &waypoints =
+        lane.Waypoints();
+      for (auto &waypoint : waypoints) {
+        waypoint_positions.push_back(
+          ToGlobalCoordinates(origin, waypoint.Location()));
+      }
+      builder->CreateLaneConnections(segment.Id(),
+        lane.Id(),
+        waypoint_positions);
+    }
+  }
   return builder->Build({rndfInfo->Name()});
 }
 
@@ -191,6 +211,31 @@ const Waypoint* RNDFTBuilder::FindWaypointById(
   return nullptr;
 }
 
+ignition::math::Vector3d RNDFTBuilder::ToGlobalCoordinates(
+  const ignition::math::Vector3d &origin,
+  const ignition::math::SphericalCoordinates &spherical_position) const{
+  const auto build_spherical_coordinates = [] (
+    const double latitude, const double longitude) {
+      return ignition::math::SphericalCoordinates(
+        ignition::math::SphericalCoordinates::EARTH_WGS84,
+        ignition::math::Angle(latitude / 180.0 * M_PI),
+        ignition::math::Angle(longitude / 180.0 * M_PI),
+        0.0,
+        ignition::math::Angle(0.0));
+  };
+
+  const auto &_origin = build_spherical_coordinates(
+    origin.X(), origin.Y());
+
+  const auto &_spherical_position = ignition::math::Vector3d(
+      spherical_position.LatitudeReference().Radian(),
+      spherical_position.LongitudeReference().Radian(),
+      spherical_position.ElevationReference());
+  return _origin.PositionTransform(
+      _spherical_position,
+      ignition::math::SphericalCoordinates::SPHERICAL,
+      ignition::math::SphericalCoordinates::GLOBAL);
+}
 
 
 }  // namespace automotive
