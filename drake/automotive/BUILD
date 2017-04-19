@@ -215,18 +215,6 @@ drake_cc_library(
 )
 
 drake_cc_library(
-    name = "rndf_generator",
-    srcs = ["rndf_generator.cc"],
-    hdrs = ["rndf_generator.h"],
-    deps = [
-        "//drake/automotive/maliput/api",
-        "//drake/automotive/maliput/rndf",
-        "@ignition_math",
-        "@ignition_rndf",
-    ],
-)
-
-drake_cc_library(
     name = "pose_selector",
     srcs = ["pose_selector.cc"],
     hdrs = ["pose_selector.h"],
@@ -397,10 +385,30 @@ drake_cc_binary(
     deps = [
         ":automotive_simulator",
         ":monolane_onramp_merge",
-        ":rndf_generator",
         "//drake/automotive/maliput/dragway",
         "//drake/common:text_logging_gflags",
-        "@ignition_math",
+    ],
+)
+
+drake_cc_binary(
+    name = "automotive_demo_rndf",
+    srcs = [
+        "automotive_rndf.cc",
+        "create_trajectory_params.cc",
+        "create_trajectory_params_rndf.cc",
+        "create_trajectory_params.h",
+        "create_trajectory_params_rndf.h",
+    ],
+    data = [
+        ":models",
+        "//drake/automotive/maliput/rndf:rndfs",
+    ],
+    deps = [
+        ":automotive_simulator",
+        ":monolane_onramp_merge",
+        "//drake/automotive/maliput/dragway",
+        "//drake/automotive/maliput/rndf",
+        "//drake/common:text_logging_gflags",
     ],
 )
 
@@ -476,6 +484,23 @@ py_binary(
         "@lcm//:lcm-logger",
     ],
     main = "automotive_demo.py",
+    deps = [
+        "@lcm//:lcm-python",
+    ],
+)
+
+py_binary(
+    name = "demo_rndf",
+    srcs = ["automotive_demo_rndf.py"],
+    data = [
+        ":automotive_demo_rndf",
+        ":lcm-spy",
+        ":steering_command_driver",
+        "@drake_visualizer//:drake-visualizer",
+        "@lcm//:lcm-logger",
+        "//drake/automotive/maliput/rndf:rndfs",
+    ],
+    main = "automotive_demo_rndf.py",
     deps = [
         "@lcm//:lcm-python",
     ],

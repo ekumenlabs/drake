@@ -115,8 +115,6 @@ class Lane : public api::Lane {
 
   ~Lane() override = default;
 
- protected:
-
  private:
   const api::LaneId do_id() const override { return id_; }
 

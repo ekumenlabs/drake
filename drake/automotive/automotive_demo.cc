@@ -86,6 +86,7 @@ DEFINE_bool(with_stalled_cars, false, "Places a stalled vehicle at the end of "
             "each lane of a dragway. This option is only enabled when the "
             "road is a dragway.");
 
+
 namespace drake {
 
 using maliput::api::Lane;
@@ -104,7 +105,6 @@ enum class RoadNetworkType {
   dragway = 1,
   onramp = 2,
 };
-
 
 std::string MakeChannelName(const std::string& name) {
   const std::string default_prefix{"DRIVING_COMMAND"};
@@ -322,6 +322,7 @@ const maliput::api::RoadGeometry* AddDragway(
           FLAGS_dragway_shoulder_width);
   return simulator->SetRoadGeometry(std::move(road_geometry));
 }
+
 
 // Adds a monolane-based onramp road network to the provided `simulator`.
 const maliput::api::RoadGeometry* AddOnramp(

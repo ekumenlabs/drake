@@ -60,6 +60,10 @@ class DirectedWaypoint {
     (void) static_cast<DirectedWaypoint& (DirectedWaypoint::*)
       (const DirectedWaypoint&)>(&DirectedWaypoint::operator=);
   }
+  static void DRAKE_COPYABLE_DEMAND_COPY_CAN_COMPILE() {
+    (void) static_cast<DirectedWaypoint& (DirectedWaypoint::*)(const DirectedWaypoint&)>
+      (&DirectedWaypoint::operator=);
+  }
 
   DirectedWaypoint(
     const ignition::rndf::UniqueId &id,
@@ -118,10 +122,15 @@ class Connection {
     DRAKE_DEMAND(waypoints_.size() >= 2);
   }
 
-  /// Constructs a spline-segment connection joining @p points[0] to @p points[size-1].
+  /// Constructs a spline-segment connection joining @p points[0] to
+  /// @p points[size-1].
   Connection(const std::string& id,
-      const std::vector<Endpoint>& points)
-      : type_(kSpline), id_(id), start_(points.front()), end_(points.back()), points_(points) {
+    const std::vector<Endpoint>& points) :
+      type_(kSpline),
+      id_(id),
+      start_(points.front()),
+      end_(points.back()),
+      points_(points) {
     DRAKE_DEMAND(points_.size() >= 2);
   }
 
@@ -208,26 +217,9 @@ class Builder {
     const api::LaneEnd::Which end,
     BranchPoint *branch_point);
 
-  void BuildOrUpdateBranchpoints(
-    Connection *connection,
-    Lane *lane,
-    std::map<std::string, BranchPoint*> *branch_point_map,
-    RoadGeometry *road_geometry);
-
   Lane* BuildConnection(
     Junction *junction,
     const Connection *connection);
-
-  std::string BuildName(const uint segment_id,
-    const uint lane_id) const;
-
-  std::string BuildName(const uint segment_id,
-    const uint lane_id,
-    const uint waypoint_id) const;
-
-  Endpoint ConvertIntoEndpoint(
-    const std::tuple<ignition::math::Vector3d,
-      ignition::math::Vector3d> &pose);
 
   api::RBounds lane_bounds_;
   api::RBounds driveable_bounds_;

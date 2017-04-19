@@ -11,8 +11,7 @@ drake_cc_library(
     srcs = [],
     hdrs = [],
     deps = [
-        ":builder",
-        ":lanes",
+        ":loader",
     ],
 )
 
@@ -63,6 +62,18 @@ drake_cc_library(
     ],
     linkopts = [
         "-lignition-math2",
+    ],
+)
+
+drake_cc_library(
+    name = "loader",
+    srcs = ["loader.cc"],
+    hdrs = ["loader.h"],
+    deps = [
+        "//drake/automotive/maliput/api",
+        ":builder",
+        "@ignition_math",
+        "@ignition_rndf",
     ],
 )
 
