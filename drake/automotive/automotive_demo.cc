@@ -91,14 +91,13 @@ DEFINE_bool(with_stalled_cars, false, "Places a stalled vehicle at the end of "
 DEFINE_bool(with_rndf, false, "Loads the rndf road network. Only one road "
             "network can be enabled. Thus, if this option is enabled, no other "
             "road network can be enabled.");
-DEFINE_double(rndf_base_speed, 10, "The speed of the vehicles added to the "
+DEFINE_double(rndf_base_speed, 10.0, "The speed of the vehicles added to the "
               "rndf.");
 DEFINE_double(rndf_delay, 5.0, "The starting time delay.");
 DEFINE_string(lane_names, "",
   "A comma-separated list (e.g. 'lane_1,lane_2,lane_3' that generates a path "
   "for the car to follow.");
-
-DEFINE_bool(build_T, false, "Build RNDF T example. It overrides the RNDF file.");
+DEFINE_string(rndf_file_path, "", "File path of the RNDF file to load.");
 
 namespace drake {
 
@@ -120,7 +119,6 @@ enum class RoadNetworkType {
   rndf = 3
 };
 
-/*
 std::string MakeChannelName(const std::string& name) {
   const std::string default_prefix{"DRIVING_COMMAND"};
   if (name.empty()) {
@@ -128,8 +126,6 @@ std::string MakeChannelName(const std::string& name) {
   }
   return default_prefix + "_" + name;
 }
-*/
-
 
 // Adds a MaliputRailcar to the simulation involving a dragway. It throws a
 // std::runtime_error if there is insufficient lane length for adding the
@@ -324,6 +320,7 @@ void AddFlatTerrain(AutomotiveSimulator<double>*) {
   // drake/multibody/rigid_body_tree_construction.h.
 }
 
+
 // Adds a dragway to the provided `simulator`. The number of lanes, lane width,
 // lane length, and the shoulder width are all user-specifiable via command line
 // flags.
@@ -339,222 +336,16 @@ const maliput::api::RoadGeometry* AddDragway(
   return simulator->SetRoadGeometry(std::move(road_geometry));
 }
 
-// Adds a dragway to the provided `simulator`. The number of lanes, lane width,
-// lane length, and the shoulder width are all user-specifiable via command line
-// flags.
+
+// Adds a rndf sample to the provided `simulator`. The path to follow should
+// be specified by command line flags.
 const maliput::api::RoadGeometry* AddRNDF(
     AutomotiveSimulator<double>* simulator) {
   auto onramp_generator = std::make_unique<RNDFTBuilder>();
-  if (FLAGS_build_T) {
-    return simulator->SetRoadGeometry(
-      onramp_generator->Build());
-  } else {
-  const std::string road_waypoints =
-"1.1.1\t9.999982 65.000912\n"
-"1.1.2\t10.000045 65.000912\n"
-"1.1.3\t10.000841 65.000912\n"
-"1.1.4\t10.000967 65.000912\n"
-"1.1.5\t10.001745 65.000912\n"
-"1.1.6\t10.001871 65.000912\n"
-"1.1.7\t10.002649 65.000912\n"
-"1.1.8\t10.002776 65.000912\n"
-"1.1.9\t10.003571 65.000912\n"
-"1.1.10\t10.003634 65.000912\n"
-
-"2.1.1\t9.999982 65.001824\n"
-"2.1.2\t10.000045 65.001824\n"
-"2.1.3\t10.000841 65.001824\n"
-"2.1.4\t10.000967 65.001824\n"
-"2.1.5\t10.001745 65.001824\n"
-"2.1.6\t10.001871 65.001824\n"
-"2.1.7\t10.002649 65.001824\n"
-"2.1.8\t10.002776 65.001824\n"
-"2.1.9\t10.003571 65.001824\n"
-"2.1.10\t10.003634 65.001824\n"
-
-"3.1.1\t9.999982 65.002736\n"
-"3.1.2\t10.000045 65.002736\n"
-"3.1.3\t10.000841 65.002736\n"
-"3.1.4\t10.000967 65.002736\n"
-"3.1.5\t10.001745 65.002736\n"
-"3.1.6\t10.001871 65.002736\n"
-"3.1.7\t10.002649 65.002736\n"
-"3.1.8\t10.002776 65.002736\n"
-"3.1.9\t10.003571 65.002736\n"
-"3.1.10\t10.003634 65.002736\n"
-
-"4.1.1\t10.000904 64.999982\n"
-"4.1.2\t10.000904 65.000046\n"
-"4.1.3\t10.000904 65.000848\n"
-"4.1.4\t10.000904 65.000976\n"
-"4.1.5\t10.000904 65.001760\n"
-"4.1.6\t10.000904 65.001888\n"
-"4.1.7\t10.000904 65.002672\n"
-"4.1.8\t10.000904 65.002800\n"
-"4.1.9\t10.000904 65.003603\n"
-"4.1.10\t10.000904 65.003667\n"
-
-"5.1.1\t10.001808 64.999982\n"
-"5.1.2\t10.001808 65.000046\n"
-"5.1.3\t10.001808 65.000848\n"
-"5.1.4\t10.001808 65.000976\n"
-"5.1.5\t10.001808 65.001760\n"
-"5.1.6\t10.001808 65.001888\n"
-"5.1.7\t10.001808 65.002672\n"
-"5.1.8\t10.001808 65.002800\n"
-"5.1.9\t10.001808 65.003603\n"
-"5.1.10\t10.001808 65.003667\n"
-
-"6.1.1\t10.002712 64.999982\n"
-"6.1.2\t10.002712 65.000046\n"
-"6.1.3\t10.002712 65.000848\n"
-"6.1.4\t10.002712 65.000976\n"
-"6.1.5\t10.002712 65.001760\n"
-"6.1.6\t10.002712 65.001888\n"
-"6.1.7\t10.002712 65.002672\n"
-"6.1.8\t10.002712 65.002800\n"
-"6.1.9\t10.002712 65.003603\n"
-"6.1.10\t10.002712 65.003667\n"
-
-"7.1.1\t9.999982 64.999982\n"
-"7.1.2\t10.000027 65.000027\n"
-"7.1.3\t10.000859 65.000867\n"
-"7.1.4\t10.000949 65.000957\n"
-"7.1.5\t10.001763 65.001779\n"
-"7.1.6\t10.001853 65.001869\n"
-"7.1.7\t10.002668 65.002691\n"
-"7.1.8\t10.002757 65.002781\n"
-"7.1.9\t10.003590 65.003621\n"
-"7.1.10\t10.003634 65.003667\n"
-
-
-"8.1.1\t10.003634 64.999982\n"
-"8.1.2\t10.003590 65.000027\n"
-"8.1.3\t10.002757 65.000867\n"
-"8.1.4\t10.002668 65.000957\n"
-"8.1.5\t10.001853 65.001779\n"
-"8.1.6\t10.001763 65.001869\n"
-"8.1.7\t10.000949 65.002691\n"
-"8.1.8\t10.000859 65.002781\n"
-"8.1.9\t10.000027 65.003621\n"
-"8.1.10\t9.999982 65.003667\n"
-
-
-"9.1.1\t9.999982 64.999982\n"
-"9.1.2\t9.999982 65.000046\n"
-"9.1.3\t9.999982 65.000848\n"
-"9.1.4\t9.999982 65.001760\n"
-"9.1.5\t9.999982 65.002672\n"
-"9.1.6\t9.999982 65.003603\n"
-"9.1.7\t9.999982 65.003667\n"
-
-
-"10.1.1\t9.999982 65.003667\n"
-"10.1.2\t10.000045 65.003667\n"
-"10.1.3\t10.000967 65.003667\n"
-"10.1.4\t10.001871 65.003667\n"
-"10.1.5\t10.002776 65.003667\n"
-"10.1.6\t10.003571 65.003667\n"
-"10.1.7\t10.003634 65.003667\n"
-
-"11.1.1\t10.003634 65.003667\n"
-"11.1.2\t10.003634 65.003603\n"
-"11.1.3\t10.003634 65.002672\n"
-"11.1.4\t10.003634 65.001760\n"
-"11.1.5\t10.003634 65.000848\n"
-"11.1.6\t10.003634 65.000046\n"
-"11.1.7\t10.003634 64.999982\n"
-
-"12.1.1\t10.003634 64.999982\n"
-"12.1.2\t10.003571 64.999982\n"
-"12.1.3\t10.002776 64.999982\n"
-"12.1.4\t10.001871 64.999982\n"
-"12.1.5\t10.000967 64.999982\n"
-"12.1.6\t10.000045 64.999982\n"
-"12.1.7\t9.999982 64.999982\n";
-
-  const std::string connections =
-"1.1.3 4.1.4\n"
-"1.1.5 5.1.4\n"
-"1.1.7 6.1.4\n"
-
-"2.1.3 4.1.6\n"
-"2.1.5 5.1.6\n"
-
-"2.1.7 6.1.6\n"
-"3.1.3 4.1.8\n"
-
-"3.1.5 5.1.8\n"
-"3.1.7 6.1.8\n"
-"4.1.3 1.1.4\n"
-"4.1.5 2.1.4\n"
-"4.1.7 3.1.4\n"
-
-"5.1.3 1.1.6\n"
-"5.1.5 2.1.6\n"
-
-"5.1.7 3.1.6\n"
-"6.1.3 1.1.8\n"
-
-"6.1.5 2.1.8\n"
-"6.1.7 3.1.8\n"
-
-"2.1.5 7.1.6\n"
-"1.1.3 7.1.4\n"
-"6.1.7 7.1.8\n"
-"7.1.3 1.1.4\n"
-"7.1.3 4.1.4\n"
-"7.1.5 2.1.6\n"
-"7.1.5 5.1.6\n"
-"7.1.7 3.1.8\n"
-"7.1.7 6.1.8\n"
-"3.1.7 7.1.8\n"
-"4.1.3 7.1.4\n"
-"5.1.5 7.1.6\n"
-
-"4.1.7 8.1.8\n"
-"5.1.5 8.1.6\n"
-"6.1.3 8.1.4\n"
-"8.1.3 1.1.8\n"
-"8.1.3 6.1.4\n"
-"8.1.5 2.1.6\n"
-"8.1.5 5.1.6\n"
-"8.1.5 7.1.6\n"
-"8.1.7 3.1.4\n"
-"8.1.7 4.1.8\n"
-"7.1.5 8.1.6\n"
-"3.1.3 8.1.8\n"
-"2.1.5 8.1.6\n"
-"1.1.7 8.1.4\n"
-
-"9.1.3 1.1.2\n"
-"9.1.4 2.1.2\n"
-"9.1.5 3.1.2\n"
-"9.1.6 10.1.2\n"
-"12.1.6 9.1.2\n"
-
-"8.1.9 10.1.2\n"
-"5.1.9 10.1.4\n"
-"4.1.9 10.1.3\n"
-"6.1.9 10.1.5\n"
-"10.1.6 11.1.2\n"
-
-"7.1.9 11.1.2\n"
-"1.1.9 11.1.5\n"
-"2.1.9 11.1.4\n"
-"3.1.9 11.1.3\n"
-"11.1.6 12.1.2\n"
-"11.1.6 8.1.2\n"
-
-"12.1.3 6.1.2\n"
-"12.1.4 5.1.2\n"
-"12.1.5 4.1.2\n"
-"12.1.6 7.1.2\n";
-
   return simulator->SetRoadGeometry(
-    onramp_generator->Build(road_waypoints, connections));
-  }
+    onramp_generator->Build(FLAGS_rndf_file_path));
 }
+
 
 // Adds a monolane-based onramp road network to the provided `simulator`.
 const maliput::api::RoadGeometry* AddOnramp(
@@ -562,6 +353,8 @@ const maliput::api::RoadGeometry* AddOnramp(
   auto onramp_generator = std::make_unique<MonolaneOnrampMerge>();
   return simulator->SetRoadGeometry(onramp_generator->BuildOnramp());
 }
+
+
 // Adds a terrain to the simulated world. The type of terrain added depends on
 // the provided `road_network_type` parameter. A pointer to the road network is
 // returned. A return value of `nullptr` is possible if no road network is

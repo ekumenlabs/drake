@@ -12,6 +12,11 @@
 #include "ignition/math/Vector3.hh"
 #include "ignition/math/SphericalCoordinates.hh"
 #include "ignition/rndf/RNDF.hh"
+#include "ignition/rndf/Segment.hh"
+#include "ignition/rndf/Lane.hh"
+#include "ignition/rndf/Waypoint.hh"
+#include "ignition/rndf/UniqueId.hh"
+#include "ignition/rndf/Exit.hh"
 
 #include "drake/automotive/maliput/api/road_geometry.h"
 #include "drake/automotive/maliput/rndf/builder.h"
@@ -176,41 +181,23 @@ class RNDFTBuilder {
   /// Constructor for the example, using default RoadCharacteristics settings.
   RNDFTBuilder() : RNDFTBuilder(RNDFRoadCharacteristics{}) {}
 
-  /// Implements a T connection example.
-  std::unique_ptr<const maliput::api::RoadGeometry> Build();
-
-  /// Implements a custom RNDF map
-  std::unique_ptr<const maliput::api::RoadGeometry> Build(
-    const std::string &road_waypoints,
-    const std::string &connections);
-
   std::unique_ptr<const maliput::api::RoadGeometry> Build(
     const std::string &file_name);
 
  private:
-  void BuildWaypointMap(
-    const std::string &rndf_description,
-    std::map<uint, std::vector<Waypoint>> &waypoints_map);
 
-  void BuildSegment(
+  ignition::math::Vector3d ToGlobalCoordinates(
+    const ignition::math::Vector3d &origin,
+    const ignition::math::SphericalCoordinates &spherical_position) const;
+
+  void BuildSegments(
     maliput::rndf::Builder &builder,
-    const uint segment_id,
-    const std::vector<Waypoint> &waypoints,
-    const double latitude,
-    const double longitude);
+    const ignition::math::Vector3d &origin,
+    std::vector<ignition::rndf::Segment> &segments) const;
 
-  void BuildConnection(
+  void BuildConnections(
     maliput::rndf::Builder &builder,
-    const Waypoint *exit,
-    const Waypoint *entry);
-
-  void BuildConnectionsTupleList(
-    const std::string &connections,
-    std::vector<std::tuple<std::string, std::string>> &conn_vector);
-
-  const Waypoint* FindWaypointById(
-    const std::map<uint, std::vector<Waypoint>> &waypoints_map,
-    const std::string &wpId);
+    std::vector<ignition::rndf::Segment> &segments) const;
 
   /// Tolerances for monolane's Builder.
   const double linear_tolerance_  = 0.01;
