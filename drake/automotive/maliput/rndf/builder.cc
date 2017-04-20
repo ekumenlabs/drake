@@ -58,9 +58,6 @@ void Builder::CreateLaneConnections(
   spline.AddPoint(ignition::math::Vector3d(points.back().X(), points.back().Y(), 0.),
     ignition::math::Vector3d(end_tangent.X(), end_tangent.Y(), 0.0));
 
-  for (uint i  = 0; i < points.size(); i++) {
-    std::cout << "ID: " << segment_id << " h: " << std::atan2(spline.Tangent(i).Y(), spline.Tangent(i).X()) << " p: " << spline.Point(i) << " t: " << spline.Tangent(i) << std::endl;
-  }
   // We move the spline to connections
   for(uint i = 0; i < (points.size() - 1); i++) {
     // Get the points with their respective tangent.
