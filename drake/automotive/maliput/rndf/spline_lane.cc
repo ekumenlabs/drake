@@ -56,50 +56,16 @@ api::GeoPosition SplineLane::DoToGeoPosition(
   return {xyz.x(), xyz.y(), xyz.z()};
 }
 
-api::Rotation SplineLane::DoGetOrientation(const api::LanePosition& lane_pos) const {
+api::Rotation SplineLane::DoGetOrientation(
+  const api::LanePosition& lane_pos) const {
   // Recover linear parameter p from arc-length position s.
-  const double s = lane_pos.s;
-  // const double r = lane_pos.r;
-  // const double h = lane_pos.h;
-  // Calculate orientation of (s,r,h) basis at (s,0,0).
-  const Rot3 Rabg = Rabg_of_s(s);
-
-  // Calculate s,r basis vectors at (s,r,h)...
-  //const V3 s_hat = s_hat_of_srh(s, r, h, Rabg);
-  // ...and then derive orientation from those basis vectors.
-  //
-  // (s_hat  r_hat  h_hat) is an orthonormal basis, obtained by rotating the
-  // (x_hat  y_hat  z_hat) basis by some R-P-Y rotation; in this case, we know
-  // the value of (s_hat  r_hat  h_hat) (w.r.t. 'xyz' world frame), so we are
-  // trying to recover the roll/pitch/yaw.  Since (x_hat  y_hat  z_hat) is an
-  // identity matrix (e.g., x_hat = column vector (1, 0, 0), etc), then
-  // (s_hat  r_hat  h_hat) equals the R-P-Y matrix itself.
-  // If we define a = alpha = roll, b = beta = pitch, g = gamma = yaw,
-  // then s_hat is the first column of the rotation, r_hat is the second:
-  //   s_hat = (cb * cg, cb * sg, - sb)
-  //   r_hat = (- ca * sg + sa * sb * cg, ca * cg + sa * sb * sg, sa * cb)
-  // We solve the above for a, b, g.
-  /*const double gamma = std::atan2(s_hat.y(),
-                                  s_hat.x());*/
+  const Rot3 Rabg = Rabg_of_s(lane_pos.s);
   return api::Rotation(0.0, 0.0, Rabg.yaw());
 }
 
 api::LanePosition SplineLane::DoEvalMotionDerivatives(
     const api::LanePosition& position,
     const api::IsoLaneVelocity& velocity) const {
-  /*
-  const double s = position.s;
-  const double r = position.r;
-  const double h = position.h;
-
-  const Rot3 R = Rabg_of_s(s);
-  const V3 W_prime = W_prime_of_srh(s, r, h, R);
-
-  // The definition of path-length of a path along σ yields dσ = |∂W/∂p| dp.
-  // Similarly, path-length s along the road at r = 0 is related to the
-  // elevation by ds = p_scale * sqrt(1 + g'^2) dp.  Chaining yields ds/dσ:
-  const double ds_dsigma = p_scale_ / W_prime.norm();
-*/
   return api::LanePosition(velocity.sigma_v,
                            velocity.rho_v,
                            velocity.eta_v);
@@ -173,7 +139,6 @@ V2 SplineLane::xy_of_s(const double s) const {
 V2 SplineLane::xy_dot_of_s(const double s) const {
   // We get here the tangent, which is the first derivative of
   // L --> dL(p) / dp
-  //const auto& tangent = spline_->InterpolateMthDerivative(1, p * spline_->BaseSpline()->ArcLength());
   const auto &point = spline_->InterpolateMthDerivative(1, s);
   return {point.X(), point.Y()};
 }
@@ -196,12 +161,10 @@ double SplineLane::heading_dot_of_s(const double s) const {
   // Where y and x are the components of the L' and, x' and y' are
   // the components of L'' as they are independant.
   const double heading = heading_of_s(s);
-  // const auto first_derivative = spline_->InterpolateMthDerivative(1, p * spline_->BaseSpline()->ArcLength());
-  // const auto second_derivative = spline_->InterpolateMthDerivative(2, p * spline_->BaseSpline()->ArcLength());
   const auto &first_derivative = spline_->InterpolateMthDerivative(1, s);
   const auto &second_derivative = spline_->InterpolateMthDerivative(2, s);
   const double m =
-    ( second_derivative.Y() * first_derivative.X() -
+    (second_derivative.Y() * first_derivative.X() -
       first_derivative.Y() * second_derivative.X() ) /
     (first_derivative.X() * first_derivative.X());
   return (1.0 / (1.0 + heading * heading) * m);

@@ -115,8 +115,6 @@ class Lane : public api::Lane {
 
   ~Lane() override = default;
 
- protected:
-
  private:
   const api::LaneId do_id() const override { return id_; }
 
@@ -153,7 +151,8 @@ class Lane : public api::Lane {
 
   const api::RBounds lane_bounds_;
   const api::RBounds driveable_bounds_;
-protected:
+
+ protected:
   const double p_scale_{};
 };
 
