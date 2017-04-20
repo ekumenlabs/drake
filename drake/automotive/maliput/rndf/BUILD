@@ -35,7 +35,6 @@ drake_cc_library(
         "segment.h",
         "spline_lane.h",
         "spline_helpers.h",
-        "parameters.h"
     ],
     deps = [
         "//drake/automotive/maliput/api",
