@@ -9,7 +9,6 @@
 #include "ignition/math/Spline.hh"
 
 #include "spline_helpers.h"
-#include "parameters.h"
 
 namespace drake {
 namespace maliput {
@@ -33,6 +32,8 @@ class SplineLane : public Lane {
   static double ComputeLength(
     const std::vector<std::tuple<ignition::math::Vector3d,
     ignition::math::Vector3d>> &points);
+
+  static double Tension() { return kTension; }
 
  private:
   api::LanePosition DoToLanePosition(
@@ -61,8 +62,10 @@ class SplineLane : public Lane {
 
   double module_p(const double _p) const;
 
-  // ignition::math::Spline spline_;
   std::unique_ptr<ArcLengthParameterizedSpline> spline_;
+
+  static const double kSplinesSamples;
+  static const double kTension;
 };
 
 }  // namespace rndf
