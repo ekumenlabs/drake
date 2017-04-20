@@ -10,9 +10,9 @@
 #include "drake/automotive/gen/maliput_railcar_params.h"
 #include "drake/automotive/maliput/api/lane_data.h"
 #include "drake/automotive/maliput/dragway/road_geometry.h"
+#include "drake/automotive/maliput/rndf/loader.h"
 #include "drake/automotive/maliput/rndf/road_geometry.h"
 #include "drake/automotive/monolane_onramp_merge.h"
-#include "drake/automotive/rndf_generator.h"
 #include "drake/common/drake_path.h"
 #include "drake/common/text_logging_gflags.h"
 
@@ -338,9 +338,9 @@ const maliput::api::RoadGeometry* AddDragway(
 // be specified by command line flags.
 const maliput::api::RoadGeometry* AddRNDF(
     AutomotiveSimulator<double>* simulator) {
-  auto onramp_generator = std::make_unique<RNDFTBuilder>();
+  auto rndf_loader = std::make_unique<drake::maliput::rndf::Loader>();
   return simulator->SetRoadGeometry(
-    onramp_generator->Build(FLAGS_rndf_file_path));
+    rndf_loader->LoadFile(FLAGS_rndf_file_path));
 }
 
 

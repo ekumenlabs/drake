@@ -1,14 +1,12 @@
-#include "drake/automotive/rndf_generator.h"
-
+#include "drake/automotive/maliput/rndf/loader.h"
 #include "drake/automotive/maliput/api/road_geometry.h"
 
 namespace drake {
-namespace automotive {
-
-namespace rndf = maliput::rndf;
+namespace maliput {
+namespace rndf {
 
 std::unique_ptr<const maliput::api::RoadGeometry>
-RNDFTBuilder::Build(const std::string &file_name) {
+Loader::LoadFile(const std::string &file_name) {
   std::unique_ptr<maliput::rndf::Builder> builder =
     std::make_unique<maliput::rndf::Builder>(
       rc_.lane_bounds,
@@ -39,7 +37,7 @@ RNDFTBuilder::Build(const std::string &file_name) {
   return builder->Build({rndfInfo->Name()});
 }
 
-void RNDFTBuilder::BuildSegments(
+void Loader::BuildSegments(
   maliput::rndf::Builder &builder,
   const ignition::math::Vector3d &origin,
   const std::vector<ignition::rndf::Segment> &segments) const{
@@ -57,7 +55,7 @@ void RNDFTBuilder::BuildSegments(
   }
 }
 
-void RNDFTBuilder::BuildConnections(
+void Loader::BuildConnections(
   maliput::rndf::Builder &builder,
   const std::vector<ignition::rndf::Segment> &segments) const {
   const auto unique_id_to_str = [] (
@@ -79,7 +77,7 @@ void RNDFTBuilder::BuildConnections(
   }
 }
 
-ignition::math::Vector3d RNDFTBuilder::ToGlobalCoordinates(
+ignition::math::Vector3d Loader::ToGlobalCoordinates(
   const ignition::math::Vector3d &origin,
   const ignition::math::SphericalCoordinates &spherical_position) const{
   const auto build_spherical_coordinates = [] (
@@ -105,6 +103,6 @@ ignition::math::Vector3d RNDFTBuilder::ToGlobalCoordinates(
       ignition::math::SphericalCoordinates::GLOBAL);
 }
 
-
-}  // namespace automotive
-}  // namespace drake
+} // namespace rndf
+} // namespace automotive
+} // namespace drake
