@@ -24,14 +24,15 @@
 #include "drake/common/drake_assert.h"
 
 namespace drake {
-namespace automotive {
+namespace maliput {
+namespace rndf {
 
-struct RNDFRoadCharacteristics {
+struct RoadCharacteristics {
   /// Constructor for using default road geometries.
-  RNDFRoadCharacteristics() = default;
+  RoadCharacteristics() = default;
 
   /// Constructor for custom road geometries.
-  RNDFRoadCharacteristics(const double lw, const double dw)
+  RoadCharacteristics(const double lw, const double dw)
       : lane_width(lw), driveable_width(dw) {}
 
   const double lane_width{4.};
@@ -42,18 +43,18 @@ struct RNDFRoadCharacteristics {
                                                driveable_width / 2.};
 };
 
-class RNDFTBuilder {
+class Loader {
  public:
-  DRAKE_NO_COPY_NO_MOVE_NO_ASSIGN(RNDFTBuilder)
+  DRAKE_NO_COPY_NO_MOVE_NO_ASSIGN(Loader)
 
   /// Constructor for the example.  The user supplies @p rc, a
   /// RoadCharacteristics structure that aggregates the road boundary data.
-  explicit RNDFTBuilder(const RNDFRoadCharacteristics& rc) : rc_(rc) {}
+  explicit Loader(const RoadCharacteristics& rc) : rc_(rc) {}
 
   /// Constructor for the example, using default RoadCharacteristics settings.
-  RNDFTBuilder() : RNDFTBuilder(RNDFRoadCharacteristics{}) {}
+  Loader() : Loader(RoadCharacteristics{}) {}
 
-  std::unique_ptr<const maliput::api::RoadGeometry> Build(
+  std::unique_ptr<const maliput::api::RoadGeometry> LoadFile(
     const std::string &file_name);
 
  private:
@@ -78,8 +79,9 @@ class RNDFTBuilder {
   // https://bitbucket.org/ekumen/terminus-simulation/issues/119
   const double angular_tolerance_ = 2.0 * M_PI;
 
-  const RNDFRoadCharacteristics rc_;
+  const RoadCharacteristics rc_;
 };
 
+}  // namespace rndf
 }  // namespace automotive
 }  // namespace drake
