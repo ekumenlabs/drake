@@ -20,10 +20,20 @@ RNDFTBuilder::Build(const std::string &file_name) {
     std::make_unique<ignition::rndf::RNDF>(file_name);
   DRAKE_DEMAND(rndfInfo->Valid());
 
-  const ignition::math::Vector3d origin(10.0, 65.0, 0.0);
-
   std::vector<ignition::rndf::Segment> &segments =
     rndfInfo->Segments();
+
+  // I get the first waypoint location and build the map
+  // from it.
+  DRAKE_DEMAND(segments.size() > 0);
+  DRAKE_DEMAND(segments[0].Lanes().size() > 0);
+  DRAKE_DEMAND(segments[0].Lanes()[0].Waypoints().size() > 0);
+  const auto &location = segments[0].Lanes()[0].Waypoints()[0].
+    Location();
+  const ignition::math::Vector3d origin(
+    location.LatitudeReference().Degree(),
+    location.LongitudeReference().Degree(),
+    0.0);
 
   BuildSegments(*builder, origin, segments);
   BuildConnections(*builder, segments);

@@ -1,5 +1,5 @@
 #pragma once
 
-#define	SPLINE_TENSION 0.9
+#define	SPLINE_TENSION 0.8
 
 

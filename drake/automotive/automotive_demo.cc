@@ -70,6 +70,7 @@ DEFINE_string(lane_names, "",
   "for the car to follow.");
 DEFINE_string(rndf_file_path, "", "File path of the RNDF file to load.");
 
+
 namespace drake {
 
 using maliput::api::Lane;
