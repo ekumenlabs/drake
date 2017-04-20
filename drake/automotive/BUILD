@@ -186,18 +186,6 @@ drake_cc_library(
 )
 
 drake_cc_library(
-    name = "rndf_generator",
-    srcs = ["rndf_generator.cc"],
-    hdrs = ["rndf_generator.h"],
-    deps = [
-        "//drake/automotive/maliput/api",
-        "//drake/automotive/maliput/rndf",
-        "@ignition_math",
-        "@ignition_rndf",
-    ],
-)
-
-drake_cc_library(
     name = "pose_selector",
     srcs = ["pose_selector.cc"],
     hdrs = ["pose_selector.h"],
@@ -334,7 +322,7 @@ drake_cc_binary(
     deps = [
         ":automotive_simulator",
         ":monolane_onramp_merge",
-        ":rndf_generator",
+        "//drake/automotive/maliput/rndf",
         "//drake/automotive/maliput/dragway",
         "//drake/common:text_logging_gflags",
     ],
