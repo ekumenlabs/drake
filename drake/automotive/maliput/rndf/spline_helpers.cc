@@ -29,9 +29,18 @@ void InverseArcLengthInterpolator::Fit(const ignition::math::Spline &_spline)
 double InverseArcLengthInterpolator::InterpolateMthDerivative(
     const int _mth, const double _s) const
 {
+
   double __s = std::max(this->s_t_.front(), _s);
   __s = std::min(this->s_t_.back(), __s);
 
+  /*
+  if (!(this->s_t_.back() >= _s)){
+    std::cout.precision(20);
+    std::cout << "mth: " << _mth << std::endl;
+    std::cout << "_s: " << _s << " this->s_t_.back(): " << this->s_t_.back() << std::endl;
+  }
+  double __s = _s;
+  */
   // Make sure that the derivative order is a positive integer.
   DRAKE_THROW_UNLESS(_mth >= 0);
   // Make sure that the arc length requested is not below
