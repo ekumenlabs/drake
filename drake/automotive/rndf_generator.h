@@ -73,8 +73,8 @@ class RNDFTBuilder {
 
   /// Tolerances for monolane's Builder.
   const double linear_tolerance_  = 0.01;
-  const double angular_tolerance_ = 2.0 * M_PI;
-  //const double angular_tolerance_ = 0.01 * M_PI;
+  //const double angular_tolerance_ = 2.0 * M_PI;
+  const double angular_tolerance_ = 0.01 * M_PI;
 
   const RNDFRoadCharacteristics rc_;
 };

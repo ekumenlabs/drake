@@ -40,23 +40,16 @@ void Builder::CreateLaneConnections(
   DRAKE_DEMAND(points.size() >= 2);
   // Build the base name
   const auto &base_name = BuildName(segment_id, lane_id);
-  // We first get the initial and final tangents from the
-  // heading of the initial and last point.
-  const auto &initial_tangent = (points[1] - points[0]).Normalize()/** 0.5*/;
-  const auto &end_tangent = (points.back() - points[points.size() - 2]).Normalize()/** 0.5*/;
 
   // We generate the spline
   ignition::math::Spline spline;
   spline.AutoCalculate(true);
-  spline.Tension(SPLINE_TENSION);
+  spline.Tension(SplineLane::Tension());
 
-  spline.AddPoint(ignition::math::Vector3d(points.front().X(), points.front().Y(), 0.),
-    ignition::math::Vector3d(initial_tangent.X(), initial_tangent.Y(), 0.0));
-  for(uint i = 1; i < points.size() - 1; i++) {
-    spline.AddPoint(ignition::math::Vector3d(points[i].X(), points[i].Y(), 0.));
+  for(uint i = 0; i < points.size(); i++) {
+    spline.AddPoint(ignition::math::Vector3d(
+      points[i].X(), points[i].Y(), 0.));
   }
-  spline.AddPoint(ignition::math::Vector3d(points.back().X(), points.back().Y(), 0.),
-    ignition::math::Vector3d(end_tangent.X(), end_tangent.Y(), 0.0));
 
   // We move the spline to connections
   for(uint i = 0; i < (points.size() - 1); i++) {
