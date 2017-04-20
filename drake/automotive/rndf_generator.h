@@ -65,11 +65,11 @@ class RNDFTBuilder {
   void BuildSegments(
     maliput::rndf::Builder &builder,
     const ignition::math::Vector3d &origin,
-    std::vector<ignition::rndf::Segment> &segments) const;
+    const std::vector<ignition::rndf::Segment> &segments) const;
 
   void BuildConnections(
     maliput::rndf::Builder &builder,
-    std::vector<ignition::rndf::Segment> &segments) const;
+    const std::vector<ignition::rndf::Segment> &segments) const;
 
   /// Tolerances for monolane's Builder.
   const double linear_tolerance_  = 0.01;

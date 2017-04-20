@@ -20,9 +20,7 @@ RNDFTBuilder::Build(const std::string &file_name) {
     std::make_unique<ignition::rndf::RNDF>(file_name);
   DRAKE_DEMAND(rndfInfo->Valid());
 
-  std::vector<ignition::rndf::Segment> &segments =
-    rndfInfo->Segments();
-
+  const auto &segments = rndfInfo->Segments();
   // I get the first waypoint location and build the map
   // from it.
   DRAKE_DEMAND(segments.size() > 0);
@@ -44,15 +42,11 @@ RNDFTBuilder::Build(const std::string &file_name) {
 void RNDFTBuilder::BuildSegments(
   maliput::rndf::Builder &builder,
   const ignition::math::Vector3d &origin,
-  std::vector<ignition::rndf::Segment> &segments) const{
-  for (auto &segment : segments) {
-    std::vector<ignition::rndf::Lane> &lanes =
-      segment.Lanes();
-    for (auto &lane : lanes) {
+  const std::vector<ignition::rndf::Segment> &segments) const{
+  for (const auto &segment : segments) {
+    for (const auto &lane : segment.Lanes()) {
       std::vector<ignition::math::Vector3d> waypoint_positions;
-      std::vector<ignition::rndf::Waypoint> &waypoints =
-        lane.Waypoints();
-      for (auto &waypoint : waypoints) {
+      for (auto &waypoint : lane.Waypoints()) {
         waypoint_positions.push_back(
           ToGlobalCoordinates(origin, waypoint.Location()));
       }
@@ -65,22 +59,16 @@ void RNDFTBuilder::BuildSegments(
 
 void RNDFTBuilder::BuildConnections(
   maliput::rndf::Builder &builder,
-  std::vector<ignition::rndf::Segment> &segments) const {
-
+  const std::vector<ignition::rndf::Segment> &segments) const {
   const auto unique_id_to_str = [] (
     const ignition::rndf::UniqueId &id) {
     return std::to_string(id.X()) + "_" +
       std::to_string(id.Y()) + "_" +
       std::to_string(id.Z());
   };
-  for (auto &segment : segments) {
-    std::vector<ignition::rndf::Lane> &lanes =
-      segment.Lanes();
-    for (auto &lane : lanes) {
-      std::vector<ignition::math::Vector3d> waypoint_positions;
-      std::vector<ignition::rndf::Exit> &exits =
-        lane.Exits();
-      for (auto &exit : exits) {
+  for (const auto &segment : segments) {
+    for (const auto &lane : segment.Lanes()) {
+      for (const auto &exit : lane.Exits()) {
         const auto &exit_id = exit.ExitId();
         const auto &entry_id = exit.EntryId();
         builder.CreateLaneToLaneConnection(
