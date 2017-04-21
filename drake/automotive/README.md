@@ -67,7 +67,7 @@ The following demos are available:
  based on waypoint connections as shown below:
 
    ```
-   bazel run drake/automotive:demo -- \
+   bazel run drake/automotive:demo_rndf -- \
       -lane_names=1_1_1-1_1_2,1_1_2-1_1_3,1_1_3-7_1_4,7_1_4-7_1_5,7_1_5-2_1_6,2_1_6-2_1_7,2_1_7-6_1_6,6_1_7-3_1_8,3_1_8-3_1_9 \
       -rndf_base_speed=7 \
       -rndf_delay=10 \
@@ -77,7 +77,7 @@ The following demos are available:
  If you want to run the Prius over the Darpa map, you can do the following:
 
    ```
-   bazel run drake/automotive:demo -- -lane_names=1_2_1-1_2_2,1_2_2-1_2_3,\
+   bazel run drake/automotive:demo_rndf -- -lane_names=1_2_1-1_2_2,1_2_2-1_2_3,\
       1_2_3-1_2_4,1_2_4-3_1_1,3_1_1-3_1_2,3_1_2-3_1_3,3_1_3-3_1_4,3_1_4-3_1_5,\
       3_1_5-3_1_6,3_1_6-3_1_7,3_1_7-10_2_3,10_2_3-10_2_4,10_2_4-4_2_1,4_2_1-4_2_2,\
     4_2_2-4_2_3,4_2_3-4_2_4,4_2_4-4_2_5,4_2_5-4_2_6,4_2_6-4_2_7 \
