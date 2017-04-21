@@ -7,9 +7,12 @@
 
 #include "drake/automotive/automotive_simulator.h"
 #include "drake/automotive/create_trajectory_params.h"
+#include "drake/automotive/create_trajectory_params_rndf.h"
 #include "drake/automotive/gen/maliput_railcar_params.h"
 #include "drake/automotive/maliput/api/lane_data.h"
 #include "drake/automotive/maliput/dragway/road_geometry.h"
+#include "drake/automotive/maliput/rndf/loader.h"
+#include "drake/automotive/maliput/rndf/road_geometry.h"
 #include "drake/automotive/monolane_onramp_merge.h"
 #include "drake/common/drake_path.h"
 #include "drake/common/text_logging_gflags.h"
@@ -81,6 +84,14 @@ DEFINE_bool(with_stalled_cars, false, "Places a stalled vehicle at the end of "
             "each lane of a dragway. This option is only enabled when the "
             "road is a dragway.");
 
+DEFINE_double(rndf_base_speed, 10.0, "The speed of the vehicles added to the "
+              "rndf.");
+DEFINE_double(rndf_delay, 5.0, "The starting time delay.");
+DEFINE_string(lane_names, "",
+  "A comma-separated list (e.g. 'lane_1,lane_2,lane_3' that generates a path "
+  "for the car to follow.");
+DEFINE_string(rndf_file_path, "", "File path of the RNDF file to load.");
+
 
 namespace drake {
 
@@ -98,6 +109,7 @@ enum class RoadNetworkType {
   flat = 0,
   dragway = 1,
   onramp = 2,
+  rndf = 3
 };
 
 std::string MakeChannelName(const std::string& name) {
@@ -237,6 +249,34 @@ void AddVehicles(RoadNetworkType road_network_type,
             "StalledCarChannel" + std::to_string(i), state);
       }
     }
+  } else if (road_network_type == RoadNetworkType::rndf) {
+    DRAKE_DEMAND(road_geometry != nullptr);
+
+    const maliput::rndf::RoadGeometry* rndf_road_geometry =
+        dynamic_cast<const maliput::rndf::RoadGeometry*>(road_geometry);
+    DRAKE_DEMAND(rndf_road_geometry != nullptr);
+
+    if (!FLAGS_lane_names.empty()) {
+      std::vector<std::string> lane_name_paths;
+      std::istringstream simple_lane_name_stream(FLAGS_lane_names);
+      std::string lane_name;
+      while (getline(simple_lane_name_stream, lane_name, ',')) {
+        lane_name_paths.push_back(lane_name);
+      }
+      const auto& params = CreateTrajectoryParamsForRndf(
+        *rndf_road_geometry,
+        lane_name_paths,
+        FLAGS_rndf_base_speed,
+        FLAGS_rndf_delay);
+
+      const auto &curve = std::get<0>(params);
+      if (curve.path_length() != 0) {
+        simulator->AddPriusTrajectoryCar("RNDFCar",
+          std::get<0>(params),
+          std::get<1>(params),
+          std::get<2>(params));
+      }
+    }
   } else if (road_network_type == RoadNetworkType::onramp) {
     DRAKE_DEMAND(road_geometry != nullptr);
     for (int i = 0; i < FLAGS_num_maliput_railcar; ++i) {
@@ -298,6 +338,16 @@ const maliput::api::RoadGeometry* AddDragway(
 }
 
 
+// Adds a rndf sample to the provided `simulator`. The path to follow should
+// be specified by command line flags.
+const maliput::api::RoadGeometry* AddRNDF(
+    AutomotiveSimulator<double>* simulator) {
+  auto rndf_loader = std::make_unique<drake::maliput::rndf::Loader>();
+  return simulator->SetRoadGeometry(
+    rndf_loader->LoadFile(FLAGS_rndf_file_path));
+}
+
+
 // Adds a monolane-based onramp road network to the provided `simulator`.
 const maliput::api::RoadGeometry* AddOnramp(
     AutomotiveSimulator<double>* simulator) {
@@ -323,6 +373,10 @@ const maliput::api::RoadGeometry* AddTerrain(RoadNetworkType road_network_type,
       road_geometry = AddDragway(simulator);
       break;
     }
+    case RoadNetworkType::rndf: {
+      road_geometry = AddRNDF(simulator);
+      break;
+    }
     case RoadNetworkType::onramp: {
       road_geometry = AddOnramp(simulator);
       break;
@@ -337,12 +391,15 @@ RoadNetworkType DetermineRoadNetworkType() {
   int num_environments_selected{0};
   if (FLAGS_with_onramp) ++num_environments_selected;
   if (FLAGS_num_dragway_lanes) ++num_environments_selected;
+  if (!FLAGS_rndf_file_path.empty()) ++num_environments_selected;
   if (num_environments_selected > 1) {
     throw std::runtime_error("ERROR: More than one road network selected. Only "
         "one road network can be selected at a time.");
   }
 
-  if (FLAGS_num_dragway_lanes > 0) {
+  if (!FLAGS_rndf_file_path.empty()) {
+    return RoadNetworkType::rndf;
+  } else if (FLAGS_num_dragway_lanes > 0) {
     return RoadNetworkType::dragway;
   } else if (FLAGS_with_onramp) {
     return RoadNetworkType::onramp;
