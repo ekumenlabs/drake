@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <vector>
+#include <utility>
 
 #include "ignition/math/Spline.hh"
 #include "ignition/math/Vector3.hh"
@@ -45,8 +46,8 @@ class InverseArcLengthInterpolator {
                                   const double _s) const;
 
  private:
-  std::vector<double> s_t_; ///< Arc length function s(t) as a table.
-  double dt_; ///< Step value in the independent variable t.
+  std::vector<double> s_t_;  ///< Arc length function s(t) as a table.
+  double dt_;  ///< Step value in the independent variable t.
 };
 
 /// An extension for ignition::math::Splines that reparameterizes
@@ -62,7 +63,7 @@ class ArcLengthParameterizedSpline {
   /// the amount of segments to be used for piecewise interpolation.
   /// @throws whenever arguments constrains are not satisfied.
   explicit ArcLengthParameterizedSpline(
-    std::unique_ptr<ignition::math::Spline>& _spline,
+    const std::unique_ptr<ignition::math::Spline>& _spline,
     const int _num_of_segments);
 
   /// Interpolates @f$ Q(s) @f$, that is, the spline parameterized
@@ -82,8 +83,8 @@ class ArcLengthParameterizedSpline {
   }
 
  private:
-  std::unique_ptr<ignition::math::Spline> q_t_; ///< Parameterized curve Q(t).
-  InverseArcLengthInterpolator t_s_; ///< Inverse arc length function t(s).
+  std::unique_ptr<ignition::math::Spline> q_t_;  ///< Parameterized curve Q(t).
+  InverseArcLengthInterpolator t_s_;  ///< Inverse arc length function t(s).
 };
 
 }  // namespace rndf

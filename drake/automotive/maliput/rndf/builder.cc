@@ -46,15 +46,13 @@ void Builder::CreateLaneConnections(
   spline.AutoCalculate(true);
   spline.Tension(SplineLane::Tension());
 
-  for(uint i = 0; i < points.size(); i++) {
-    spline.AddPoint(ignition::math::Vector3d(
-      points[i].X(), points[i].Y(), 0.));
+  for (const auto &point : points) {
+    spline.AddPoint(ignition::math::Vector3d(point.X(), point.Y(), 0.));
   }
 
   // We move the spline to connections
-  for(uint i = 0; i < (points.size() - 1); i++) {
+  for (uint i = 0; i < (points.size() - 1); i++) {
     // Get the points with their respective tangent.
-
     const auto init_pose =
       std::make_tuple(spline.Point(i), spline.Tangent(i));
     const auto end_pose =
@@ -195,9 +193,10 @@ Lane* Builder::BuildConnection(
       for (const auto& endpoint : conn->points()) {
         const auto &point =
           ignition::math::Vector3d(endpoint.xy().x(), endpoint.xy().y(), 0.);
-        const auto &tangent =
-          ignition::math::Vector3d(std::cos(endpoint.xy().heading()), std::sin(endpoint.xy().heading()), 0.).Normalize() *
-          endpoint.xy().heading_mod();
+        const auto &tangent = ignition::math::Vector3d(
+          std::cos(endpoint.xy().heading()),
+          std::sin(endpoint.xy().heading()), 0.).Normalize() *
+            endpoint.xy().heading_mod();
         points_tangents.push_back(std::make_tuple(point, tangent));
       }
       lane = segment->NewSplineLane(lane_id,

@@ -7,12 +7,11 @@ namespace rndf {
 
 std::unique_ptr<const maliput::api::RoadGeometry>
 Loader::LoadFile(const std::string &file_name) {
-  std::unique_ptr<maliput::rndf::Builder> builder =
-    std::make_unique<maliput::rndf::Builder>(
-      rc_.lane_bounds,
-      rc_.driveable_bounds,
-      linear_tolerance_,
-      angular_tolerance_);
+  builder = std::make_unique<maliput::rndf::Builder>(
+    rc_.lane_bounds,
+    rc_.driveable_bounds,
+    linear_tolerance_,
+    angular_tolerance_);
 
   std::unique_ptr<ignition::rndf::RNDF> rndfInfo =
     std::make_unique<ignition::rndf::RNDF>(file_name);
@@ -31,16 +30,15 @@ Loader::LoadFile(const std::string &file_name) {
     location.LongitudeReference().Degree(),
     0.0);
 
-  BuildSegments(*builder, origin, segments);
-  BuildConnections(*builder, segments);
+  BuildSegments(origin, segments);
+  BuildConnections(segments);
 
   return builder->Build({rndfInfo->Name()});
 }
 
 void Loader::BuildSegments(
-  maliput::rndf::Builder &builder,
   const ignition::math::Vector3d &origin,
-  const std::vector<ignition::rndf::Segment> &segments) const{
+  const std::vector<ignition::rndf::Segment> &segments) const {
   for (const auto &segment : segments) {
     for (const auto &lane : segment.Lanes()) {
       std::vector<ignition::math::Vector3d> waypoint_positions;
@@ -56,7 +54,6 @@ void Loader::BuildSegments(
 }
 
 void Loader::BuildConnections(
-  maliput::rndf::Builder &builder,
   const std::vector<ignition::rndf::Segment> &segments) const {
   const auto unique_id_to_str = [] (
     const ignition::rndf::UniqueId &id) {
@@ -79,7 +76,7 @@ void Loader::BuildConnections(
 
 ignition::math::Vector3d Loader::ToGlobalCoordinates(
   const ignition::math::Vector3d &origin,
-  const ignition::math::SphericalCoordinates &spherical_position) const{
+  const ignition::math::SphericalCoordinates &spherical_position) const {
   const auto build_spherical_coordinates = [] (
     const double latitude, const double longitude) {
       return ignition::math::SphericalCoordinates(
@@ -103,6 +100,6 @@ ignition::math::Vector3d Loader::ToGlobalCoordinates(
       ignition::math::SphericalCoordinates::GLOBAL);
 }
 
-} // namespace rndf
-} // namespace automotive
-} // namespace drake
+}  // namespace rndf
+}  // namespace maliput
+}  // namespace drake

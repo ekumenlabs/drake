@@ -1,14 +1,18 @@
 #pragma once
 
 #include <cmath>
+#include <memory>
+#include <tuple>
+#include <vector>
+#include <utility>
 
 #include "drake/automotive/maliput/rndf/lane.h"
+#include "drake/automotive/maliput/rndf/spline_helpers.h"
 #include "drake/common/drake_assert.h"
 #include "drake/common/drake_copyable.h"
 
 #include "ignition/math/Spline.hh"
 
-#include "spline_helpers.h"
 
 namespace drake {
 namespace maliput {
@@ -58,7 +62,9 @@ class SplineLane : public Lane {
   V3 W_prime_of_srh(const double s, const double r, const double h,
                         const Rot3& Rabg) const;
 
-  double do_length() const override { return spline_->BaseSpline()->ArcLength(); }
+  double do_length() const override {
+    return spline_->BaseSpline()->ArcLength();
+  }
 
   double module_p(const double _p) const;
 
