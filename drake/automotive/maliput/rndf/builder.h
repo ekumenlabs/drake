@@ -183,10 +183,15 @@ class Connection {
   enum Type { kSpline };
 
 
-  /// Constructs a spline-segment connection joining @p points[0] to @p points[size-1].
+  /// Constructs a spline-segment connection joining @p points[0] to
+  /// @p points[size-1].
   Connection(const std::string& id,
-      const std::vector<Endpoint>& points)
-      : type_(kSpline), id_(id), start_(points.front()), end_(points.back()), points_(points) {
+    const std::vector<Endpoint>& points) :
+      type_(kSpline),
+      id_(id),
+      start_(points.front()),
+      end_(points.back()),
+      points_(points) {
     DRAKE_DEMAND(points_.size() >= 2);
   }
 

@@ -255,7 +255,7 @@ void AddVehicles(RoadNetworkType road_network_type,
         dynamic_cast<const maliput::rndf::RoadGeometry*>(road_geometry);
     DRAKE_DEMAND(rndf_road_geometry != nullptr);
 
-    if (!FLAGS_lane_names.empty()){
+    if (!FLAGS_lane_names.empty()) {
       std::vector<std::string> lane_name_paths;
       std::istringstream simple_lane_name_stream(FLAGS_lane_names);
       std::string lane_name;
@@ -263,7 +263,10 @@ void AddVehicles(RoadNetworkType road_network_type,
         lane_name_paths.push_back(lane_name);
       }
       const auto& params = CreateTrajectoryParamsForRndf(
-          *rndf_road_geometry, lane_name_paths, FLAGS_rndf_base_speed, FLAGS_rndf_delay);
+        *rndf_road_geometry,
+        lane_name_paths,
+        FLAGS_rndf_base_speed,
+        FLAGS_rndf_delay);
 
       const auto &curve = std::get<0>(params);
       if (curve.path_length() != 0) {

@@ -58,18 +58,15 @@ class Loader {
     const std::string &file_name);
 
  private:
-
   ignition::math::Vector3d ToGlobalCoordinates(
     const ignition::math::Vector3d &origin,
     const ignition::math::SphericalCoordinates &spherical_position) const;
 
   void BuildSegments(
-    maliput::rndf::Builder &builder,
     const ignition::math::Vector3d &origin,
     const std::vector<ignition::rndf::Segment> &segments) const;
 
   void BuildConnections(
-    maliput::rndf::Builder &builder,
     const std::vector<ignition::rndf::Segment> &segments) const;
 
   /// Tolerances for monolane's Builder.
@@ -80,8 +77,10 @@ class Loader {
   const double angular_tolerance_ = 2.0 * M_PI;
 
   const RoadCharacteristics rc_;
+
+  std::unique_ptr<maliput::rndf::Builder> builder;
 };
 
 }  // namespace rndf
-}  // namespace automotive
+}  // namespace maliput
 }  // namespace drake
