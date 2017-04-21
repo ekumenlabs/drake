@@ -46,7 +46,7 @@ void Loader::BuildSegments(
         waypoint_positions.push_back(
           ToGlobalCoordinates(origin, waypoint.Location()));
       }
-      builder.CreateLaneConnections(segment.Id(),
+      builder->CreateLaneConnections(segment.Id(),
         lane.Id(),
         waypoint_positions);
     }
@@ -66,7 +66,7 @@ void Loader::BuildConnections(
       for (const auto &exit : lane.Exits()) {
         const auto &exit_id = exit.ExitId();
         const auto &entry_id = exit.EntryId();
-        builder.CreateLaneToLaneConnection(
+        builder->CreateLaneToLaneConnection(
           unique_id_to_str(exit_id),
           unique_id_to_str(entry_id));
       }
