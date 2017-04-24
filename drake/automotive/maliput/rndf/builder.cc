@@ -25,18 +25,65 @@ Builder::Builder(const api::RBounds& lane_bounds,
   DRAKE_DEMAND(lane_bounds_.r_max <= driveable_bounds_.r_max);
 }
 
-const Connection* Builder::Connect(
-      const std::string& id,
-      const std::vector<Endpoint> &points) {
-  connections_.push_back(std::make_unique<Connection>(
-    id, points));
-  return connections_.back().get();
+void Builder::CreateLane(
+  const api::RBounds& lane_bounds,
+  const api::RBounds& driveable_bounds,
+  const std::vector<DirectedWaypoint> &control_points) {
+  DRAKE_ABORT();
 }
 
+void Builder::CreateConnection(
+  const api::RBounds& lane_bounds,
+  const api::RBounds& driveable_bounds,
+  const ignition::rndf::UniqueId &exit,
+  const ignition::rndf::UniqueId &end) {
+  DRAKE_ABORT();
+}
+
+/*
 void Builder::CreateLaneConnections(
   const uint segment_id,
   const uint lane_id,
   const std::vector<ignition::math::Vector3d> &points) {
+
+  // DRAKE_DEMAND(points.size() >= 2);
+  // // Build the base name
+  // const auto &base_name = BuildName(segment_id, lane_id);
+
+  // // We generate the spline
+  // ignition::math::Spline spline;
+  // spline.AutoCalculate(true);
+  // spline.Tension(SplineLane::Tension());
+
+  // for (const auto &point : points) {
+  //   spline.AddPoint(ignition::math::Vector3d(point.X(), point.Y(), 0.));
+  // }
+
+  // // We move the spline to connections
+  // for (uint i = 0; i < (points.size() - 1); i++) {
+  //   // Get the points with their respective tangent.
+  //   const auto init_pose =
+  //     std::make_tuple(spline.Point(i), spline.Tangent(i));
+  //   const auto end_pose =
+  //     std::make_tuple(spline.Point(i + 1), spline.Tangent(i + 1));
+  //   // Generate the name for the new connection
+  //   const auto &name = base_name + std::to_string(i + 1) +
+  //     "-" + base_name + std::to_string(i + 2);
+  //   // Add the waypoints to the map so as to use them later
+  //   // for connections
+  //   waypoints[BuildName(segment_id, lane_id, i + 1)] = init_pose;
+  //   waypoints[BuildName(segment_id, lane_id, i + 2)] = end_pose;
+
+  //   // Convert those points into endpoints
+  //   std::vector<Endpoint> endpoints;
+  //   endpoints.push_back(ConvertIntoEndpoint(init_pose));
+  //   endpoints.push_back(ConvertIntoEndpoint(end_pose));
+
+  //   // Create a connection
+  //   Connect(name, endpoints);
+  // }
+
+
   DRAKE_DEMAND(points.size() >= 2);
   // Build the base name
   const auto &base_name = BuildName(segment_id, lane_id);
@@ -52,29 +99,39 @@ void Builder::CreateLaneConnections(
 
   // We move the spline to connections
   for (uint i = 0; i < (points.size() - 1); i++) {
-    // Get the points with their respective tangent.
-    const auto init_pose =
-      std::make_tuple(spline.Point(i), spline.Tangent(i));
-    const auto end_pose =
-      std::make_tuple(spline.Point(i + 1), spline.Tangent(i + 1));
-    // Generate the name for the new connection
-    const auto &name = base_name + std::to_string(i + 1) +
-      "-" + base_name + std::to_string(i + 2);
+    // Create the directed waypoints
+    const DirectedWaypoint init_wp(
+      ignition::rndf::UniqueId(segment_id, lane_id, i + 1),
+      spline.Point(i),
+      spline.Tangent(i));
+    const DirectedWaypoint end_wp(
+      ignition::rndf::UniqueId(segment_id, lane_id, i + 2),
+      spline.Point(i + 1),
+      spline.Tangent(i + 1));
     // Add the waypoints to the map so as to use them later
     // for connections
-    waypoints[BuildName(segment_id, lane_id, i + 1)] = init_pose;
-    waypoints[BuildName(segment_id, lane_id, i + 2)] = end_pose;
+    directed_waypoints[init_wp.Id()] = init_wp;
+    directed_waypoints[end_wp.Id()] = end_wp;
 
-    // Convert those points into endpoints
-    std::vector<Endpoint> endpoints;
-    endpoints.push_back(ConvertIntoEndpoint(init_pose));
-    endpoints.push_back(ConvertIntoEndpoint(end_pose));
-
-    // Create a connection
-    Connect(name, endpoints);
+    // Create the vector and build the name of the road
+    const std::vector<DirectedWaypoint> wps = {init_wp, end_wp};
+    const auto lane_name =
+      BuildName(segment_id, lane_id, i + 1) + "_" +
+      BuildName(segment_id, lane_id, i + 2);
+    CreateLane(lane_name, lane_bounds_, driveable_bounds_, wps);
   }
 }
-
+*/
+/*
+const Connection* Builder::Connect(
+      const std::string& id,
+      const std::vector<Endpoint> &points) {
+  connections_.push_back(std::make_unique<Connection>(
+    id, points));
+  return connections_.back().get();
+}
+*/
+/*
 void Builder::CreateLaneToLaneConnection(
   const std::string &exit_id,
   const std::string &entry_id) {
@@ -90,6 +147,7 @@ void Builder::CreateLaneToLaneConnection(
   // Generate the spline
   Connect(exit_id + "-" + entry_id, endpoints);
 }
+*/
 
 
 void Builder::SetDefaultBranch(
@@ -220,6 +278,7 @@ Lane* Builder::BuildConnection(
 
 std::unique_ptr<const api::RoadGeometry> Builder::Build(
     const api::RoadGeometryId& id) const {
+  /*
   auto road_geometry = std::make_unique<RoadGeometry>(
       id, linear_tolerance_, angular_tolerance_);
   std::map<Endpoint, BranchPoint*, EndpointFuzzyOrder> bp_map(
@@ -259,6 +318,11 @@ std::unique_ptr<const api::RoadGeometry> Builder::Build(
   DRAKE_DEMAND(failures.size() == 0);
 
   return std::move(road_geometry);
+  */
+  auto road_geometry = std::make_unique<RoadGeometry>(
+    id,
+    linear_tolerance_,
+    angular_tolerance_);
 }
 
 std::string Builder::BuildName(const uint segment_id,
