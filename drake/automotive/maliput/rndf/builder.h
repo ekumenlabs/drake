@@ -280,9 +280,9 @@ class Connection {
   /// Returns the parameters of the endpoint.
   const DirectedWaypoint& end() const { return end_; }
 
-  const std::vector<Endpoint> &waypoints() const {
+  const std::vector<DirectedWaypoint> &waypoints() const {
     DRAKE_DEMAND(type_ == kSpline);
-    return DirectedWaypoint;
+    return waypoints_;
   }
 
  private:
@@ -310,10 +310,10 @@ class Builder {
           const double linear_tolerance,
           const double angular_tolerance);
 
-  void CreateLane(
-    const api::RBounds& lane_bounds,
-    const api::RBounds& driveable_bounds,
-    const std::vector<DirectedWaypoint> &control_points);
+  void CreateLaneConnections(
+    const uint segment_id,
+    const uint lane_id,
+    const std::vector<ignition::math::Vector3d> &points);
 
   void CreateConnection(
     const api::RBounds& lane_bounds,
@@ -343,15 +343,18 @@ class Builder {
   /// actually be joined at the specified ends (i.e., the Endpoint's for
   /// those ends must be coincident and (anti)parallel within the tolerances
   /// for the Builder).
+  /*
   void SetDefaultBranch(
       const Connection* in, const api::LaneEnd::Which in_end,
       const Connection* out, const api::LaneEnd::Which out_end);
+  */
 
   /// Produces a RoadGeometry, with the ID @p id.
   std::unique_ptr<const api::RoadGeometry> Build(
       const api::RoadGeometryId& id) const;
 
  private:
+  /*
   // EndpointFuzzyOrder is an arbitrary strict complete ordering of Endpoints
   // useful for, e.g., std::map.  It provides a comparison operation that
   // treats two Endpoints within @p linear_tolerance of one another as
@@ -403,7 +406,8 @@ class Builder {
 
     double lin_tol_{};
   };
-
+  */
+  /*
   struct DefaultBranch {
     DefaultBranch() = default;
 
@@ -417,22 +421,32 @@ class Builder {
     const Connection* out{};
     api::LaneEnd::Which out_end{};
   };
-
+  */
+  /*
   Lane* BuildConnection(
       const Connection* const cnx,
       Junction* const junction,
       RoadGeometry* const rg,
       std::map<Endpoint, BranchPoint*, EndpointFuzzyOrder>* const bp_map) const;
-
+  */
+  /*
   BranchPoint* FindOrCreateBranchPoint(
       const Endpoint& point,
       RoadGeometry* rg,
       std::map<Endpoint, BranchPoint*, EndpointFuzzyOrder>* const bp_map) const;
-
+  */
+  /*
   void AttachBranchPoint(
       const Endpoint& point, Lane* const lane, const api::LaneEnd::Which end,
       RoadGeometry* rg,
       std::map<Endpoint, BranchPoint*, EndpointFuzzyOrder>* bp_map) const;
+  */
+  /*
+  Endpoint ConvertIntoEndpoint(
+    const std::tuple<ignition::math::Vector3d,
+      ignition::math::Vector3d> &pose);
+  */
+  //---------------------------
 
   std::string BuildName(const uint segment_id,
     const uint lane_id) const;
@@ -441,9 +455,25 @@ class Builder {
     const uint lane_id,
     const uint waypoint_id) const;
 
-  Endpoint ConvertIntoEndpoint(
-    const std::tuple<ignition::math::Vector3d,
-      ignition::math::Vector3d> &pose);
+  void CreateLane(
+    const api::RBounds& lane_bounds,
+    const api::RBounds& driveable_bounds,
+    const std::vector<DirectedWaypoint> &control_points);
+
+  void AttachBranchPoint(
+    Lane* const lane,
+    const api::LaneEnd::Which end,
+    const BranchPoint *branch_point) const;
+
+  void BuildOrUpdateBranchpoints(
+    const Connection *connection,
+    const Lane *lane,
+    std::<DirectedWaypoint, BranchPoint*> &branch_point_map,
+    const RoadGeometry *road_geometry) const;
+
+  const Lane* BuildConnection(
+    const Junction *junction,
+    const Connection *connection) const;
 
   api::RBounds lane_bounds_;
   api::RBounds driveable_bounds_;
