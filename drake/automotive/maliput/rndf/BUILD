@@ -54,6 +54,7 @@ drake_cc_library(
     deps = [
         ":lanes",
         "@ignition_math",
+        "@ignition_rndf",
     ],
 )
 

@@ -55,20 +55,16 @@ void Loader::BuildSegments(
 
 void Loader::BuildConnections(
   const std::vector<ignition::rndf::Segment> &segments) const {
-  const auto unique_id_to_str = [] (
-    const ignition::rndf::UniqueId &id) {
-    return std::to_string(id.X()) + "_" +
-      std::to_string(id.Y()) + "_" +
-      std::to_string(id.Z());
-  };
   for (const auto &segment : segments) {
     for (const auto &lane : segment.Lanes()) {
       for (const auto &exit : lane.Exits()) {
         const auto &exit_id = exit.ExitId();
         const auto &entry_id = exit.EntryId();
-        builder->CreateLaneToLaneConnection(
-          unique_id_to_str(exit_id),
-          unique_id_to_str(entry_id));
+        builder->CreateConnection(
+          rc_.lane_bounds,
+          rc_.driveable_bounds,
+          exit_id,
+          entry_id);
       }
     }
   }
