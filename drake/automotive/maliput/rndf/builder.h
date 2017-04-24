@@ -162,6 +162,33 @@ class Endpoint {
   EndpointZ z_;
 };
 
+class DirectedWaypoint {
+ public:
+  DRAKE_DEFAULT_COPY_AND_MOVE_AND_ASSIGN(DirectedWaypoint)
+
+  DirectedWaypoint(
+    const ignition::rndf::UniqueId &id,
+    const ignition::math::Vector3d &position,
+    const ignition::math::Vector3d &tangent) :
+      id_(id),
+      position_(position),
+      tangent_(tangent) {}
+
+  const ignition::rndf::UniqueId& Id() const {
+    return id_;
+  }
+  const ignition::math::Vector3d& Position() const {
+    return position;
+  }
+  const ignition::math::Vector3d& Tangent() const {
+    return tangent_;
+  }
+
+ private:
+  const ignition::rndf::UniqueId id_;
+  const ignition::math::Vector3d position_;
+  const ignition::math::Vector3d tangent_;
+};
 
 /// Representation of a reference path connecting two endpoints.
 ///
@@ -175,6 +202,7 @@ class Endpoint {
 /// (locally-flat) plane of the earth.  The out-of-plane shape of
 /// the path will be determined by the EndpointZ (elevation) parameters
 /// of the endpoints.
+/*
 class Connection {
  public:
   DRAKE_NO_COPY_NO_MOVE_NO_ASSIGN(Connection)
@@ -219,6 +247,51 @@ class Connection {
   Endpoint end_;
   std::vector<Endpoint> points_;
 };
+*/
+
+class Connection {
+ public:
+  DRAKE_NO_COPY_NO_MOVE_NO_ASSIGN(Connection)
+
+  /// Possible connection geometries: splines
+  enum Type { kSpline };
+
+  /// Constructs a spline-segment connection joining @p points[0] to
+  /// @p points[size-1].
+  Connection(const std::string& id,
+    const std::vector<DirectedWaypoint>& waypoints) :
+      type_(kSpline),
+      id_(id),
+      start_(points.front()),
+      end_(points.back()),
+      waypoints_(waypoints) {
+    DRAKE_DEMAND(waypoints_.size() >= 2);
+  }
+
+  /// Returns the geometric type of the path.
+  Type type() const { return type_; }
+
+  /// Returns the ID string.
+  const std::string& id() const { return id_; }
+
+  /// Returns the parameters of the start point.
+  const DirectedWaypoint& start() const { return start_; }
+
+  /// Returns the parameters of the endpoint.
+  const DirectedWaypoint& end() const { return end_; }
+
+  const std::vector<Endpoint> &waypoints() const {
+    DRAKE_DEMAND(type_ == kSpline);
+    return DirectedWaypoint;
+  }
+
+ private:
+  Type type_{};
+  std::string id_;
+  DirectedWaypoint start_;
+  DirectedWaypoint end_;
+  std::vector<DirectedWaypoint> waypoints_;
+};
 
 // N.B. The Builder class overview documentation lives at the top of this file.
 class Builder {
@@ -237,6 +310,18 @@ class Builder {
           const double linear_tolerance,
           const double angular_tolerance);
 
+  void CreateLane(
+    const api::RBounds& lane_bounds,
+    const api::RBounds& driveable_bounds,
+    const std::vector<DirectedWaypoint> &control_points);
+
+  void CreateConnection(
+    const api::RBounds& lane_bounds,
+    const api::RBounds& driveable_bounds,
+    const ignition::rndf::UniqueId &exit,
+    const ignition::rndf::UniqueId &entry);
+
+  /*
   const Connection* Connect(
       const std::string& id,
       const std::vector<Endpoint> &points);
@@ -249,6 +334,7 @@ class Builder {
   void CreateLaneToLaneConnection(
     const std::string &exit_id,
     const std::string &entry_id);
+  */
 
   /// Sets the default branch for one end of a connection.
   ///
@@ -368,6 +454,8 @@ class Builder {
   std::map<
     std::string,
     std::tuple<ignition::math::Vector3d, ignition::math::Vector3d>> waypoints;
+
+  std::map<ignition::rndf::UniqueId, DirectedWaypoint> directed_waypoints_;
 };
 
 }  // namespace rndf
