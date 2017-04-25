@@ -1,5 +1,6 @@
 #include <memory>
 #include <string>
+
 #include <gflags/gflags.h>
 #include "bot_core/robot_state_t.hpp"
 #include "robotlocomotion/robot_plan_t.hpp"
@@ -68,6 +69,10 @@ int DoMain(void) {
   auto sys = builder.Build();
   Simulator<double> simulator(*sys);
   simulator.Initialize();
+
+  plant->InitializeIiwaPlan(
+      Eigen::VectorXd::Zero(7),
+      sys->GetMutableSubsystemContext(simulator.get_mutable_context(), plant));
 
   simulator.StepTo(FLAGS_simulation_sec);
 
