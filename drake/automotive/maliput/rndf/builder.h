@@ -196,6 +196,10 @@ class DirectedWaypoint {
     id_.SetZ(directed_waypoint.id_.Z());
     return *this;    
   }
+  static void DRAKE_COPYABLE_DEMAND_COPY_CAN_COMPILE() {
+    (void) static_cast<DirectedWaypoint& (DirectedWaypoint::*)(const DirectedWaypoint&)>
+      (&DirectedWaypoint::operator=); 
+  }
 
   DirectedWaypoint(
     const ignition::rndf::UniqueId &id,
@@ -204,6 +208,8 @@ class DirectedWaypoint {
       id_(id),
       position_(position),
       tangent_(tangent) {}
+
+  DirectedWaypoint() {}
 
   const ignition::rndf::UniqueId& Id() const {
     return id_;
@@ -233,53 +239,6 @@ class DirectedWaypoint {
 /// (locally-flat) plane of the earth.  The out-of-plane shape of
 /// the path will be determined by the EndpointZ (elevation) parameters
 /// of the endpoints.
-/*
-class Connection {
- public:
-  DRAKE_NO_COPY_NO_MOVE_NO_ASSIGN(Connection)
-
-  /// Possible connection geometries:  line- or arc-segment.
-  enum Type { kSpline };
-
-
-  /// Constructs a spline-segment connection joining @p points[0] to
-  /// @p points[size-1].
-  Connection(const std::string& id,
-    const std::vector<Endpoint>& points) :
-      type_(kSpline),
-      id_(id),
-      start_(points.front()),
-      end_(points.back()),
-      points_(points) {
-    DRAKE_DEMAND(points_.size() >= 2);
-  }
-
-  /// Returns the geometric type of the path.
-  Type type() const { return type_; }
-
-  /// Returns the ID string.
-  const std::string& id() const { return id_; }
-
-  /// Returns the parameters of the start point.
-  const Endpoint& start() const { return start_; }
-
-  /// Returns the parameters of the endpoint.
-  const Endpoint& end() const { return end_; }
-
-  const std::vector<Endpoint> &points() const {
-    DRAKE_DEMAND(type_ == kSpline);
-    return points_;
-  }
-
- private:
-  Type type_{};
-  std::string id_;
-  Endpoint start_;
-  Endpoint end_;
-  std::vector<Endpoint> points_;
-};
-*/
-
 class Connection {
  public:
   DRAKE_NO_COPY_NO_MOVE_NO_ASSIGN(Connection)
@@ -307,9 +266,11 @@ class Connection {
 
   /// Returns the parameters of the start point.
   const DirectedWaypoint& start() const { return start_; }
+  DirectedWaypoint& start() { return start_; }
 
   /// Returns the parameters of the endpoint.
   const DirectedWaypoint& end() const { return end_; }
+  DirectedWaypoint& end() { return end_; }
 
   const std::vector<DirectedWaypoint> &waypoints() const {
     DRAKE_DEMAND(type_ == kSpline);
@@ -352,133 +313,11 @@ class Builder {
     const ignition::rndf::UniqueId &exit,
     const ignition::rndf::UniqueId &entry);
 
-  /*
-  const Connection* Connect(
-      const std::string& id,
-      const std::vector<Endpoint> &points);
-
-  void CreateLaneConnections(
-    const uint segment_id,
-    const uint lane_id,
-    const std::vector<ignition::math::Vector3d> &points);
-
-  void CreateLaneToLaneConnection(
-    const std::string &exit_id,
-    const std::string &entry_id);
-  */
-
-  /// Sets the default branch for one end of a connection.
-  ///
-  /// The default branch for the @p in_end of connection @p in will set to be
-  /// @p out_end of connection @p out.  The specified connections must
-  /// actually be joined at the specified ends (i.e., the Endpoint's for
-  /// those ends must be coincident and (anti)parallel within the tolerances
-  /// for the Builder).
-  /*
-  void SetDefaultBranch(
-      const Connection* in, const api::LaneEnd::Which in_end,
-      const Connection* out, const api::LaneEnd::Which out_end);
-  */
-
   /// Produces a RoadGeometry, with the ID @p id.
   std::unique_ptr<const api::RoadGeometry> Build(
       const api::RoadGeometryId& id);
 
  private:
-  /*
-  // EndpointFuzzyOrder is an arbitrary strict complete ordering of Endpoints
-  // useful for, e.g., std::map.  It provides a comparison operation that
-  // treats two Endpoints within @p linear_tolerance of one another as
-  // equivalent.
-  //
-  // This is used to match up the endpoints of Connections, to determine
-  // how Connections are linked to one another.  Exact numeric equality
-  // would not be robust given the use of floating-point values in Endpoints.
-  class EndpointFuzzyOrder {
-   public:
-    DRAKE_DEFAULT_COPY_AND_MOVE_AND_ASSIGN(EndpointFuzzyOrder)
-
-    explicit EndpointFuzzyOrder(const double linear_tolerance)
-        : lin_tol_(linear_tolerance) {}
-
-    bool operator()(const Endpoint& lhs, const Endpoint& rhs) const {
-      switch (fuzzy_compare(rhs.xy().x(), lhs.xy().x())) {
-        case -1: { return true; }
-        case 1: { return false; }
-        case 0: {
-          switch (fuzzy_compare(rhs.xy().y(), lhs.xy().y())) {
-            case -1: { return true; }
-            case 1: { return false; }
-            case 0: {
-              switch (fuzzy_compare(rhs.z().z(), lhs.z().z())) {
-                case -1: { return true; }
-                case 1: { return false; }
-                case 0: { return false; }
-                default: { DRAKE_ABORT(); }
-              }
-            }
-            default: { DRAKE_ABORT(); }
-          }
-        }
-        default: { DRAKE_ABORT(); }
-      }
-    }
-
-   private:
-    int fuzzy_compare(const double a, const double b) const {
-      if (a < (b - lin_tol_)) {
-        return -1;
-      } else if (a > (b + lin_tol_)) {
-        return 1;
-      } else {
-        return 0;
-      }
-    }
-
-    double lin_tol_{};
-  };
-  */
-  /*
-  struct DefaultBranch {
-    DefaultBranch() = default;
-
-    DefaultBranch(
-        const Connection* ain, const api::LaneEnd::Which ain_end,
-        const Connection* aout, const api::LaneEnd::Which aout_end)
-        : in(ain), in_end(ain_end), out(aout), out_end(aout_end) {}
-
-    const Connection* in{};
-    api::LaneEnd::Which in_end{};
-    const Connection* out{};
-    api::LaneEnd::Which out_end{};
-  };
-  */
-  /*
-  Lane* BuildConnection(
-      const Connection* const cnx,
-      Junction* const junction,
-      RoadGeometry* const rg,
-      std::map<Endpoint, BranchPoint*, EndpointFuzzyOrder>* const bp_map) const;
-  */
-  /*
-  BranchPoint* FindOrCreateBranchPoint(
-      const Endpoint& point,
-      RoadGeometry* rg,
-      std::map<Endpoint, BranchPoint*, EndpointFuzzyOrder>* const bp_map) const;
-  */
-  /*
-  void AttachBranchPoint(
-      const Endpoint& point, Lane* const lane, const api::LaneEnd::Which end,
-      RoadGeometry* rg,
-      std::map<Endpoint, BranchPoint*, EndpointFuzzyOrder>* bp_map) const;
-  */
-  /*
-  Endpoint ConvertIntoEndpoint(
-    const std::tuple<ignition::math::Vector3d,
-      ignition::math::Vector3d> &pose);
-  */
-  //---------------------------
-
   std::string BuildName(const uint segment_id,
     const uint lane_id) const;
 
@@ -491,16 +330,16 @@ class Builder {
     const api::RBounds& driveable_bounds,
     const std::vector<DirectedWaypoint> &control_points);
 
-  void AttachBranchPoint(
+  void AttachLaneEndToBranchPoint(
     Lane* lane,
     const api::LaneEnd::Which end,
     BranchPoint *branch_point);
 
   void BuildOrUpdateBranchpoints(
-    const Connection *connection,
+    Connection *connection,
     Lane *lane,
     std::map<DirectedWaypoint, BranchPoint*> &branch_point_map,
-    const RoadGeometry *road_geometry);
+    RoadGeometry *road_geometry);
 
   Lane* BuildConnection(
     Junction *junction,
