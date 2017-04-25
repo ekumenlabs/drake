@@ -32,7 +32,9 @@ void Builder::CreateLane(
   DRAKE_DEMAND(control_points.size() > 1);
   const auto &start_id = control_points.front().Id();
   const auto &end_id = control_points.back().Id();
-  const std::string name = BuildName(start_id.X(), start_id.Y(), start_id.Z()) +
+  const std::string name =
+    BuildName(start_id.X(), start_id.Y(), start_id.Z()) +
+    "-" +
     BuildName(end_id.X(), end_id.Y(), end_id.Z());
   connections_.push_back(std::make_unique<Connection>(name, control_points));
   DRAKE_DEMAND(connections_.back() != nullptr);
