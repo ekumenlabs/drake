@@ -295,8 +295,8 @@ bitbucket_archive(
 bitbucket_archive(
     name = "ignition_rndf",
     repository = "ignitionrobotics/ign-rndf",
-    commit = "ignition-rndf_0.1.2",
-    sha256 = "e0aa1489311679639717d3614c7c55edaa5f6de9a78c31ea48ea637bc1ba001a",
+    commit = "fa9c7bdc5b37",
+    sha256 = "87e6b9b352fc2248bf15d7b5866d8793fa906f50f72bd312aec614dc6977dbcd",
     build_file = "tools/ignition_rndf.BUILD",
-    strip_prefix = "ignitionrobotics-ign-rndf-b20a4f68333f",
+    strip_prefix = "ignitionrobotics-ign-rndf-fa9c7bdc5b37",
 )
