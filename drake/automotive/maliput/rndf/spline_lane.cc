@@ -32,7 +32,8 @@ SplineLane::SplineLane(const api::LaneId& id, const api::Segment* segment,
     spline->AddPoint(std::get<0>(point), std::get<1>(point));
   }
   spline_ = std::make_unique<ArcLengthParameterizedSpline>(
-    spline, kSplinesSamples);
+    std::move(spline),
+    kSplinesSamples);
 }
 
 api::LanePosition SplineLane::DoToLanePosition(

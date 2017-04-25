@@ -1,6 +1,8 @@
 #pragma once
 
 #include <algorithm>
+#include <string>
+#include <tuple>
 #include <vector>
 
 #include "drake/automotive/curve2.h"
