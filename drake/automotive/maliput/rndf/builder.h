@@ -194,11 +194,11 @@ class DirectedWaypoint {
     id_.SetX(directed_waypoint.id_.X());
     id_.SetY(directed_waypoint.id_.Y());
     id_.SetZ(directed_waypoint.id_.Z());
-    return *this;    
+    return *this;
   }
   static void DRAKE_COPYABLE_DEMAND_COPY_CAN_COMPILE() {
     (void) static_cast<DirectedWaypoint& (DirectedWaypoint::*)(const DirectedWaypoint&)>
-      (&DirectedWaypoint::operator=); 
+      (&DirectedWaypoint::operator=);
   }
 
   DirectedWaypoint(
@@ -338,7 +338,7 @@ class Builder {
   void BuildOrUpdateBranchpoints(
     Connection *connection,
     Lane *lane,
-    std::map<DirectedWaypoint, BranchPoint*> &branch_point_map,
+    std::map<std::string, BranchPoint*> &branch_point_map,
     RoadGeometry *road_geometry);
 
   Lane* BuildConnection(
@@ -351,9 +351,11 @@ class Builder {
   double angular_tolerance_{};
   std::vector<std::unique_ptr<Connection>> connections_;
   // std::vector<DefaultBranch> default_branches_;
+  /*
   std::map<
     std::string,
     std::tuple<ignition::math::Vector3d, ignition::math::Vector3d>> waypoints;
+    */
 
   std::map<std::string, DirectedWaypoint> directed_waypoints_;
 };

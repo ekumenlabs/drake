@@ -111,7 +111,7 @@ double HeadingIntoLane(const api::Lane* const lane,
 
 std::unique_ptr<const api::RoadGeometry> Builder::Build(
     const api::RoadGeometryId& id) {
-  std::map<DirectedWaypoint, BranchPoint *> branch_point_map;
+  std::map<std::string, BranchPoint *> branch_point_map;
   auto road_geometry = std::make_unique<RoadGeometry>(
     id,
     linear_tolerance_,
@@ -221,46 +221,41 @@ Lane* Builder::BuildConnection(
 void Builder::BuildOrUpdateBranchpoints(
   Connection *connection,
   Lane *lane,
-  std::map<DirectedWaypoint, BranchPoint*> &branch_point_map,
+  std::map<std::string, BranchPoint*> &branch_point_map,
   RoadGeometry *road_geometry) {
   DRAKE_DEMAND(connection != nullptr);
   DRAKE_DEMAND(lane != nullptr);
   DRAKE_DEMAND(road_geometry != nullptr);
-  bool found;
   //First we care about the start of the branch point
-  found = false;
+  BranchPoint* bp = nullptr;
   for (const auto &it : branch_point_map) {
-    if (connection->start().Id() != it.first.Id()) {
-      continue;
+    if (connection->start().Id().String() == it.first) {
+      bp = it.second;
+      break;
     }
-    AttachLaneEndToBranchPoint(lane, api::LaneEnd::kStart, it.second);
-    found = true;
-    break;
   }
-  if (!found) {
-    BranchPoint* bp = road_geometry->NewBranchPoint(
-        {"bp:" + std::to_string(road_geometry->num_branch_points())});
-    DirectedWaypoint &start = connection->start();
-    branch_point_map[start] = bp;
-    AttachLaneEndToBranchPoint(lane, api::LaneEnd::kStart, bp);
+  if (bp == nullptr) {
+    bp = road_geometry->NewBranchPoint(
+      {"bp:" + std::to_string(road_geometry->num_branch_points())});
+    DRAKE_DEMAND(bp != nullptr);
+    branch_point_map[connection->start().Id().String()] = bp;
   }
-  // Now we attach the end to a branch point
-  found = false;
+  AttachLaneEndToBranchPoint(lane, api::LaneEnd::kStart, bp);
+  //Now, it's the turn of the end lane end
+  bp = nullptr;
   for (const auto &it : branch_point_map) {
-    if (connection->end().Id() != it.first.Id()) {
-      continue;
+    if (connection->end().Id().String() == it.first) {
+      bp = it.second;
+      break;
     }
-    AttachLaneEndToBranchPoint(lane, api::LaneEnd::kFinish, it.second);
-    found = true;
-    break;
   }
-  if (!found) {
+  if (bp == nullptr) {
     BranchPoint* bp = road_geometry->NewBranchPoint(
-        {"bp:" + std::to_string(road_geometry->num_branch_points())});
-    DirectedWaypoint &end = connection->end();
-    branch_point_map[end] = bp;
-    AttachLaneEndToBranchPoint(lane, api::LaneEnd::kFinish, bp);
+      {"bp:" + std::to_string(road_geometry->num_branch_points())});
+    DRAKE_DEMAND(bp != nullptr);
+    branch_point_map[connection->end().Id().String()] = bp;
   }
+  AttachLaneEndToBranchPoint(lane, api::LaneEnd::kFinish, bp);
 }
 
 
