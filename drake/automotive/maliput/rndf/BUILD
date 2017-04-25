@@ -86,4 +86,13 @@ drake_cc_googletest(
     ],
 )
 
+drake_cc_googletest(
+    name = "lane_test",
+    size = "small",
+    srcs = ["test/lane_test.cc"],
+    deps = [
+        ":lanes",
+    ],
+)
+
 cpplint()
