@@ -7,7 +7,6 @@
 
 #include "drake/automotive/automotive_simulator.h"
 #include "drake/automotive/create_trajectory_params.h"
-#include "drake/automotive/create_trajectory_params_rndf.h"
 #include "drake/automotive/gen/maliput_railcar_params.h"
 #include "drake/automotive/maliput/api/lane_data.h"
 #include "drake/automotive/maliput/dragway/road_geometry.h"
@@ -86,10 +85,7 @@ DEFINE_bool(with_stalled_cars, false, "Places a stalled vehicle at the end of "
 
 DEFINE_double(rndf_base_speed, 10.0, "The speed of the vehicles added to the "
               "rndf.");
-DEFINE_double(rndf_delay, 5.0, "The starting time delay.");
-DEFINE_string(lane_names, "",
-  "A comma-separated list (e.g. 'lane_1,lane_2,lane_3' that generates a path "
-  "for the car to follow.");
+DEFINE_string(rndf_first_lane, "", "The lane from where to spawn the cars.");
 DEFINE_string(rndf_file_path, "", "File path of the RNDF file to load.");
 
 
@@ -165,6 +161,49 @@ void AddMaliputRailcar(int num_cars, bool idm_controlled, int initial_s_offset,
     }
   }
 }
+
+// Adds a MaliputRailcar to the simulation involving a rndf. It throws a
+// std::runtime_error if there is insufficient lane length for adding the
+// vehicle.
+//
+// It loads all the cars in l:1_1_1-1_1_2.
+//
+// All the cars have a difference of 10% from FLAGS_rndf_base_speed between each
+// other using FLAGS_rndf_base_speed for the first car.
+//
+// It will load FLAGS_ num_maliput_railcar MaliputRailCars.
+//
+// @param intial_s_offset It is the length from the start of the lane to spawn
+// the cars. Each car will have an offset of 3 meters from the other.
+//
+// @param road_geometry The road on which to add the railcars.
+//
+// @param simulator The simulator to modify.
+void AddMaliputRailcar(int initial_s_offset,
+    const maliput::rndf::RoadGeometry* road_geometry,
+    AutomotiveSimulator<double>* simulator) {
+  const Lane* lane = simulator->FindLane(FLAGS_rndf_first_lane);
+  if (lane == nullptr) {
+    throw std::runtime_error(std::string("No lane [\"") +
+      FLAGS_rndf_first_lane +
+      std::string("\"] in RNDF road_geometry."));
+  }
+  for (int i = 0; i < FLAGS_num_maliput_railcar; i++) {
+    const MaliputRailcarParams<double> params;
+    MaliputRailcarState<double> state;
+    const double s_offset = initial_s_offset + 3.0 * static_cast<double>(i);
+    if (s_offset >= lane->length()) {
+      throw std::runtime_error(
+          "Ran out of lane length to add a MaliputRailcar.");
+    }
+    state.set_s(s_offset);
+    state.set_speed(FLAGS_rndf_base_speed *
+      (1.0 + static_cast<double>(i) * 0.2));
+    simulator->AddPriusMaliputRailcar("MaliputRailcar-" + std::to_string(i),
+      LaneDirection(lane), params, state);
+  }
+}
+
 
 // Adds SimpleCar instances to the simulator. It uses FLAGS_num_simple_car or
 // FLAGS_simple_car_names to determine the number and names of SimpleCar
@@ -255,28 +294,10 @@ void AddVehicles(RoadNetworkType road_network_type,
     const maliput::rndf::RoadGeometry* rndf_road_geometry =
         dynamic_cast<const maliput::rndf::RoadGeometry*>(road_geometry);
     DRAKE_DEMAND(rndf_road_geometry != nullptr);
-
-    if (!FLAGS_lane_names.empty()) {
-      std::vector<std::string> lane_name_paths;
-      std::istringstream simple_lane_name_stream(FLAGS_lane_names);
-      std::string lane_name;
-      while (getline(simple_lane_name_stream, lane_name, ',')) {
-        lane_name_paths.push_back(lane_name);
-      }
-      const auto& params = CreateTrajectoryParamsForRndf(
-        *rndf_road_geometry,
-        lane_name_paths,
-        FLAGS_rndf_base_speed,
-        FLAGS_rndf_delay);
-
-      const auto &curve = std::get<0>(params);
-      if (curve.path_length() != 0) {
-        simulator->AddPriusTrajectoryCar("RNDFCar",
-          std::get<0>(params),
-          std::get<1>(params),
-          std::get<2>(params));
-      }
-    }
+    // Load MaliputRailCars as needed.
+    AddMaliputRailcar(0.0 /* Initial position at the lane*/,
+      rndf_road_geometry /* RoadGeometry pointer*/,
+      simulator /* Simulator pointer */);
   } else if (road_network_type == RoadNetworkType::onramp) {
     DRAKE_DEMAND(road_geometry != nullptr);
     for (int i = 0; i < FLAGS_num_maliput_railcar; ++i) {

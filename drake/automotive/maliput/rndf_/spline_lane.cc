@@ -11,7 +11,7 @@ namespace drake {
 namespace maliput {
 namespace rndf {
 
-const double SplineLane::kSplinesSamples = 100.0;
+const double SplineLane::kSplineErrorBound = 1e-6;
 const double SplineLane::kTension = 0.8;
 
 SplineLane::SplineLane(const api::LaneId& id, const api::Segment* segment,
@@ -36,7 +36,7 @@ SplineLane::SplineLane(const api::LaneId& id, const api::Segment* segment,
   // Maliput s coordinate.
   spline_ = std::make_unique<ArcLengthParameterizedSpline>(
     std::move(spline),
-    kSplinesSamples);
+    kSplineErrorBound);
 }
 
 api::LanePosition SplineLane::DoToLanePosition(
@@ -78,6 +78,7 @@ V3 SplineLane::s_hat_of_srh(const double s, const double r, const double h,
   const V3 W_prime = W_prime_of_srh(s, r, h, Rabg);
   return W_prime * (1.0 / W_prime.norm());
 }
+
 V3 SplineLane::W_prime_of_srh(const double s, const double r, const double h,
                         const Rot3& Rabg) const {
   const V2 G_prime = xy_dot_of_s(s);

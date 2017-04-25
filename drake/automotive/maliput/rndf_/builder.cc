@@ -216,6 +216,25 @@ Lane* Builder::BuildConnection(
         driveable_bounds_);
       break;
     }
+    case Connection::kSpline: {
+      std::vector<std::tuple<
+        ignition::math::Vector3d,
+        ignition::math::Vector3d>> points_tangents;
+      for (const auto& endpoint : conn->points()) {
+        const auto &point =
+          ignition::math::Vector3d(endpoint.xy().x(), endpoint.xy().y(), 0.);
+        const auto &tangent = ignition::math::Vector3d(
+          std::cos(endpoint.xy().heading()),
+          std::sin(endpoint.xy().heading()), 0.).Normalize() *
+            endpoint.xy().heading_mod();
+        points_tangents.push_back(std::make_tuple(point, tangent));
+      }
+      lane = segment->NewSplineLane(lane_id,
+        points_tangents,
+        lane_bounds_,
+        driveable_bounds_);
+      break;
+    }
     default: {
       DRAKE_ABORT();
     }
@@ -257,7 +276,6 @@ void Builder::BuildOrUpdateBranchpoints(
   }
   AttachLaneEndToBranchPoint(lane, api::LaneEnd::kFinish, bp);
 }
-
 
 std::string Builder::BuildName(const uint segment_id,
   const uint lane_id) const {

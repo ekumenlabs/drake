@@ -57,11 +57,11 @@ class SplineLane : public Lane {
   /// straight line.
   static double Tension() { return kTension; }
 
-  /// It returns the number of samples that the acr lenght interpolator will use
-  /// to get an aproximation of the inverse function that maps the s coordinate
-  /// of s,r,h frame into the t parameter that ignition::math::Spline uses to
-  /// evaluate the function.
-  static double SplinesSamples() { return kSplinesSamples; }
+  /// It returns the error bound that the arc length interpolator will
+  /// attempt to attain when aproximating the inverse function that maps
+  /// the s coordinate of s,r,h frame into the t parameter that
+  /// ignition::math::Spline uses to evaluate the function.
+  static double SplineErrorBound() { return kSplineErrorBound; }
 
  private:
   api::LanePosition DoToLanePosition(
@@ -129,7 +129,7 @@ class SplineLane : public Lane {
 
   std::unique_ptr<ArcLengthParameterizedSpline> spline_;
 
-  static const double kSplinesSamples;
+  static const double kSplineErrorBound;
   static const double kTension;
 };
 

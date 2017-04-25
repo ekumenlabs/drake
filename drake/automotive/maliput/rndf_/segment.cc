@@ -29,7 +29,6 @@ SplineLane* Segment::NewSplineLane(const api::LaneId& id,
   return result;
 }
 
-
 const api::Lane* Segment::do_lane(int index) const {
   DRAKE_DEMAND(index == 0);
   return lane_.get();

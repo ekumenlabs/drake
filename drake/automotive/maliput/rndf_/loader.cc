@@ -69,8 +69,7 @@ void Loader::BuildConnections(
       for (const auto &exit : lane.Exits()) {
         const auto &exit_id = exit.ExitId();
         const auto &entry_id = exit.EntryId();
-        builder->CreateConnection(
-          rc_.lane_bounds,
+        builder->CreateConnection(rc_.lane_bounds,
           rc_.driveable_bounds,
           exit_id,
           entry_id);

@@ -148,6 +148,7 @@ class Connection {
   std::vector<DirectedWaypoint> waypoints_;
 };
 
+
 // N.B. The Builder class overview documentation lives at the top of this file.
 class Builder {
  public:
@@ -197,12 +198,6 @@ class Builder {
     Lane* lane,
     const api::LaneEnd::Which end,
     BranchPoint *branch_point);
-
-  void BuildOrUpdateBranchpoints(
-    Connection *connection,
-    Lane *lane,
-    std::map<std::string, BranchPoint*> *branch_point_map,
-    RoadGeometry *road_geometry);
 
   Lane* BuildConnection(
     Junction *junction,

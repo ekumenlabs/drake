@@ -395,9 +395,7 @@ drake_cc_binary(
     srcs = [
         "automotive_rndf.cc",
         "create_trajectory_params.cc",
-        "create_trajectory_params_rndf.cc",
         "create_trajectory_params.h",
-        "create_trajectory_params_rndf.h",
     ],
     data = [
         ":models",
