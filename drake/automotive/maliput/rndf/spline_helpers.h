@@ -63,7 +63,7 @@ class ArcLengthParameterizedSpline {
   /// the amount of segments to be used for piecewise interpolation.
   /// @throws whenever arguments constrains are not satisfied.
   explicit ArcLengthParameterizedSpline(
-    std::unique_ptr<ignition::math::Spline>& _spline,
+    std::unique_ptr<ignition::math::Spline> _spline,
     const int _num_of_segments);
 
   /// Interpolates @f$ Q(s) @f$, that is, the spline parameterized
