@@ -24,145 +24,6 @@ namespace maliput {
 namespace rndf {
 class RoadGeometry;
 
-/// @class Builder
-/// Convenient builder class which makes it easy to construct a rndf road
-/// network.
-///
-/// rndf is a simple road-network implementation:
-///  - single lane per segment;
-///  - constant lane_bounds and driveable_bounds, same for all lanes;
-///  - only linear and constant-curvature-arc primitives in XY-plane;
-///  - cubic polynomials (parameterized on XY-arc-length) for elevation
-///    and superelevation;
-///  - superelevation (bank of road) rotates around the reference line (r = 0)
-///    of the path.
-///
-/// The Builder class simplifies the assembly of rndf road network
-/// components into a valid RoadGeometry.  In the Builder model, an Endpoint
-/// specifies a point in world coordinates (along with a direction, slope,
-/// and superelevation parameters).  A Connection is a path from an explicit
-/// start Endpoint to an end Endpoint calculated via a linear or arc
-/// displacement (ArcOffset).  A Group is a collection of Connections.
-///
-/// Builder::Build() constructs a RoadGeometry.  Each Connection yields a
-/// Segment bearing a single Lane.  Each Group yields a Junction containing
-/// the Segments associated with the grouped Connections; ungrouped
-/// Connections each receive their own Junction.
-
-
-/// XY-plane-only parameters for an endpoint of a connection, specified in
-/// the world frame.
-///
-/// The three components are:
-///  - x: x position
-///  - y: y position
-///  - heading: heading of reference path (radians, zero == x-direction)
-class EndpointXy {
- public:
-  DRAKE_DEFAULT_COPY_AND_MOVE_AND_ASSIGN(EndpointXy)
-
-  // Constructs an EndpointXy with all zero parameters.
-  EndpointXy() = default;
-
-  EndpointXy(double x, double y, double heading, double heading_mod)
-      : x_(x), y_(y), heading_(heading), heading_mod_(heading_mod) {}
-
-  /// Returns an EndpointXy with reversed direction.
-  EndpointXy reverse() const {
-    return EndpointXy(x_, y_,
-                      std::atan2(-std::sin(heading_), -std::cos(heading_)),
-                      heading_mod_);
-  }
-
-  double x() const { return x_; }
-
-  double y() const { return y_; }
-
-  double heading() const { return heading_; }
-
-  double heading_mod() const { return heading_mod_; }
-
- private:
-  double x_{};
-  double y_{};
-  double heading_{};
-  double heading_mod_{};
-};
-
-
-/// Out-of-plane parameters for an endpoint of a connection, specified in
-/// the world frame.
-///
-/// The four components are:
-///  - z: elevation
-///  - z_dot: grade (rate of change of elevation with respect to
-///           arc length of the reference path)
-///  - theta: superelevation (rotation of road surface around r = 0 centerline;
-///           when theta > 0, elevation at r > 0 is above elevation at r < 0)
-///  - theta_dot: rate of change of superelevation with respect to arc length
-///               of the reference path
-class EndpointZ {
- public:
-  DRAKE_DEFAULT_COPY_AND_MOVE_AND_ASSIGN(EndpointZ)
-
-  // Constructs an EndpointZ with all zero parameters.
-  EndpointZ() = default;
-
-  EndpointZ(double z, double z_dot, double theta, double theta_dot)
-      : z_(z), z_dot_(z_dot), theta_(theta), theta_dot_(theta_dot) {}
-
-  /// Returns an EndpointZ with reversed direction.
-  EndpointZ reverse() const {
-    return EndpointZ(z_, -z_dot_, -theta_, -theta_dot_);
-  }
-
-  double z() const { return z_; }
-
-  double z_dot() const { return z_dot_; }
-
-  double theta() const { return theta_; }
-
-  double theta_dot() const { return theta_dot_; }
-
- private:
-  double z_{};
-  double z_dot_{};
-
-  double theta_{};
-  double theta_dot_{};
-};
-
-
-/// Complete set of parameters for an endpoint of a connection,
-/// specified in the world frame.  It comprises two subsets of parameters:
-/// those pertaining only to the xy ground-plane, and those pertaining to
-/// out-of-plane aspects of an endpoint.
-class Endpoint {
- public:
-  DRAKE_DEFAULT_COPY_AND_MOVE_AND_ASSIGN(Endpoint)
-
-  // Constructs an Endpoint with all zero parameters.
-  Endpoint() = default;
-
-  Endpoint(const EndpointXy& xy, const EndpointZ& z) : xy_(xy), z_(z) {}
-
-  /// Returns an Endpoint with reversed direction.
-  Endpoint reverse() const {
-    return Endpoint(xy_.reverse(), z_.reverse());
-  }
-
-  /// Returns the subset of parameters pertaining to the xy ground-plane.
-  const EndpointXy& xy() const { return xy_; }
-
-  /// Returns the subset of parameters pertaining to out-of-ground-plane
-  /// aspects.
-  const EndpointZ& z() const { return z_; }
-
- private:
-  EndpointXy xy_;
-  EndpointZ z_;
-};
-
 class DirectedWaypoint {
  public:
 
@@ -197,8 +58,8 @@ class DirectedWaypoint {
     return *this;
   }
   static void DRAKE_COPYABLE_DEMAND_COPY_CAN_COMPILE() {
-    (void) static_cast<DirectedWaypoint& (DirectedWaypoint::*)(const DirectedWaypoint&)>
-      (&DirectedWaypoint::operator=);
+    (void) static_cast<DirectedWaypoint& (DirectedWaypoint::*)
+      (const DirectedWaypoint&)>(&DirectedWaypoint::operator=);
   }
 
   DirectedWaypoint(
@@ -350,13 +211,6 @@ class Builder {
   double linear_tolerance_{};
   double angular_tolerance_{};
   std::vector<std::unique_ptr<Connection>> connections_;
-  // std::vector<DefaultBranch> default_branches_;
-  /*
-  std::map<
-    std::string,
-    std::tuple<ignition::math::Vector3d, ignition::math::Vector3d>> waypoints;
-    */
-
   std::map<std::string, DirectedWaypoint> directed_waypoints_;
 };
 
