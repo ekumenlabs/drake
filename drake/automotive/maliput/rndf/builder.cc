@@ -161,7 +161,9 @@ void Builder::AttachLaneEndToBranchPoint(
       lane->SetEndBp(branch_point);
       break;
     }
-    default: { DRAKE_ABORT(); }
+    default: {
+      DRAKE_ABORT();
+    }
   }
   // Now, tell the branch-point about the lane.
   //
