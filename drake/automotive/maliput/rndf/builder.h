@@ -11,6 +11,7 @@
 
 #include "ignition/math/Vector3.hh"
 #include "ignition/math/Spline.hh"
+#include "ignition/rndf/UniqueId.hh"
 
 #include "drake/automotive/maliput/api/lane_data.h"
 #include "drake/automotive/maliput/rndf/junction.h"
@@ -164,7 +165,37 @@ class Endpoint {
 
 class DirectedWaypoint {
  public:
-  DRAKE_DEFAULT_COPY_AND_MOVE_AND_ASSIGN(DirectedWaypoint)
+
+  DirectedWaypoint(const DirectedWaypoint &directed_waypoint) :
+    position_(directed_waypoint.position_),
+    tangent_(directed_waypoint.tangent_) {
+    id_.SetX(directed_waypoint.id_.X());
+    id_.SetY(directed_waypoint.id_.Y());
+    id_.SetZ(directed_waypoint.id_.Z());
+  }
+  DirectedWaypoint& operator=(const DirectedWaypoint &directed_waypoint) {
+    position_ = directed_waypoint.position_;
+    tangent_ = directed_waypoint.tangent_;
+    id_.SetX(directed_waypoint.id_.X());
+    id_.SetY(directed_waypoint.id_.Y());
+    id_.SetZ(directed_waypoint.id_.Z());
+    return *this;
+  }
+  DirectedWaypoint(DirectedWaypoint &&directed_waypoint) :
+    position_(directed_waypoint.position_),
+    tangent_(directed_waypoint.tangent_)  {
+    id_.SetX(directed_waypoint.id_.X());
+    id_.SetY(directed_waypoint.id_.Y());
+    id_.SetZ(directed_waypoint.id_.Z());
+  }
+  DirectedWaypoint& operator=(DirectedWaypoint &&directed_waypoint) {
+    position_ = directed_waypoint.position_;
+    tangent_ = directed_waypoint.tangent_;
+    id_.SetX(directed_waypoint.id_.X());
+    id_.SetY(directed_waypoint.id_.Y());
+    id_.SetZ(directed_waypoint.id_.Z());
+    return *this;    
+  }
 
   DirectedWaypoint(
     const ignition::rndf::UniqueId &id,
@@ -178,16 +209,16 @@ class DirectedWaypoint {
     return id_;
   }
   const ignition::math::Vector3d& Position() const {
-    return position;
+    return position_;
   }
   const ignition::math::Vector3d& Tangent() const {
     return tangent_;
   }
 
  private:
-  const ignition::rndf::UniqueId id_;
-  const ignition::math::Vector3d position_;
-  const ignition::math::Vector3d tangent_;
+  ignition::rndf::UniqueId id_;
+  ignition::math::Vector3d position_;
+  ignition::math::Vector3d tangent_;
 };
 
 /// Representation of a reference path connecting two endpoints.
@@ -262,8 +293,8 @@ class Connection {
     const std::vector<DirectedWaypoint>& waypoints) :
       type_(kSpline),
       id_(id),
-      start_(points.front()),
-      end_(points.back()),
+      start_(waypoints.front()),
+      end_(waypoints.back()),
       waypoints_(waypoints) {
     DRAKE_DEMAND(waypoints_.size() >= 2);
   }
@@ -351,7 +382,7 @@ class Builder {
 
   /// Produces a RoadGeometry, with the ID @p id.
   std::unique_ptr<const api::RoadGeometry> Build(
-      const api::RoadGeometryId& id) const;
+      const api::RoadGeometryId& id);
 
  private:
   /*
@@ -461,31 +492,31 @@ class Builder {
     const std::vector<DirectedWaypoint> &control_points);
 
   void AttachBranchPoint(
-    Lane* const lane,
+    Lane* lane,
     const api::LaneEnd::Which end,
-    const BranchPoint *branch_point) const;
+    BranchPoint *branch_point);
 
   void BuildOrUpdateBranchpoints(
     const Connection *connection,
-    const Lane *lane,
-    std::<DirectedWaypoint, BranchPoint*> &branch_point_map,
-    const RoadGeometry *road_geometry) const;
+    Lane *lane,
+    std::map<DirectedWaypoint, BranchPoint*> &branch_point_map,
+    const RoadGeometry *road_geometry);
 
-  const Lane* BuildConnection(
-    const Junction *junction,
-    const Connection *connection) const;
+  Lane* BuildConnection(
+    Junction *junction,
+    const Connection *connection);
 
   api::RBounds lane_bounds_;
   api::RBounds driveable_bounds_;
   double linear_tolerance_{};
   double angular_tolerance_{};
   std::vector<std::unique_ptr<Connection>> connections_;
-  std::vector<DefaultBranch> default_branches_;
+  // std::vector<DefaultBranch> default_branches_;
   std::map<
     std::string,
     std::tuple<ignition::math::Vector3d, ignition::math::Vector3d>> waypoints;
 
-  std::map<ignition::rndf::UniqueId, DirectedWaypoint> directed_waypoints_;
+  std::map<std::string, DirectedWaypoint> directed_waypoints_;
 };
 
 }  // namespace rndf

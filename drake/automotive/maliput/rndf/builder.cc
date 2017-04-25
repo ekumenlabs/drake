@@ -43,8 +43,8 @@ void Builder::CreateConnection(
   const api::RBounds& driveable_bounds,
   const ignition::rndf::UniqueId &exit,
   const ignition::rndf::UniqueId &entry) {
-  const auto &exit_it = directed_waypoints_.find(exit);
-  const auto &entry_it = directed_waypoints_.find(entry);
+  const auto &exit_it = directed_waypoints_.find(exit.String());
+  const auto &entry_it = directed_waypoints_.find(entry.String());
   DRAKE_DEMAND(exit_it != directed_waypoints_.end());
   DRAKE_DEMAND(entry_it != directed_waypoints_.end());
 
@@ -100,9 +100,6 @@ void Builder::CreateLaneConnections(
 
 
   DRAKE_DEMAND(points.size() >= 2);
-  // Build the base name
-  const auto &base_name = BuildName(segment_id, lane_id);
-
   // We generate the spline
   ignition::math::Spline spline;
   spline.AutoCalculate(true);
@@ -125,15 +122,12 @@ void Builder::CreateLaneConnections(
       spline.Tangent(i + 1));
     // Add the waypoints to the map so as to use them later
     // for connections
-    directed_waypoints[init_wp.Id()] = init_wp;
-    directed_waypoints[end_wp.Id()] = end_wp;
+    directed_waypoints_[init_wp.Id().String()] = init_wp;
+    directed_waypoints_[end_wp.Id().String()] = end_wp;
 
     // Create the vector and build the name of the road
     const std::vector<DirectedWaypoint> wps = {init_wp, end_wp};
-    const auto lane_name =
-      BuildName(segment_id, lane_id, i + 1) + "_" +
-      BuildName(segment_id, lane_id, i + 2);
-    CreateLane(lane_name, lane_bounds_, driveable_bounds_, wps);
+    CreateLane(lane_bounds_, driveable_bounds_, wps);
   }
 }
 
@@ -295,7 +289,7 @@ Lane* Builder::BuildConnection(
 
 
 std::unique_ptr<const api::RoadGeometry> Builder::Build(
-    const api::RoadGeometryId& id) const {
+    const api::RoadGeometryId& id) {
   /*
   auto road_geometry = std::make_unique<RoadGeometry>(
       id, linear_tolerance_, angular_tolerance_);
@@ -351,10 +345,11 @@ std::unique_ptr<const api::RoadGeometry> Builder::Build(
         {std::string("j:") + connection->id()});
     DRAKE_DEMAND(junction != nullptr);
     // Create the lane
-    const auto *lane = BuildConnection(junction, connection);
+    drake::maliput::rndf::Lane *lane =
+      BuildConnection(junction, connection.get());
     DRAKE_DEMAND(lane != nullptr);
     // Build the branch points of necessary for the lane
-    BuildOrUpdateBranchpoints(connection,
+    BuildOrUpdateBranchpoints(connection.get(),
       lane,
       branch_point_map,
       road_geometry.get());
@@ -370,15 +365,58 @@ std::unique_ptr<const api::RoadGeometry> Builder::Build(
   return std::move(road_geometry);
 }
 
-const Lane* Builder::BuildConnection(
-  const Junction *junction,
-  const Connection *connection) const {
-  // Create a new segment and assign a lane to it
-  Segment* segment = junction->NewSegment({std::string("s:") + conn->id()});
-  Lane* lane{};
-  api::LaneId lane_id{std::string("l:") + conn->id()};
+void Builder::AttachBranchPoint(
+  Lane* lane,
+  const api::LaneEnd::Which end,
+  BranchPoint *branch_point) {
+  DRAKE_DEMAND(lane != nullptr);
+  DRAKE_DEMAND(branch_point != nullptr);
+  // Tell the lane about its branch-point.
+  switch (end) {
+    case api::LaneEnd::kStart: {
+      lane->SetStartBp(branch_point);
+      break;
+    }
+    case api::LaneEnd::kFinish: {
+      lane->SetEndBp(branch_point);
+      break;
+    }
+    default: { DRAKE_ABORT(); }
+  }
+  // Now, tell the branch-point about the lane.
+  //
+  // Is this the first lane-end added to the branch-point?
+  // If so, just stick it on A-Side.
+  // (NB: We just test size of A-Side, since A-Side is always populated first.)
+  if (branch_point->GetASide()->size() == 0) {
+    branch_point->AddABranch({lane, end});
+    return;
+  }
+  // Otherwise, assess if this new lane-end is parallel or anti-parallel to
+  // the first lane-end.  Parallel: go to same, A-side; anti-parallel:
+  // other, B-side.  Do this by examining the dot-product of the heading
+  // vectors (rather than goofing around with cyclic angle arithmetic).
+  const double new_h = HeadingIntoLane(lane, end);
+  const api::LaneEnd old_le = branch_point->GetASide()->get(0);
+  const double old_h = HeadingIntoLane(old_le.lane, old_le.end);
+  if (((std::cos(new_h) * std::cos(old_h)) +
+       (std::sin(new_h) * std::sin(old_h))) > 0.) {
+    branch_point->AddABranch({lane, end});
+  } else {
+    branch_point->AddBBranch({lane, end});
+  }
+}
 
-  switch (conn->type()) {
+Lane* Builder::BuildConnection(
+  Junction *junction,
+  const Connection *connection) {
+  DRAKE_DEMAND(junction != nullptr);
+  // Create a new segment and assign a lane to it
+  Segment* segment = junction->NewSegment({std::string("s:") + connection->id()});
+  Lane* lane{};
+  api::LaneId lane_id{std::string("l:") + connection->id()};
+
+  switch (connection->type()) {
     case Connection::kSpline: {
       std::vector<std::tuple<
         ignition::math::Vector3d,
@@ -401,20 +439,17 @@ const Lane* Builder::BuildConnection(
 }
 void BuildOrUpdateBranchpoints(
   const Connection *connection,
-  const Lane *lane,
-  std::<DirectedWaypoint, BranchPoint*> &branch_point_map,
-  const RoadGeometry *road_geometry) const {
-  const auto find_id_in_vector = [] (
-    const ignition::rndf::UniqueId &id,
-    DirectedWaypoint &waypoint) {
-      return directed_waypoint.Id() == id;
-  };
-
+  Lane *lane,
+  std::map<DirectedWaypoint, BranchPoint*> &branch_point_map,
+  RoadGeometry *road_geometry) {
+  DRAKE_DEMAND(connection != nullptr);
+  DRAKE_DEMAND(lane != nullptr);
+  DRAKE_DEMAND(road_geometry != nullptr);
   bool found;
   //First we care about the start of the branch point
   found = false;
   for (const auto &it : branch_point_map) {
-    if (connection->start().Id() != it.first) {
+    if (connection->start().Id() != it.first.Id()) {
       continue;
     }
     AttachBranchPoint(lane, api::LaneEnd::kStart, it.second);
@@ -425,15 +460,15 @@ void BuildOrUpdateBranchpoints(
     BranchPoint* bp = road_geometry->NewBranchPoint(
         {"bp:" + std::to_string(road_geometry->num_branch_points())});
     branch_point_map.emplace(connection->start(), bp);
-    AttachBranchPoint(lane, api::LaneEnd::kStart, road_geometry, it.first);
+    AttachBranchPoint(lane, api::LaneEnd::kStart, road_geometry, bp);
   }
   // Now we attach the end to a branch point
   found = false;
   for (const auto &it : branch_point_map) {
-    if (connection->end().Id() != it.first) {
+    if (connection->end().Id() != it.first.Id()) {
       continue;
     }
-    AttachBranchPoint(lane, api::LaneEnd::kFinish, road_geometry, it.first);
+    AttachBranchPoint(lane, api::LaneEnd::kFinish, road_geometry, it.second);
     found = true;
     break;
   }
@@ -441,51 +476,10 @@ void BuildOrUpdateBranchpoints(
     BranchPoint* bp = road_geometry->NewBranchPoint(
         {"bp:" + std::to_string(road_geometry->num_branch_points())});
     branch_point_map.emplace(connection->end().Id(), bp);
-    AttachBranchPoint(lane, api::LaneEnd::kFinish, road_geometry, it.first);
+    AttachBranchPoint(lane, api::LaneEnd::kFinish, road_geometry, bp);
   }
 }
 
-void Builder::AttachBranchPoint(
-    Lane* const lane,
-    const api::LaneEnd::Which end,
-    const BranchPoint *branch_point) const {
-  DRAKE_DEMAND(branch_point != nullptr);
-  DRAKE_DEMAND(road_geometry != nullptr);
-  // Tell the lane about its branch-point.
-  switch (end) {
-    case api::LaneEnd::kStart: {
-      lane->SetStartBp(bp);
-      break;
-    }
-    case api::LaneEnd::kFinish: {
-      lane->SetEndBp(bp);
-      break;
-    }
-    default: { DRAKE_ABORT(); }
-  }
-  // Now, tell the branch-point about the lane.
-  //
-  // Is this the first lane-end added to the branch-point?
-  // If so, just stick it on A-Side.
-  // (NB: We just test size of A-Side, since A-Side is always populated first.)
-  if (bp->GetASide()->size() == 0) {
-    bp->AddABranch({lane, end});
-    return;
-  }
-  // Otherwise, assess if this new lane-end is parallel or anti-parallel to
-  // the first lane-end.  Parallel: go to same, A-side; anti-parallel:
-  // other, B-side.  Do this by examining the dot-product of the heading
-  // vectors (rather than goofing around with cyclic angle arithmetic).
-  const double new_h = HeadingIntoLane(lane, end);
-  const api::LaneEnd old_le = bp->GetASide()->get(0);
-  const double old_h = HeadingIntoLane(old_le.lane, old_le.end);
-  if (((std::cos(new_h) * std::cos(old_h)) +
-       (std::sin(new_h) * std::sin(old_h))) > 0.) {
-    bp->AddABranch({lane, end});
-  } else {
-    bp->AddBBranch({lane, end});
-  }
-}
 
 std::string Builder::BuildName(const uint segment_id,
   const uint lane_id) const {
