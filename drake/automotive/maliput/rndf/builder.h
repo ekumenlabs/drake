@@ -26,7 +26,6 @@ class RoadGeometry;
 
 class DirectedWaypoint {
  public:
-
   DirectedWaypoint(const DirectedWaypoint &directed_waypoint) :
     position_(directed_waypoint.position_),
     tangent_(directed_waypoint.tangent_) {
@@ -199,7 +198,7 @@ class Builder {
   void BuildOrUpdateBranchpoints(
     Connection *connection,
     Lane *lane,
-    std::map<std::string, BranchPoint*> &branch_point_map,
+    std::map<std::string, BranchPoint*> *branch_point_map,
     RoadGeometry *road_geometry);
 
   Lane* BuildConnection(

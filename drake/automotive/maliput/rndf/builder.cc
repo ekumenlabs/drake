@@ -113,7 +113,8 @@ double HeadingIntoLane(const api::Lane* const lane,
 
 std::unique_ptr<const api::RoadGeometry> Builder::Build(
     const api::RoadGeometryId& id) {
-  std::map<std::string, BranchPoint *> branch_point_map;
+  std::unique_ptr<std::map<std::string, BranchPoint *>> branch_point_map =
+    std::make_unique<std::map<std::string, BranchPoint *>>();
   auto road_geometry = std::make_unique<RoadGeometry>(
     id,
     linear_tolerance_,
@@ -133,9 +134,8 @@ std::unique_ptr<const api::RoadGeometry> Builder::Build(
     // Build the branch points of necessary for the lane
     BuildOrUpdateBranchpoints(connection.get(),
       lane,
-      branch_point_map,
+      branch_point_map.get(),
       road_geometry.get());
-
   }
   // Make sure we didn't screw up!
   std::vector<std::string> failures = road_geometry->CheckInvariants();
@@ -226,31 +226,32 @@ Lane* Builder::BuildConnection(
 void Builder::BuildOrUpdateBranchpoints(
   Connection *connection,
   Lane *lane,
-  std::map<std::string, BranchPoint*> &branch_point_map,
+  std::map<std::string, BranchPoint*> *branch_point_map,
   RoadGeometry *road_geometry) {
   DRAKE_DEMAND(connection != nullptr);
   DRAKE_DEMAND(lane != nullptr);
+  DRAKE_DEMAND(branch_point_map != nullptr);
   DRAKE_DEMAND(road_geometry != nullptr);
-  //First we care about the start of the branch point
+  // First we care about the start of the branch point
   BranchPoint* bp{nullptr};
-  auto it = branch_point_map.find(connection->start().Id().String());
-  if (it == branch_point_map.end()) {
+  auto it = branch_point_map->find(connection->start().Id().String());
+  if (it == branch_point_map->end()) {
     bp = road_geometry->NewBranchPoint(
       {"bp:" + std::to_string(road_geometry->num_branch_points())});
     DRAKE_DEMAND(bp != nullptr);
-    branch_point_map[connection->start().Id().String()] = bp;
+    (*branch_point_map)[connection->start().Id().String()] = bp;
   } else {
     bp = it->second;
   }
   AttachLaneEndToBranchPoint(lane, api::LaneEnd::kStart, bp);
-  //Now, it's the turn of the end lane end
+  // Now, it's the turn of the end lane end
   bp = nullptr;
-  it = branch_point_map.find(connection->end().Id().String());
-  if (it == branch_point_map.end()) {
+  it = branch_point_map->find(connection->end().Id().String());
+  if (it == branch_point_map->end()) {
     bp = road_geometry->NewBranchPoint(
       {"bp:" + std::to_string(road_geometry->num_branch_points())});
     DRAKE_DEMAND(bp != nullptr);
-    branch_point_map[connection->end().Id().String()] = bp;
+    (*branch_point_map)[connection->end().Id().String()] = bp;
   } else {
     bp = it->second;
   }

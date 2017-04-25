@@ -60,7 +60,7 @@ double InverseArcLengthInterpolator::InterpolateMthDerivative(
 }
 
 ArcLengthParameterizedSpline::ArcLengthParameterizedSpline(
-  std::unique_ptr<ignition::math::Spline>& _spline,
+  std::unique_ptr<ignition::math::Spline> _spline,
   const int _num_of_segments) :
     q_t_(std::move(_spline)),
     t_s_(_num_of_segments) {
