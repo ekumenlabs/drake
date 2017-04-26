@@ -95,4 +95,13 @@ drake_cc_googletest(
     ],
 )
 
+drake_cc_googletest(
+    name = "spline_helper_test",
+    size = "small",
+    srcs = ["test/spline_helper_test.cc"],
+    deps = [
+        ":lanes",
+    ],
+)
+
 cpplint()
