@@ -113,4 +113,13 @@ drake_cc_googletest(
     ],
 )
 
+drake_cc_googletest(
+    name = "builder_test",
+    size = "small",
+    srcs = ["test/builder_test.cc"],
+    deps = [
+        ":builder",
+    ],
+)
+
 cpplint()

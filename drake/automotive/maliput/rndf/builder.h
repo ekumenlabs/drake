@@ -16,6 +16,7 @@
 #include "drake/automotive/maliput/api/lane_data.h"
 #include "drake/automotive/maliput/rndf/junction.h"
 #include "drake/common/drake_assert.h"
+#include "drake/common/drake_throw.h"
 #include "drake/common/drake_copyable.h"
 
 namespace drake {
@@ -49,11 +50,13 @@ class DirectedWaypoint {
     id_.SetZ(directed_waypoint.id_.Z());
   }
   DirectedWaypoint& operator=(DirectedWaypoint &&directed_waypoint) {
-    position_ = directed_waypoint.position_;
-    tangent_ = directed_waypoint.tangent_;
-    id_.SetX(directed_waypoint.id_.X());
-    id_.SetY(directed_waypoint.id_.Y());
-    id_.SetZ(directed_waypoint.id_.Z());
+    if (this == &directed_waypoint) {
+      position_ = directed_waypoint.position_;
+      tangent_ = directed_waypoint.tangent_;
+      id_.SetX(directed_waypoint.id_.X());
+      id_.SetY(directed_waypoint.id_.Y());
+      id_.SetZ(directed_waypoint.id_.Z());
+    }
     return *this;
   }
   static void DRAKE_COPYABLE_DEMAND_COPY_CAN_COMPILE() {
@@ -115,7 +118,7 @@ class Connection {
       start_(waypoints.front()),
       end_(waypoints.back()),
       waypoints_(waypoints) {
-    DRAKE_DEMAND(waypoints_.size() >= 2);
+    DRAKE_THROW_UNLESS(waypoints_.size() >= 2);
   }
 
   /// Returns the geometric type of the path.
@@ -133,7 +136,7 @@ class Connection {
   DirectedWaypoint& end() { return end_; }
 
   const std::vector<DirectedWaypoint> &waypoints() const {
-    DRAKE_DEMAND(type_ == kSpline);
+    DRAKE_THROW_UNLESS(type_ == kSpline);
     return waypoints_;
   }
 

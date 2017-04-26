@@ -69,36 +69,6 @@ GTEST_TEST(RNDFSplineHelperTest, StraightLine) {
   }
 }
 
-GTEST_TEST(RNDFSplineHelperTest, ConstantTangentModule) {
-  std::vector<
-    std::tuple<ignition::math::Vector3d,ignition::math::Vector3d>>
-      control_points;
-  control_points.push_back(
-    std::make_tuple(
-      ignition::math::Vector3d(0.0, 0.0, 0.0),
-      ignition::math::Vector3d(10.0, 0.0, 0.0)));
-  control_points.push_back(
-    std::make_tuple(
-      ignition::math::Vector3d(20.0, 0.0, 0.0),
-      ignition::math::Vector3d(-10.0, 0.0, 0.0)));
-
-  std::unique_ptr<ignition::math::Spline> spline =
-  	CreateSpline(control_points);
-  std::unique_ptr<ArcLengthParameterizedSpline> arc_lenght_param_spline =
-  	std::make_unique<ArcLengthParameterizedSpline>(std::move(spline), 100);
-
-  const double length = arc_lenght_param_spline->BaseSpline()->ArcLength();
-  const double tangent_module = arc_lenght_param_spline->InterpolateMthDerivative(1, length/2.0).Length();
-  const double tangent_module_tolerance = tangent_module * kLinearToleranceProportionForModule;
-  ignition::math::Vector3d p;
-  for (double l = 0.0; l < length; l += 1.0) {
-  	p.X() = l;
-  	const auto tangent = arc_lenght_param_spline->InterpolateMthDerivative(1, l);
-    EXPECT_NEAR(tangent.Length(), tangent_module, tangent_module_tolerance);
-  }
-}
-
-
 } // rndf
 } // maliput
 } // drake

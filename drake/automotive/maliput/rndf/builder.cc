@@ -21,23 +21,8 @@ Builder::Builder(const api::RBounds& lane_bounds,
       driveable_bounds_(driveable_bounds),
       linear_tolerance_(linear_tolerance),
       angular_tolerance_(angular_tolerance) {
-  DRAKE_DEMAND(lane_bounds_.r_min >= driveable_bounds_.r_min);
-  DRAKE_DEMAND(lane_bounds_.r_max <= driveable_bounds_.r_max);
-}
-
-void Builder::CreateLane(
-  const api::RBounds& lane_bounds,
-  const api::RBounds& driveable_bounds,
-  const std::vector<DirectedWaypoint> &control_points) {
-  DRAKE_DEMAND(control_points.size() > 1);
-  const auto &start_id = control_points.front().Id();
-  const auto &end_id = control_points.back().Id();
-  const std::string name =
-    BuildName(start_id.X(), start_id.Y(), start_id.Z()) +
-    "-" +
-    BuildName(end_id.X(), end_id.Y(), end_id.Z());
-  connections_.push_back(std::make_unique<Connection>(name, control_points));
-  DRAKE_DEMAND(connections_.back() != nullptr);
+  DRAKE_THROW_UNLESS(lane_bounds_.r_min >= driveable_bounds_.r_min);
+  DRAKE_THROW_UNLESS(lane_bounds_.r_max <= driveable_bounds_.r_max);
 }
 
 void Builder::CreateConnection(
@@ -47,8 +32,8 @@ void Builder::CreateConnection(
   const ignition::rndf::UniqueId &entry) {
   const auto &exit_it = directed_waypoints_.find(exit.String());
   const auto &entry_it = directed_waypoints_.find(entry.String());
-  DRAKE_DEMAND(exit_it != directed_waypoints_.end());
-  DRAKE_DEMAND(entry_it != directed_waypoints_.end());
+  DRAKE_THROW_UNLESS(exit_it != directed_waypoints_.end());
+  DRAKE_THROW_UNLESS(entry_it != directed_waypoints_.end());
 
   std::vector<DirectedWaypoint> control_points = {
     exit_it->second,
@@ -57,12 +42,11 @@ void Builder::CreateConnection(
   CreateLane(lane_bounds_, driveable_bounds_, control_points);
 }
 
-
 void Builder::CreateLaneConnections(
   const uint segment_id,
   const uint lane_id,
   const std::vector<ignition::math::Vector3d> &points) {
-  DRAKE_DEMAND(points.size() >= 2);
+  DRAKE_THROW_UNLESS(points.size() >= 2);
   // We generate the spline
   ignition::math::Spline spline;
   spline.AutoCalculate(true);
@@ -94,22 +78,6 @@ void Builder::CreateLaneConnections(
   }
 }
 
-namespace {
-// Determine the heading (in xy-plane) along the centerline when
-// travelling towards/into the lane, from the specified end.
-double HeadingIntoLane(const api::Lane* const lane,
-                       const api::LaneEnd::Which end) {
-  switch (end) {
-    case api::LaneEnd::kStart: {
-      return lane->GetOrientation({0., 0., 0.}).yaw;
-    }
-    case api::LaneEnd::kFinish: {
-      return lane->GetOrientation({lane->length(), 0., 0.}).yaw + M_PI;
-    }
-    default: { DRAKE_ABORT(); }
-  }
-}
-}  // namespace
 
 std::unique_ptr<const api::RoadGeometry> Builder::Build(
     const api::RoadGeometryId& id) {
@@ -142,10 +110,43 @@ std::unique_ptr<const api::RoadGeometry> Builder::Build(
   for (const auto& s : failures) {
     drake::log()->error(s);
   }
-  DRAKE_DEMAND(failures.size() == 0);
+  DRAKE_THROW_UNLESS(failures.size() == 0);
 
   return std::move(road_geometry);
 }
+
+void Builder::CreateLane(
+  const api::RBounds& lane_bounds,
+  const api::RBounds& driveable_bounds,
+  const std::vector<DirectedWaypoint> &control_points) {
+  DRAKE_DEMAND(control_points.size() > 1);
+  const auto &start_id = control_points.front().Id();
+  const auto &end_id = control_points.back().Id();
+  const std::string name =
+    BuildName(start_id.X(), start_id.Y(), start_id.Z()) +
+    "-" +
+    BuildName(end_id.X(), end_id.Y(), end_id.Z());
+  connections_.push_back(std::make_unique<Connection>(name, control_points));
+  DRAKE_DEMAND(connections_.back() != nullptr);
+}
+
+namespace {
+// Determine the heading (in xy-plane) along the centerline when
+// travelling towards/into the lane, from the specified end.
+double HeadingIntoLane(const api::Lane* const lane,
+                       const api::LaneEnd::Which end) {
+  switch (end) {
+    case api::LaneEnd::kStart: {
+      return lane->GetOrientation({0., 0., 0.}).yaw;
+    }
+    case api::LaneEnd::kFinish: {
+      return lane->GetOrientation({lane->length(), 0., 0.}).yaw + M_PI;
+    }
+    default: { DRAKE_ABORT(); }
+  }
+}
+}  // namespace
+
 
 void Builder::AttachLaneEndToBranchPoint(
     Lane* lane,
