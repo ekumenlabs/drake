@@ -19,14 +19,14 @@ namespace rndf {
 const double kLinearTolerance = 1e-4;
 const double kLinearToleranceProportionForModule = 0.05;
 
-#define EXPECT_IGN_VECTOR_NEAR(actual, expected, tolerance)         \
-  do {                                                       \
-    const ignition::math::Vector3d _actual(actual);                  \
-    const ignition::math::Vector3d _expected(expected);               \
+#define EXPECT_IGN_VECTOR_NEAR(actual, expected, tolerance)	\
+  do {                                                      \
+    const ignition::math::Vector3d _actual(actual);         \
+    const ignition::math::Vector3d _expected(expected);     \
     const double _tolerance(tolerance);                   	\
-    EXPECT_NEAR(_actual.X(), _expected.X(), _tolerance);         \
-    EXPECT_NEAR(_actual.Y(), _expected.Y(), _tolerance);         \
-    EXPECT_NEAR(_actual.Z(), _expected.Z(), _tolerance);         \
+    EXPECT_NEAR(_actual.X(), _expected.X(), _tolerance);    \
+    EXPECT_NEAR(_actual.Y(), _expected.Y(), _tolerance);    \
+    EXPECT_NEAR(_actual.Z(), _expected.Z(), _tolerance);    \
   } while (0)
 
 std::unique_ptr<ignition::math::Spline>
