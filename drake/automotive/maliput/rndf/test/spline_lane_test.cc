@@ -64,7 +64,7 @@ CreateSpline(
     EXPECT_NEAR(_actual.roll, _expected.roll, _tolerance);           \
   } while (0)
 
-GTEST_TEST(RNDFLanesTest, FlatLineLane) {
+GTEST_TEST(RNDFSplineLanesTest, FlatLineLane) {
   RoadGeometry rg({"FlatLineLane"}, kLinearTolerance, kAngularTolerance);
   Segment* s1 = rg.NewJunction({"j1"})->NewSegment({"s1"});
   std::vector<
@@ -151,7 +151,7 @@ GTEST_TEST(RNDFLanesTest, FlatLineLane) {
   }
 }
 
-GTEST_TEST(RNDFLanesTest, CurvedLineLane) {
+GTEST_TEST(RNDFSplineLanesTest, CurvedLineLane) {
   RoadGeometry rg({"CurvedLineLane"}, kLinearTolerance, kAngularTolerance);
   Segment* s1 = rg.NewJunction({"j1"})->NewSegment({"s1"});
   std::vector<
@@ -178,8 +178,9 @@ GTEST_TEST(RNDFLanesTest, CurvedLineLane) {
     std::make_unique<ArcLengthParameterizedSpline>(
       std::move(spline), SplineLane::SplinesSamples());
   // Check length
+  const double s_total = arc_length_interpolator->BaseSpline()->ArcLength();
   {
-    EXPECT_NEAR(l1->length(), arc_length_interpolator->BaseSpline()->ArcLength(), kLinearTolerance);
+    EXPECT_NEAR(l1->length(), s_total, kLinearTolerance);
   }
 
   // Check bounds
@@ -195,21 +196,28 @@ GTEST_TEST(RNDFLanesTest, CurvedLineLane) {
   // At the beginning, end and middle
   {
     EXPECT_GEO_NEAR(l1->ToGeoPosition({0., 0., 0.}), (0., 0., 0.), kLinearTolerance);
-    EXPECT_GEO_NEAR(l1->ToGeoPosition({arc_length_interpolator->BaseSpline()->ArcLength(), 0., 0.}), (20., 20.0, 0.), kLinearTolerance);
-    const auto point = arc_length_interpolator->InterpolateMthDerivative(0, arc_length_interpolator->BaseSpline()->ArcLength()/2.);
-    EXPECT_GEO_NEAR(l1->ToGeoPosition({arc_length_interpolator->BaseSpline()->ArcLength()/2., 0., 0.}), (point.X(), point.Y(), 0.), kLinearTolerance);
+    EXPECT_GEO_NEAR(l1->ToGeoPosition({s_total, 0., 0.}), (20., 20.0, 0.), kLinearTolerance);
+    const auto point = arc_length_interpolator->InterpolateMthDerivative(0, s_total/2.);
+    EXPECT_GEO_NEAR(l1->ToGeoPosition({s_total/2., 0., 0.}), (point.X(), point.Y(), 0.), kLinearTolerance);
   }
 
   // On the plane but at any point over the road
   {
-    const auto point = arc_length_interpolator->InterpolateMthDerivative(1, arc_length_interpolator->BaseSpline()->ArcLength()/2.);
-    const double yaw = std::atan2(point.Y(), point.X());
-    const double x_offset = 2. * std::cos(yaw);
-    const double y_offset = -2. * std::sin(yaw);
-    EXPECT_GEO_NEAR(l1->ToGeoPosition({arc_length_interpolator->BaseSpline()->ArcLength()/2., 2., 0.}), (point.X() + x_offset, point.Y() + y_offset, 0.), kLinearTolerance);
+    const auto point = arc_length_interpolator->InterpolateMthDerivative(0, s_total/2.);
+    const auto tangent = arc_length_interpolator->InterpolateMthDerivative(1, s_total/2.);
+    const double yaw = std::atan2(tangent.Y(), tangent.X());
+    const double x_offset = -2. * std::cos(yaw);
+    const double y_offset = 2. * std::sin(yaw);
+    EXPECT_GEO_NEAR(l1->ToGeoPosition({s_total/2., 2., 0.}), (point.X() + x_offset, point.Y() + y_offset, 0.), kLinearTolerance);
   }
   // Outside the lane constraints
   {
+    const auto point = arc_length_interpolator->InterpolateMthDerivative(0, s_total/2.);
+    const auto tangent = arc_length_interpolator->InterpolateMthDerivative(1, s_total/2.);
+    const double yaw = std::atan2(tangent.Y(), tangent.X());
+    const double x_offset = -15. * std::cos(yaw);
+    const double y_offset = 15. * std::sin(yaw);
+    EXPECT_GEO_NEAR(l1->ToGeoPosition({s_total/2., 15., 0.}), (point.X() + x_offset, point.Y() + y_offset, 0.), kLinearTolerance);
   }
   // Orientation
   {
@@ -231,6 +239,22 @@ GTEST_TEST(RNDFLanesTest, CurvedLineLane) {
   }
 }
 
+GTEST_TEST(RNDFSplineLanesTest, ComputeLength) {
+  std::vector<
+    std::tuple<ignition::math::Vector3d,ignition::math::Vector3d>>
+      control_points;
+  control_points.push_back(
+    std::make_tuple(
+      ignition::math::Vector3d(0.0, 0.0, 0.0),
+      ignition::math::Vector3d(10.0, 0.0, 0.0)));
+  control_points.push_back(
+    std::make_tuple(
+      ignition::math::Vector3d(20.0, 20.0, 0.0),
+      ignition::math::Vector3d(0, 10.0, 0.0)));
+  auto spline = CreateSpline(control_points);
+  // Check road geometry invariants
+  EXPECT_NEAR(spline->ArcLength(), SplineLane::ComputeLength(control_points), kLinearTolerance);
+}
 
 } // rndf
 } // maliput
