@@ -68,6 +68,29 @@ GTEST_TEST(RNDFBuilder, ConnectionClass) {
   EXPECT_THROW(std::make_unique<Connection>("1_1_1-1_1_2", directed_waypoints), std::runtime_error);
 }
 
+GTEST_TEST(RNDFBuilder, BuilderConstructor) {
+  EXPECT_NO_THROW(std::make_unique<Builder>(
+    api::RBounds(-5. / 2., 5. / 2.),
+    api::RBounds(-10/ 2., 10. / 2.),
+    0.01,
+    0.01 * M_PI));
+/*
+  EXPECT_THROW(std::make_unique<Builder>(
+    api::RBounds(-15. / 2., 5. / 2.),
+    api::RBounds(-10/ 2., 10. / 2.),
+    0.01,
+    0.01 * M_PI), std::runtime_error);
+*/
+/*
+  EXPECT_THROW(std::make_unique<Builder>(
+    api::RBounds(-5. / 2., 15. / 2.),
+    api::RBounds(-10/ 2., 10. / 2.),
+    0.01,
+    0.01 * M_PI), std::runtime_error);
+*/
+}
+
+
 } // rndf
 } // maliput
 } // drake
