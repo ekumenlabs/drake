@@ -78,7 +78,6 @@ void Builder::CreateLaneConnections(
   }
 }
 
-
 std::unique_ptr<const api::RoadGeometry> Builder::Build(
     const api::RoadGeometryId& id) {
   std::unique_ptr<std::map<std::string, BranchPoint *>> branch_point_map =

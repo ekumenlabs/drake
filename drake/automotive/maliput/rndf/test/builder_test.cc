@@ -74,21 +74,27 @@ GTEST_TEST(RNDFBuilder, BuilderConstructor) {
     api::RBounds(-10/ 2., 10. / 2.),
     0.01,
     0.01 * M_PI));
-/*
+
   EXPECT_THROW(std::make_unique<Builder>(
     api::RBounds(-15. / 2., 5. / 2.),
     api::RBounds(-10/ 2., 10. / 2.),
     0.01,
     0.01 * M_PI), std::runtime_error);
-/*
+
   EXPECT_THROW(std::make_unique<Builder>(
     api::RBounds(-5. / 2., 15. / 2.),
     api::RBounds(-10/ 2., 10. / 2.),
     0.01,
     0.01 * M_PI), std::runtime_error);
-*/
 }
 
+GTEST_TEST(RNDFBuilder, BuilderLaneConnections) {
+  std::unique_ptr<Builder> builder = std::make_unique<Builder>(
+    api::RBounds(-5. / 2., 5. / 2.),
+    api::RBounds(-10/ 2., 10. / 2.),
+    0.01,
+    0.01 * M_PI);
+}
 
 } // rndf
 } // maliput
