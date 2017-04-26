@@ -238,7 +238,7 @@ GTEST_TEST(RNDFSplineLanesTest, ComputeLength) {
     std::make_tuple(
       ignition::math::Vector3d(0.0, 0.0, 0.0),
       ignition::math::Vector3d(10.0, 0.0, 0.0)));
-  control_points.push_back(
+  control_points.push_back(add
     std::make_tuple(
       ignition::math::Vector3d(20.0, 20.0, 0.0),
       ignition::math::Vector3d(0, 10.0, 0.0)));
