@@ -87,15 +87,6 @@ GTEST_TEST(RNDFSplineLanesTest, FlatLineLane) {
   // Check road geometry invariants
   EXPECT_EQ(rg.CheckInvariants(), std::vector<std::string>());
 
-  // Check meta properties
-  {
-    EXPECT_EQ(l1->id().id, "l1");
-    EXPECT_EQ(l1->segment(), s1);
-    EXPECT_EQ(l1->index(), 0);
-    EXPECT_EQ(l1->to_left(), nullptr);
-    EXPECT_EQ(l1->to_right(), nullptr);
-  }
-
   // Check length
   {
     EXPECT_NEAR(l1->length(), std::sqrt((20. * 20.) + (0. * 0.)), kLinearTolerance);
