@@ -94,6 +94,184 @@ GTEST_TEST(RNDFBuilder, BuilderLaneConnections) {
     api::RBounds(-10/ 2., 10. / 2.),
     0.01,
     0.01 * M_PI);
+
+  EXPECT_THROW(
+  	builder->CreateLaneConnections(1, 1,
+	  std::vector<ignition::math::Vector3d>()),
+    std::runtime_error);
+
+  std::vector<ignition::math::Vector3d> points = {
+  	ignition::math::Vector3d(0., 0., 0.)
+  };
+  EXPECT_THROW(
+  	builder->CreateLaneConnections(1, 1, points), std::runtime_error);
+
+  points.push_back(ignition::math::Vector3d(10., 0., 0.));
+  EXPECT_NO_THROW(builder->CreateLaneConnections(1, 1, points));
+}
+
+GTEST_TEST(RNDFBuilder, BuilderConnections) {
+  api::RBounds lane_bounds(-5. / 2., 5. / 2.);
+  api::RBounds driveable_bounds(-10/ 2., 10. / 2.);
+
+  std::unique_ptr<Builder> builder = std::make_unique<Builder>(
+    lane_bounds,
+    driveable_bounds,
+    0.01,
+    0.01 * M_PI);
+
+	{
+	  std::vector<ignition::math::Vector3d> points = {
+	  	ignition::math::Vector3d(0., 0., 0.), // 1.1.1
+	  	ignition::math::Vector3d(10., 0., 0.), // 1.1.2
+	  	ignition::math::Vector3d(20., 0., 0.) // 1.1.3
+	  };
+	  builder->CreateLaneConnections(1, 1, points);
+	}
+
+	{
+	  std::vector<ignition::math::Vector3d> points = {
+	  	ignition::math::Vector3d(5., 20., 0.), // 2.1.1
+	  	ignition::math::Vector3d(5., 12.5, 0.), // 2.1.2
+	  	ignition::math::Vector3d(5., 5., 0.) // 2.1.3
+	  };
+	  builder->CreateLaneConnections(2, 1, points);
+	}
+
+  EXPECT_THROW(builder->CreateConnection(lane_bounds,
+    driveable_bounds,
+    ignition::rndf::UniqueId(1, 1, 4),
+    ignition::rndf::UniqueId(1, 1, 3)), std::runtime_error);
+  EXPECT_THROW(builder->CreateConnection(lane_bounds,
+    driveable_bounds,
+    ignition::rndf::UniqueId(1, 1, 3),
+    ignition::rndf::UniqueId(1, 1, 4)), std::runtime_error);
+
+  EXPECT_NO_THROW(builder->CreateConnection(lane_bounds,
+    driveable_bounds,
+    ignition::rndf::UniqueId(2, 1, 3),
+    ignition::rndf::UniqueId(1, 1, 2)));
+}
+
+GTEST_TEST(RNDFBuilder, BuildT) {
+  api::RBounds lane_bounds(-5. / 2., 5. / 2.);
+  api::RBounds driveable_bounds(-10/ 2., 10. / 2.);
+
+  std::unique_ptr<Builder> builder = std::make_unique<Builder>(
+    lane_bounds,
+    driveable_bounds,
+    0.01,
+    0.01 * M_PI);
+
+  {
+    std::vector<ignition::math::Vector3d> points = {
+      ignition::math::Vector3d(0., 0., 0.), // 1.1.1
+      ignition::math::Vector3d(10., 0., 0.), // 1.1.2
+      ignition::math::Vector3d(20., 0., 0.) // 1.1.3
+    };
+    builder->CreateLaneConnections(1, 1, points);
+  }
+
+  {
+    std::vector<ignition::math::Vector3d> points = {
+      ignition::math::Vector3d(5., 20., 0.), // 2.1.1
+      ignition::math::Vector3d(5., 12.5, 0.), // 2.1.2
+      ignition::math::Vector3d(5., 5., 0.) // 2.1.3
+    };
+    builder->CreateLaneConnections(2, 1, points);
+  }
+  builder->CreateConnection(lane_bounds,
+    driveable_bounds,
+    ignition::rndf::UniqueId(2, 1, 3),
+    ignition::rndf::UniqueId(1, 1, 2));
+
+  auto road_geometry = builder->Build({"T"});
+  EXPECT_NE(road_geometry, nullptr);
+}
+
+GTEST_TEST(RNDFBuilder, BuildOutgoingT) {
+  api::RBounds lane_bounds(-5. / 2., 5. / 2.);
+  api::RBounds driveable_bounds(-10/ 2., 10. / 2.);
+
+  std::unique_ptr<Builder> builder = std::make_unique<Builder>(
+    lane_bounds,
+    driveable_bounds,
+    0.01,
+    0.01 * M_PI);
+
+  {
+    std::vector<ignition::math::Vector3d> points = {
+      ignition::math::Vector3d(0., 0., 0.), // 1.1.1
+      ignition::math::Vector3d(10., 0., 0.), // 1.1.2
+      ignition::math::Vector3d(20., 0., 0.) // 1.1.3
+    };
+    builder->CreateLaneConnections(1, 1, points);
+  }
+
+  {
+    std::vector<ignition::math::Vector3d> points = {
+      ignition::math::Vector3d(15., 5., 0.), // 2.1.1
+      ignition::math::Vector3d(15., 12.5, 0.), // 2.1.2
+      ignition::math::Vector3d(15., 20., 0.) // 2.1.3
+    };
+    builder->CreateLaneConnections(2, 1, points);
+  }
+  builder->CreateConnection(lane_bounds,
+    driveable_bounds,
+    ignition::rndf::UniqueId(1, 1, 2),
+    ignition::rndf::UniqueId(2, 1, 1));
+
+  auto road_geometry = builder->Build({"T-Outgoing"});
+  EXPECT_NE(road_geometry, nullptr);
+}
+
+GTEST_TEST(RNDFBuilder, BuildY) {
+  api::RBounds lane_bounds(-5. / 2., 5. / 2.);
+  api::RBounds driveable_bounds(-10/ 2., 10. / 2.);
+
+  std::unique_ptr<Builder> builder = std::make_unique<Builder>(
+    lane_bounds,
+    driveable_bounds,
+    0.01,
+    0.01 * M_PI);
+
+  {
+    std::vector<ignition::math::Vector3d> points = {
+      ignition::math::Vector3d(0., 0., 0.), // 1.1.1
+      ignition::math::Vector3d(10., 0., 0.), // 1.1.2
+      ignition::math::Vector3d(20., 0., 0.) // 1.1.3
+    };
+    builder->CreateLaneConnections(1, 1, points);
+  }
+
+  {
+    std::vector<ignition::math::Vector3d> points = {
+      ignition::math::Vector3d(25., 5., 0.), // 2.1.1
+      ignition::math::Vector3d(35., 5, 0.), // 2.1.2
+    };
+    builder->CreateLaneConnections(2, 1, points);
+  }
+
+  {
+    std::vector<ignition::math::Vector3d> points = {
+      ignition::math::Vector3d(25., -5., 0.), // 3.1.1
+      ignition::math::Vector3d(35., -5, 0.), // 3.1.2
+    };
+    builder->CreateLaneConnections(3, 1, points);
+  }
+
+  builder->CreateConnection(lane_bounds,
+    driveable_bounds,
+    ignition::rndf::UniqueId(1, 1, 3),
+    ignition::rndf::UniqueId(2, 1, 1));
+
+  builder->CreateConnection(lane_bounds,
+    driveable_bounds,
+    ignition::rndf::UniqueId(1, 1, 3),
+    ignition::rndf::UniqueId(3, 1, 1));
+
+  auto road_geometry = builder->Build({"Y"});
+  EXPECT_NE(road_geometry, nullptr);
 }
 
 } // rndf
