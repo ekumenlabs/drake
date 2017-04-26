@@ -201,21 +201,26 @@ GTEST_TEST(RNDFLanesTest, CurvedLineLane) {
   }
 
   // On the plane but at any point over the road
-  // EXPECT_GEO_NEAR(l1->ToGeoPosition({5., 2., 0.}), (1., 1., 0.), kLinearTolerance);
-  // EXPECT_GEO_NEAR(l1->ToGeoPosition({12., -2., 0.}), (12., -2., 0.), kLinearTolerance);
-/*
+  {
+    const auto point = arc_length_interpolator->InterpolateMthDerivative(1, arc_length_interpolator->BaseSpline()->ArcLength()/2.);
+    const double yaw = std::atan2(point.Y(), point.X());
+    const double x_offset = 2. * std::cos(yaw);
+    const double y_offset = -2. * std::sin(yaw);
+    EXPECT_GEO_NEAR(l1->ToGeoPosition({arc_length_interpolator->BaseSpline()->ArcLength()/2., 2., 0.}), (point.X() + x_offset, point.Y() + y_offset, 0.), kLinearTolerance);
+  }
   // Outside the lane constraints
-  EXPECT_GEO_NEAR(l1->ToGeoPosition({-1., 0., 0.}), (0., 0., 0.), kLinearTolerance);
-  EXPECT_GEO_NEAR(l1->ToGeoPosition({21., 0., 0.}), (20., 0., 0.), kLinearTolerance);
-  // TODO: Need to work on the lateral constraints!!
-  // EXPECT_GEO_NEAR(l1->ToGeoPosition({5., 11., 0.}), (5., 10., 0.), kLinearTolerance);
-
+  {
+  }
   // Orientation
-  EXPECT_ROT_NEAR(l1->GetOrientation({0., 0., 0.}), (0., 0., 0.), kAngularTolerance);
-  EXPECT_ROT_NEAR(l1->GetOrientation({20., 0., 0.}), (0., 0., 0.), kAngularTolerance);
-  EXPECT_ROT_NEAR(l1->GetOrientation({10., 2., 0.}), (0., 0., 0.), kAngularTolerance);
-  EXPECT_ROT_NEAR(l1->GetOrientation({10., -2., 0.}), (0., 0., 0.), kAngularTolerance);
-*/
+  {
+    EXPECT_ROT_NEAR(l1->GetOrientation({0., 0., 0.}), (0., 0., 0.), kAngularTolerance);
+    EXPECT_ROT_NEAR(l1->GetOrientation({arc_length_interpolator->BaseSpline()->ArcLength(), 0., 0.}), (0., 0., M_PI/2.), kAngularTolerance);
+    const auto point = arc_length_interpolator->InterpolateMthDerivative(1, arc_length_interpolator->BaseSpline()->ArcLength() / 2.);
+    const double yaw = std::atan2(point.Y(), point.X());
+    EXPECT_ROT_NEAR(l1->GetOrientation({arc_length_interpolator->BaseSpline()->ArcLength() / 2., 0., 0.}), (0., 0., yaw), kAngularTolerance);
+    EXPECT_ROT_NEAR(l1->GetOrientation({arc_length_interpolator->BaseSpline()->ArcLength() / 2., 2., 0.}), (0., 0., yaw), kAngularTolerance);
+    EXPECT_ROT_NEAR(l1->GetOrientation({arc_length_interpolator->BaseSpline()->ArcLength() / 2., -2., 0.}), (0., 0., yaw), kAngularTolerance);
+  }
   // EvalMotionDerivatives
   {
     EXPECT_LANE_NEAR(l1->EvalMotionDerivatives({0., 0., 0.}, {0., 0., 0.}), (0., 0., 0.), kLinearTolerance);
