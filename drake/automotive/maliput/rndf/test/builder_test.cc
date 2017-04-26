@@ -80,7 +80,6 @@ GTEST_TEST(RNDFBuilder, BuilderConstructor) {
     api::RBounds(-10/ 2., 10. / 2.),
     0.01,
     0.01 * M_PI), std::runtime_error);
-*/
 /*
   EXPECT_THROW(std::make_unique<Builder>(
     api::RBounds(-5. / 2., 15. / 2.),
