@@ -38,6 +38,7 @@ class SplineLane : public Lane {
     ignition::math::Vector3d>> &points);
 
   static double Tension() { return kTension; }
+  static double SplinesSamples() { return kSplinesSamples; }
 
  private:
   api::LanePosition DoToLanePosition(

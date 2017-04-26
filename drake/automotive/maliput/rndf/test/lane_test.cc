@@ -1,5 +1,7 @@
 #include <cmath>
 #include <iostream>
+#include <memory>
+#include <tuple>
 
 #include <gtest/gtest.h>
 
@@ -16,6 +18,20 @@ namespace rndf {
 const double kLinearTolerance = 1e-3;
 const double kAngularTolerance = 1e-3;
 const double kVeryExact = 1e-12;
+
+std::unique_ptr<ignition::math::Spline>
+CreateSpline(
+  const std::vector<
+    std::tuple<ignition::math::Vector3d, ignition::math::Vector3d>> &points) {
+  std::unique_ptr<ignition::math::Spline> spline =
+    std::make_unique<ignition::math::Spline>();
+  spline->Tension(SplineLane::Tension());
+  spline->AutoCalculate(true);
+  for (const auto &point : points) {
+    spline->AddPoint(std::get<0>(point), std::get<1>(point));
+  }
+  return spline;
+}
 
 #define EXPECT_GEO_NEAR(actual, expected, tolerance)         \
   do {                                                       \
@@ -111,7 +127,82 @@ GTEST_TEST(RNDFLanesTest, FlatLineLane) {
   EXPECT_LANE_NEAR(l1->EvalMotionDerivatives({0., 0., 0.}, {1., 0., 0.}), (1., 0., 0.), kLinearTolerance);
   EXPECT_LANE_NEAR(l1->EvalMotionDerivatives({0., 0., 0.}, {0., 1., 0.}), (0., 1., 0.), kLinearTolerance);
   EXPECT_LANE_NEAR(l1->EvalMotionDerivatives({0., 0., 0.}, {0., 0., 1.}), (0., 0., 1.), kLinearTolerance);
+  EXPECT_LANE_NEAR(l1->EvalMotionDerivatives({10., 2., 5.}, {0., 0., 1.}), (0., 0., 1.), kLinearTolerance);
 }
+
+GTEST_TEST(RNDFLanesTest, CurvedLineLane) {
+  RoadGeometry rg({"CurvedLineLane"}, kLinearTolerance, kAngularTolerance);
+  Segment* s1 = rg.NewJunction({"j1"})->NewSegment({"s1"});
+  std::vector<
+    std::tuple<ignition::math::Vector3d,ignition::math::Vector3d>>
+      control_points;
+  control_points.push_back(
+    std::make_tuple(
+      ignition::math::Vector3d(0.0, 0.0, 0.0),
+      ignition::math::Vector3d(10.0, 0.0, 0.0)));
+  control_points.push_back(
+    std::make_tuple(
+      ignition::math::Vector3d(20.0, 20.0, 0.0),
+      ignition::math::Vector3d(0, 10.0, 0.0)));
+  Lane *l1 = s1->NewSplineLane(
+    {"l1"},
+    control_points,
+    {-5., 5.},
+    {-10., 10.});
+
+  EXPECT_EQ(rg.CheckInvariants(), std::vector<std::string>());
+
+  EXPECT_EQ(l1->id().id, "l1");
+  EXPECT_EQ(l1->segment(), s1);
+  EXPECT_EQ(l1->index(), 0);
+  EXPECT_EQ(l1->to_left(), nullptr);
+  EXPECT_EQ(l1->to_right(), nullptr);
+
+  auto spline = CreateSpline(control_points);
+  auto arc_length_interpolator =
+    std::make_unique<ArcLengthParameterizedSpline>(
+      std::move(spline), SplineLane::SplinesSamples());
+
+  EXPECT_NEAR(l1->length(), arc_length_interpolator->BaseSpline()->ArcLength(), kLinearTolerance);
+
+  EXPECT_NEAR(l1->lane_bounds(0.).r_min, -5., kVeryExact);
+  EXPECT_NEAR(l1->lane_bounds(0.).r_max,  5., kVeryExact);
+  EXPECT_NEAR(l1->driveable_bounds(0.).r_min, -10., kVeryExact);
+  EXPECT_NEAR(l1->driveable_bounds(0.).r_max,  10., kVeryExact);
+
+  // ToGeoPosition
+  // Reference line
+  // At the beginning, end and middle
+  EXPECT_GEO_NEAR(l1->ToGeoPosition({0., 0., 0.}), (0., 0., 0.), kLinearTolerance);
+  EXPECT_GEO_NEAR(l1->ToGeoPosition({arc_length_interpolator->BaseSpline()->ArcLength(), 0., 0.}), (20., 20.0, 0.), kLinearTolerance);
+  const auto point = arc_length_interpolator->InterpolateMthDerivative(0, arc_length_interpolator->BaseSpline()->ArcLength()/2.);
+  EXPECT_GEO_NEAR(l1->ToGeoPosition({arc_length_interpolator->BaseSpline()->ArcLength()/2., 0., 0.}), (point.X(), point.Y(), 0.), kLinearTolerance);
+
+  // On the plane but at any point over the road
+  // EXPECT_GEO_NEAR(l1->ToGeoPosition({5., 2., 0.}), (1., 1., 0.), kLinearTolerance);
+  // EXPECT_GEO_NEAR(l1->ToGeoPosition({12., -2., 0.}), (12., -2., 0.), kLinearTolerance);
+/*
+  // Outside the lane constraints
+  EXPECT_GEO_NEAR(l1->ToGeoPosition({-1., 0., 0.}), (0., 0., 0.), kLinearTolerance);
+  EXPECT_GEO_NEAR(l1->ToGeoPosition({21., 0., 0.}), (20., 0., 0.), kLinearTolerance);
+  // TODO: Need to work on the lateral constraints!!
+  // EXPECT_GEO_NEAR(l1->ToGeoPosition({5., 11., 0.}), (5., 10., 0.), kLinearTolerance);
+
+  // Orientation
+  EXPECT_ROT_NEAR(l1->GetOrientation({0., 0., 0.}), (0., 0., 0.), kAngularTolerance);
+  EXPECT_ROT_NEAR(l1->GetOrientation({20., 0., 0.}), (0., 0., 0.), kAngularTolerance);
+  EXPECT_ROT_NEAR(l1->GetOrientation({10., 2., 0.}), (0., 0., 0.), kAngularTolerance);
+  EXPECT_ROT_NEAR(l1->GetOrientation({10., -2., 0.}), (0., 0., 0.), kAngularTolerance);
+
+  // EvalMotionDerivatives
+  EXPECT_LANE_NEAR(l1->EvalMotionDerivatives({0., 0., 0.}, {0., 0., 0.}), (0., 0., 0.), kLinearTolerance);
+  EXPECT_LANE_NEAR(l1->EvalMotionDerivatives({0., 0., 0.}, {1., 0., 0.}), (1., 0., 0.), kLinearTolerance);
+  EXPECT_LANE_NEAR(l1->EvalMotionDerivatives({0., 0., 0.}, {0., 1., 0.}), (0., 1., 0.), kLinearTolerance);
+  EXPECT_LANE_NEAR(l1->EvalMotionDerivatives({0., 0., 0.}, {0., 0., 1.}), (0., 0., 1.), kLinearTolerance);
+  EXPECT_LANE_NEAR(l1->EvalMotionDerivatives({10., 2., 5.}, {0., 0., 1.}), (0., 0., 1.), kLinearTolerance);
+*/
+}
+
 
 } // rndf
 } // maliput
