@@ -52,7 +52,7 @@ class Segment : public api::Segment {
   const api::Junction* do_junction() const override;
 
   int do_num_lanes() const override {
-    id (lane_.get() == nullptr)
+    if (lane_.get() == nullptr)
       return 0;
     return 1;
   }

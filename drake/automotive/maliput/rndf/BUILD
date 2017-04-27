@@ -121,6 +121,15 @@ drake_cc_googletest(
     ],
 )
 
+drake_cc_googletest(
+    name = "segment_test",
+    size = "small",
+    srcs = ["test/segment_test.cc"],
+    deps = [
+        ":lanes",
+    ],
+)
+
 drake_cc_binary(
     name = "rndf_load",
     testonly = 1,
