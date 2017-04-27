@@ -33,7 +33,7 @@ api::RoadPosition RoadGeometry::DoToRoadPosition(
     const api::RoadPosition*,
     api::GeoPosition*,
     double*) const {
-  // TODO We need to find a way of implement this.
+  // TODO(@agalbachicar) We need to find a way of implement this.
   DRAKE_ABORT();
 }
 

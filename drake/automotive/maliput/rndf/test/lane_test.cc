@@ -18,11 +18,12 @@ namespace rndf {
 const double kLinearTolerance = 1e-3;
 const double kAngularTolerance = 1e-3;
 
+// Check the metadata of a lane and see if it behaves OK
 GTEST_TEST(RNDFSplineLanesTest, MetadataLane) {
   RoadGeometry rg({"FlatLineLane"}, kLinearTolerance, kAngularTolerance);
   Segment* s1 = rg.NewJunction({"j1"})->NewSegment({"s1"});
   std::vector<
-    std::tuple<ignition::math::Vector3d,ignition::math::Vector3d>>
+    std::tuple<ignition::math::Vector3d, ignition::math::Vector3d>>
       control_points;
   control_points.push_back(
     std::make_tuple(
@@ -50,14 +51,20 @@ GTEST_TEST(RNDFSplineLanesTest, MetadataLane) {
     EXPECT_EQ(l1->to_right(), nullptr);
   }
 }
-
+// We create a -.- connection and check its creation and correct invariants from
+// the road geometry. It will look like:
+//
+// 1.1.1 ----->1.1.2------>1.1.3
+//
+// This simple example is useful for checking several Lane and BranchPoint
+// functions.
 GTEST_TEST(RNDFSplineLanesTest, BranchpointsLane) {
   RoadGeometry rg({"BranchpointsLane"}, kLinearTolerance, kAngularTolerance);
   Lane *l1, *l2;
   {
   Segment* s1 = rg.NewJunction({"j1"})->NewSegment({"s1"});
   std::vector<
-    std::tuple<ignition::math::Vector3d,ignition::math::Vector3d>>
+    std::tuple<ignition::math::Vector3d, ignition::math::Vector3d>>
       control_points;
   control_points.push_back(
     std::make_tuple(
@@ -76,7 +83,7 @@ GTEST_TEST(RNDFSplineLanesTest, BranchpointsLane) {
   {
   Segment* s2 = rg.NewJunction({"j2"})->NewSegment({"s2"});
   std::vector<
-    std::tuple<ignition::math::Vector3d,ignition::math::Vector3d>>
+    std::tuple<ignition::math::Vector3d, ignition::math::Vector3d>>
       control_points;
   control_points.push_back(
     std::make_tuple(
@@ -120,6 +127,6 @@ GTEST_TEST(RNDFSplineLanesTest, BranchpointsLane) {
 }
 
 
-} // rndf
-} // maliput
-} // drake
+}  // namespace rndf
+}  // namespace maliput
+}  // namespace drake

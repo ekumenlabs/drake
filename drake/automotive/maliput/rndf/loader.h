@@ -30,8 +30,8 @@ namespace rndf {
 /// It has some basic and common characteristics of Maliput's API needed to
 /// construct the road_geometry.
 
-// TODO We should use the characteristics of the RNDF parsing. Please see issue
-// https://bitbucket.org/ekumen/terminus-simulation/issues/120
+// TODO(@agalbachicar) Should use the characteristics of the RNDF parsing.
+// See issue https://bitbucket.org/ekumen/terminus-simulation/issues/120
 struct RoadCharacteristics {
   /// Constructor for using default road geometries.
   RoadCharacteristics() = default;
@@ -79,7 +79,6 @@ class Loader {
     const std::string &file_name);
 
  private:
-
   /// It's used to compute the global coordinates based on an @p origin vector
   /// (composed of latitude [degrees], longitude [degrees], elevation [meters]).
   /// @p spherical_position is the ignition::rndf::Waypoint::Location() result.

@@ -16,6 +16,8 @@ namespace drake {
 namespace maliput {
 namespace rndf {
 
+// Some constructor and operator overloading assertions on DirectedWaypoint
+// class
 GTEST_TEST(RNDFBuilder, DirectedWaypointClass) {
   std::unique_ptr<DirectedWaypoint> directed_waypoint;
 
@@ -25,32 +27,41 @@ GTEST_TEST(RNDFBuilder, DirectedWaypointClass) {
   EXPECT_EQ(directed_waypoint->Tangent(), ignition::math::Vector3d::Zero);
 
   {
-    std::unique_ptr<DirectedWaypoint> copy_directed_waypoint = std::make_unique<DirectedWaypoint>(*directed_waypoint);
-    EXPECT_EQ(copy_directed_waypoint->Id(), ignition::rndf::UniqueId());
-    EXPECT_EQ(copy_directed_waypoint->Position(), ignition::math::Vector3d::Zero);
-    EXPECT_EQ(copy_directed_waypoint->Tangent(), ignition::math::Vector3d::Zero);
+    std::unique_ptr<DirectedWaypoint> copy_directed_waypoint =
+      std::make_unique<DirectedWaypoint>(*directed_waypoint);
+    EXPECT_EQ(copy_directed_waypoint->Id(),
+      ignition::rndf::UniqueId());
+    EXPECT_EQ(copy_directed_waypoint->Position(),
+      ignition::math::Vector3d::Zero);
+    EXPECT_EQ(copy_directed_waypoint->Tangent(),
+      ignition::math::Vector3d::Zero);
   }
 
-  directed_waypoint = std::make_unique<DirectedWaypoint>(ignition::rndf::UniqueId(1,2,3), ignition::math::Vector3d(1,2,3), ignition::math::Vector3d(4,5,6));
-  EXPECT_EQ(directed_waypoint->Id(), ignition::rndf::UniqueId(1,2,3));
-  EXPECT_EQ(directed_waypoint->Position(), ignition::math::Vector3d(1,2,3));
-  EXPECT_EQ(directed_waypoint->Tangent(), ignition::math::Vector3d(4,5,6));
+  directed_waypoint = std::make_unique<DirectedWaypoint>(
+    ignition::rndf::UniqueId(1, 2, 3),
+    ignition::math::Vector3d(1, 2, 3),
+    ignition::math::Vector3d(4, 5, 6));
+  EXPECT_EQ(directed_waypoint->Id(), ignition::rndf::UniqueId(1, 2, 3));
+  EXPECT_EQ(directed_waypoint->Position(), ignition::math::Vector3d(1, 2, 3));
+  EXPECT_EQ(directed_waypoint->Tangent(), ignition::math::Vector3d(4, 5, 6));
   {
     DirectedWaypoint copy_directed_waypoint = *directed_waypoint;
-    EXPECT_EQ(directed_waypoint->Id(), ignition::rndf::UniqueId(1,2,3));
-    EXPECT_EQ(directed_waypoint->Position(), ignition::math::Vector3d(1,2,3));
-    EXPECT_EQ(directed_waypoint->Tangent(), ignition::math::Vector3d(4,5,6));
+    EXPECT_EQ(directed_waypoint->Id(), ignition::rndf::UniqueId(1, 2, 3));
+    EXPECT_EQ(directed_waypoint->Position(), ignition::math::Vector3d(1, 2, 3));
+    EXPECT_EQ(directed_waypoint->Tangent(), ignition::math::Vector3d(4, 5, 6));
   }
 }
 
+// Constructor assertions and checks over the quantity of points for the
+// Connetion class
 GTEST_TEST(RNDFBuilder, ConnectionClass) {
   std::vector<DirectedWaypoint> directed_waypoints;
   directed_waypoints.push_back(DirectedWaypoint(
-    ignition::rndf::UniqueId(1,1,1),
+    ignition::rndf::UniqueId(1, 1, 1),
     ignition::math::Vector3d(0.0, 0.0, 0.0),
     ignition::math::Vector3d(10.0, 0.0, 0.0)));
   directed_waypoints.push_back(DirectedWaypoint(
-    ignition::rndf::UniqueId(1,1,2),
+    ignition::rndf::UniqueId(1, 1, 2),
     ignition::math::Vector3d(20.0, 0.0, 0.0),
     ignition::math::Vector3d(10.0, 0.0, 0.0)));
 
@@ -59,51 +70,56 @@ GTEST_TEST(RNDFBuilder, ConnectionClass) {
 
   EXPECT_EQ(connection->type(), Connection::kSpline);
   EXPECT_EQ(connection->id(), "1_1_1-1_1_2");
-  EXPECT_EQ(connection->start().Id(), ignition::rndf::UniqueId(1,1,1));
-  EXPECT_EQ(connection->end().Id(), ignition::rndf::UniqueId(1,1,2));
+  EXPECT_EQ(connection->start().Id(), ignition::rndf::UniqueId(1, 1, 1));
+  EXPECT_EQ(connection->end().Id(), ignition::rndf::UniqueId(1, 1, 2));
   EXPECT_EQ(connection->waypoints().size(), 2);
 
   directed_waypoints.clear();
-  EXPECT_THROW(std::make_unique<Connection>("1_1_1-1_1_2", directed_waypoints), std::runtime_error);
+  EXPECT_THROW(
+    std::make_unique<Connection>("1_1_1-1_1_2", directed_waypoints),
+    std::runtime_error);
 }
 
+// Builder constructor tests. Checks on the bounds and throws assertions
 GTEST_TEST(RNDFBuilder, BuilderConstructor) {
   EXPECT_NO_THROW(std::make_unique<Builder>(
     api::RBounds(-5. / 2., 5. / 2.),
-    api::RBounds(-10/ 2., 10. / 2.),
+    api::RBounds(-10 / 2., 10. / 2.),
     0.01,
     0.01 * M_PI));
 
   EXPECT_THROW(std::make_unique<Builder>(
     api::RBounds(-15. / 2., 5. / 2.),
-    api::RBounds(-10/ 2., 10. / 2.),
+    api::RBounds(-10 / 2., 10. / 2.),
     0.01,
     0.01 * M_PI), std::runtime_error);
 
   EXPECT_THROW(std::make_unique<Builder>(
     api::RBounds(-5. / 2., 15. / 2.),
-    api::RBounds(-10/ 2., 10. / 2.),
+    api::RBounds(-10 / 2., 10. / 2.),
     0.01,
     0.01 * M_PI), std::runtime_error);
 }
 
+// Assertions on the checks when creating a lane using the builder.
+// When we get the road_geometry, we check the created values and names.
 GTEST_TEST(RNDFBuilder, BuilderLaneConnections) {
   std::unique_ptr<Builder> builder = std::make_unique<Builder>(
     api::RBounds(-5. / 2., 5. / 2.),
-    api::RBounds(-10/ 2., 10. / 2.),
+    api::RBounds(-10 / 2., 10. / 2.),
     0.01,
     0.01 * M_PI);
 
   EXPECT_THROW(
-  	builder->CreateLaneConnections(1, 1,
-	  std::vector<ignition::math::Vector3d>()),
+    builder->CreateLaneConnections(1, 1,
+    std::vector<ignition::math::Vector3d>()),
     std::runtime_error);
 
   std::vector<ignition::math::Vector3d> points = {
-  	ignition::math::Vector3d(0., 0., 0.)
+    ignition::math::Vector3d(0., 0., 0.)
   };
   EXPECT_THROW(
-  	builder->CreateLaneConnections(1, 1, points),
+    builder->CreateLaneConnections(1, 1, points),
     std::runtime_error);
 
   points.push_back(ignition::math::Vector3d(10., 0., 0.));
@@ -126,6 +142,22 @@ GTEST_TEST(RNDFBuilder, BuilderLaneConnections) {
   EXPECT_EQ(lane->id().id, "l:1_1_1-1_1_2");
 }
 
+// We create a T connection and check its creation and correct invariants from
+// the road geometry. It will look like:
+//
+//            2.1.1
+//            |
+//            v
+//            2.1.2
+//            |
+//            v
+//            2.1.3
+//            \
+//             v
+// 1.1.1 ----->1.1.2------>1.1.3
+//
+// This simple example is useful for checking several Lane and BranchPoint
+// functions.
 GTEST_TEST(RNDFBuilder, BuilderConnections) {
   api::RBounds lane_bounds(-5. / 2., 5. / 2.);
   api::RBounds driveable_bounds(-10/ 2., 10. / 2.);
@@ -136,23 +168,23 @@ GTEST_TEST(RNDFBuilder, BuilderConnections) {
     0.01,
     0.01 * M_PI);
 
-	{
-	  std::vector<ignition::math::Vector3d> points = {
-	  	ignition::math::Vector3d(0., 0., 0.), // 1.1.1
-	  	ignition::math::Vector3d(10., 0., 0.), // 1.1.2
-	  	ignition::math::Vector3d(20., 0., 0.) // 1.1.3
-	  };
-	  builder->CreateLaneConnections(1, 1, points);
-	}
+  {
+    std::vector<ignition::math::Vector3d> points = {
+      ignition::math::Vector3d(0., 0., 0.),  // 1.1.1
+      ignition::math::Vector3d(10., 0., 0.),  // 1.1.2
+      ignition::math::Vector3d(20., 0., 0.)  // 1.1.3
+    };
+    builder->CreateLaneConnections(1, 1, points);
+  }
 
-	{
-	  std::vector<ignition::math::Vector3d> points = {
-	  	ignition::math::Vector3d(5., 20., 0.), // 2.1.1
-	  	ignition::math::Vector3d(5., 12.5, 0.), // 2.1.2
-	  	ignition::math::Vector3d(5., 5., 0.) // 2.1.3
-	  };
-	  builder->CreateLaneConnections(2, 1, points);
-	}
+  {
+    std::vector<ignition::math::Vector3d> points = {
+      ignition::math::Vector3d(5., 20., 0.),  // 2.1.1
+      ignition::math::Vector3d(5., 12.5, 0.),  // 2.1.2
+      ignition::math::Vector3d(5., 5., 0.)  // 2.1.3
+    };
+    builder->CreateLaneConnections(2, 1, points);
+  }
 
   EXPECT_THROW(builder->CreateConnection(lane_bounds,
     driveable_bounds,
@@ -184,18 +216,18 @@ GTEST_TEST(RNDFBuilder, BuildT) {
 
   {
     std::vector<ignition::math::Vector3d> points = {
-      ignition::math::Vector3d(0., 0., 0.), // 1.1.1
-      ignition::math::Vector3d(10., 0., 0.), // 1.1.2
-      ignition::math::Vector3d(20., 0., 0.) // 1.1.3
+      ignition::math::Vector3d(0., 0., 0.),  // 1.1.1
+      ignition::math::Vector3d(10., 0., 0.),  // 1.1.2
+      ignition::math::Vector3d(20., 0., 0.)  // 1.1.3
     };
     builder->CreateLaneConnections(1, 1, points);
   }
 
   {
     std::vector<ignition::math::Vector3d> points = {
-      ignition::math::Vector3d(5., 20., 0.), // 2.1.1
-      ignition::math::Vector3d(5., 12.5, 0.), // 2.1.2
-      ignition::math::Vector3d(5., 5., 0.) // 2.1.3
+      ignition::math::Vector3d(5., 20., 0.),  // 2.1.1
+      ignition::math::Vector3d(5., 12.5, 0.),  // 2.1.2
+      ignition::math::Vector3d(5., 5., 0.)  // 2.1.3
     };
     builder->CreateLaneConnections(2, 1, points);
   }
@@ -401,6 +433,6 @@ GTEST_TEST(RNDFBuilder, BuildT) {
   }
 }
 
-} // rndf
-} // maliput
-} // drake
+}  // namespace rndf
+}  // namespace maliput
+}  // namespace drake

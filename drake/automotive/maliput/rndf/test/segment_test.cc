@@ -18,6 +18,7 @@ namespace rndf {
 const double kLinearTolerance = 1e-12;
 const double kAngularTolerance = 1e-12;
 
+// It tests some segment creation checks and the values of the the lanes indexes
 GTEST_TEST(RNDFSegmentTest, MetadataLane) {
   RoadGeometry rg({"BareSegment"}, kLinearTolerance, kAngularTolerance);
   Segment* s1 = rg.NewJunction({"j1"})->NewSegment({"s1"});
@@ -25,7 +26,7 @@ GTEST_TEST(RNDFSegmentTest, MetadataLane) {
   EXPECT_EQ(s1->num_lanes(), 0);
 
   std::vector<
-    std::tuple<ignition::math::Vector3d,ignition::math::Vector3d>>
+    std::tuple<ignition::math::Vector3d, ignition::math::Vector3d>>
       control_points;
   control_points.push_back(
     std::make_tuple(
@@ -40,11 +41,11 @@ GTEST_TEST(RNDFSegmentTest, MetadataLane) {
   EXPECT_EQ(s1->num_lanes(), 1);
 
   EXPECT_THROW(
-  	s1->NewSplineLane({"l2"}, control_points, {-5., 5.}, {-10., 10.}),
-  	std::runtime_error);
+    s1->NewSplineLane({"l2"}, control_points, {-5., 5.}, {-10., 10.}),
+    std::runtime_error);
 }
 
 
-} // rndf
-} // maliput
-} // drake
+}  // namespace rndf
+}  // namespace maliput
+}  // namespace drake

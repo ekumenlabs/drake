@@ -64,7 +64,6 @@ class SplineLane : public Lane {
   static double SplinesSamples() { return kSplinesSamples; }
 
  private:
-
   api::LanePosition DoToLanePosition(
       const api::GeoPosition& geo_pos,
       api::GeoPosition* nearest_point,

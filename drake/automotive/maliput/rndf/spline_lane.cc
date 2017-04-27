@@ -41,14 +41,12 @@ SplineLane::SplineLane(const api::LaneId& id, const api::Segment* segment,
 
 api::LanePosition SplineLane::DoToLanePosition(
   const api::GeoPosition&, api::GeoPosition*, double*) const {
-  // TODO We need to find a way to implement it.
+  // TODO(@agalbachicar) We need to find a way to implement it.
   DRAKE_ABORT();
 }
 
 api::GeoPosition SplineLane::DoToGeoPosition(
   const api::LanePosition& lane_pos) const {
-  // RNDF doesn't have any elevation
-  //const double z = 0.0;
   // Calculate x,y of (s,0,0).
   const V2 xy = xy_of_s(lane_pos.s);
   // Calculate orientation of (s,r,h) basis at (s,0,0).

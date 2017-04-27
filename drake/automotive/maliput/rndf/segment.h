@@ -16,11 +16,7 @@ namespace drake {
 namespace maliput {
 namespace rndf {
 
-class ArcLane;
-class LineLane;
 class SplineLane;
-
-typedef Eigen::Matrix<double, 2, 1, Eigen::DontAlign> Point2;
 
 /// An api::Segment implementation.
 class Segment : public api::Segment {
@@ -29,7 +25,8 @@ class Segment : public api::Segment {
 
   /// Constructs a new Segment.
   ///
-  /// The Segment is not fully initialized until NewSplineLane() method is called.
+  /// The Segment is not fully initialized until NewSplineLane() method is
+  /// called.
   /// Right now, we don't have support for multilane, so just call
   ///  NewSplineLane() once in the lifespan of the object.
   /// @p junction must remain valid for the lifetime of this class.

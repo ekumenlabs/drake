@@ -18,11 +18,11 @@ namespace rndf {
 
 const double kLinearTolerance = 1e-4;
 
-#define EXPECT_IGN_VECTOR_NEAR(actual, expected, tolerance)	\
+#define EXPECT_IGN_VECTOR_NEAR(actual, expected, tolerance)  \
   do {                                                      \
     const ignition::math::Vector3d _actual(actual);         \
     const ignition::math::Vector3d _expected(expected);     \
-    const double _tolerance(tolerance);                   	\
+    const double _tolerance(tolerance);                     \
     EXPECT_NEAR(_actual.X(), _expected.X(), _tolerance);    \
     EXPECT_NEAR(_actual.Y(), _expected.Y(), _tolerance);    \
     EXPECT_NEAR(_actual.Z(), _expected.Z(), _tolerance);    \
@@ -42,9 +42,11 @@ CreateSpline(
   return spline;
 }
 
+// It checks the spline interpolator class and compares its resolution against
+// a straight line lane.
 GTEST_TEST(RNDFSplineHelperTest, StraightLine) {
   std::vector<
-    std::tuple<ignition::math::Vector3d,ignition::math::Vector3d>>
+    std::tuple<ignition::math::Vector3d, ignition::math::Vector3d>>
       control_points;
   control_points.push_back(
     std::make_tuple(
@@ -56,18 +58,21 @@ GTEST_TEST(RNDFSplineHelperTest, StraightLine) {
       ignition::math::Vector3d(10.0, 0.0, 0.0)));
 
   std::unique_ptr<ignition::math::Spline> spline =
-  	CreateSpline(control_points);
+    CreateSpline(control_points);
   std::unique_ptr<ArcLengthParameterizedSpline> arc_lenght_param_spline =
-  	std::make_unique<ArcLengthParameterizedSpline>(std::move(spline), 500);
+    std::make_unique<ArcLengthParameterizedSpline>(std::move(spline), 500);
 
   const double length = arc_lenght_param_spline->BaseSpline()->ArcLength();
   ignition::math::Vector3d p(0.0, 0.0, 0.0);
   for (double l = 0.0; l < length; l += 1.0) {
-  	p.X() = l;
-    EXPECT_IGN_VECTOR_NEAR(arc_lenght_param_spline->InterpolateMthDerivative(0, l), p, kLinearTolerance);
+    p.X() = l;
+    EXPECT_IGN_VECTOR_NEAR(
+      arc_lenght_param_spline->InterpolateMthDerivative(0, l),
+      p,
+      kLinearTolerance);
   }
 }
 
-} // rndf
-} // maliput
-} // drake
+}  // namespace rndf
+}  // namespace maliput
+}  // namespace drake
