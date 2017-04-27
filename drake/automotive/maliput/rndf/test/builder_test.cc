@@ -230,6 +230,7 @@ GTEST_TEST(RNDFBuilder, BuildT) {
     EXPECT_EQ(start_branch->GetBSide()->size(), 0);
     EXPECT_EQ(start_branch->GetASide()->get(0).lane, lane);
     EXPECT_EQ(start_branch->GetASide()->get(0).end, api::LaneEnd::kStart);
+    EXPECT_NE(start_branch->GetConfluentBranches(api::LaneEnd::kStart), nullptr);
 
     auto *end_branch = lane->GetBranchPoint(api::LaneEnd::kFinish);
     EXPECT_NE(end_branch, nullptr);
