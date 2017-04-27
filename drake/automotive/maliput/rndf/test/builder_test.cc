@@ -221,6 +221,14 @@ GTEST_TEST(RNDFBuilder, BuildT) {
 
     auto lane = segment->lane(0);
     EXPECT_EQ(lane->id().id, "l:1_1_1-1_1_2");
+    EXPECT_NE(lane->GetConfluentBranches(api::LaneEnd::kStart), nullptr);
+    EXPECT_EQ(lane->GetConfluentBranches(api::LaneEnd::kStart)->size(), 1);
+    EXPECT_NE(lane->GetConfluentBranches(api::LaneEnd::kFinish), nullptr);
+    EXPECT_EQ(lane->GetConfluentBranches(api::LaneEnd::kFinish)->size(), 2);
+    EXPECT_NE(lane->GetOngoingBranches(api::LaneEnd::kStart), nullptr);
+    EXPECT_EQ(lane->GetOngoingBranches(api::LaneEnd::kStart)->size(), 0);
+    EXPECT_NE(lane->GetOngoingBranches(api::LaneEnd::kFinish), nullptr);
+    EXPECT_EQ(lane->GetOngoingBranches(api::LaneEnd::kFinish)->size(), 1);
 
     auto *start_branch = lane->GetBranchPoint(api::LaneEnd::kStart);
     EXPECT_NE(start_branch, nullptr);
@@ -230,7 +238,6 @@ GTEST_TEST(RNDFBuilder, BuildT) {
     EXPECT_EQ(start_branch->GetBSide()->size(), 0);
     EXPECT_EQ(start_branch->GetASide()->get(0).lane, lane);
     EXPECT_EQ(start_branch->GetASide()->get(0).end, api::LaneEnd::kStart);
-    EXPECT_NE(start_branch->GetConfluentBranches(api::LaneEnd::kStart), nullptr);
 
     auto *end_branch = lane->GetBranchPoint(api::LaneEnd::kFinish);
     EXPECT_NE(end_branch, nullptr);
@@ -252,6 +259,14 @@ GTEST_TEST(RNDFBuilder, BuildT) {
 
     auto lane = segment->lane(0);
     EXPECT_EQ(lane->id().id, "l:1_1_2-1_1_3");
+    EXPECT_NE(lane->GetConfluentBranches(api::LaneEnd::kStart), nullptr);
+    EXPECT_EQ(lane->GetConfluentBranches(api::LaneEnd::kStart)->size(), 1);
+    EXPECT_NE(lane->GetConfluentBranches(api::LaneEnd::kFinish), nullptr);
+    EXPECT_EQ(lane->GetConfluentBranches(api::LaneEnd::kFinish)->size(), 1);
+    EXPECT_NE(lane->GetOngoingBranches(api::LaneEnd::kStart), nullptr);
+    EXPECT_EQ(lane->GetOngoingBranches(api::LaneEnd::kStart)->size(), 2);
+    EXPECT_NE(lane->GetOngoingBranches(api::LaneEnd::kFinish), nullptr);
+    EXPECT_EQ(lane->GetOngoingBranches(api::LaneEnd::kFinish)->size(), 0);
 
     auto *start_branch = lane->GetBranchPoint(api::LaneEnd::kStart);
     EXPECT_NE(start_branch, nullptr);
@@ -282,6 +297,14 @@ GTEST_TEST(RNDFBuilder, BuildT) {
 
     auto lane = segment->lane(0);
     EXPECT_EQ(lane->id().id, "l:2_1_1-2_1_2");
+    EXPECT_NE(lane->GetConfluentBranches(api::LaneEnd::kStart), nullptr);
+    EXPECT_EQ(lane->GetConfluentBranches(api::LaneEnd::kStart)->size(), 1);
+    EXPECT_NE(lane->GetConfluentBranches(api::LaneEnd::kFinish), nullptr);
+    EXPECT_EQ(lane->GetConfluentBranches(api::LaneEnd::kFinish)->size(), 1);
+    EXPECT_NE(lane->GetOngoingBranches(api::LaneEnd::kStart), nullptr);
+    EXPECT_EQ(lane->GetOngoingBranches(api::LaneEnd::kStart)->size(), 0);
+    EXPECT_NE(lane->GetOngoingBranches(api::LaneEnd::kFinish), nullptr);
+    EXPECT_EQ(lane->GetOngoingBranches(api::LaneEnd::kFinish)->size(), 1);
 
     auto *start_branch = lane->GetBranchPoint(api::LaneEnd::kStart);
     EXPECT_NE(start_branch, nullptr);
@@ -312,6 +335,14 @@ GTEST_TEST(RNDFBuilder, BuildT) {
 
     auto lane = segment->lane(0);
     EXPECT_EQ(lane->id().id, "l:2_1_2-2_1_3");
+    EXPECT_NE(lane->GetConfluentBranches(api::LaneEnd::kStart), nullptr);
+    EXPECT_EQ(lane->GetConfluentBranches(api::LaneEnd::kStart)->size(), 1);
+    EXPECT_NE(lane->GetConfluentBranches(api::LaneEnd::kFinish), nullptr);
+    EXPECT_EQ(lane->GetConfluentBranches(api::LaneEnd::kFinish)->size(), 1);
+    EXPECT_NE(lane->GetOngoingBranches(api::LaneEnd::kStart), nullptr);
+    EXPECT_EQ(lane->GetOngoingBranches(api::LaneEnd::kStart)->size(), 1);
+    EXPECT_NE(lane->GetOngoingBranches(api::LaneEnd::kFinish), nullptr);
+    EXPECT_EQ(lane->GetOngoingBranches(api::LaneEnd::kFinish)->size(), 1);
 
     auto *start_branch = lane->GetBranchPoint(api::LaneEnd::kStart);
     EXPECT_NE(start_branch, nullptr);
@@ -342,6 +373,14 @@ GTEST_TEST(RNDFBuilder, BuildT) {
 
     auto lane = segment->lane(0);
     EXPECT_EQ(lane->id().id, "l:2_1_3-1_1_2");
+    EXPECT_NE(lane->GetConfluentBranches(api::LaneEnd::kStart), nullptr);
+    EXPECT_EQ(lane->GetConfluentBranches(api::LaneEnd::kStart)->size(), 1);
+    EXPECT_NE(lane->GetConfluentBranches(api::LaneEnd::kFinish), nullptr);
+    EXPECT_EQ(lane->GetConfluentBranches(api::LaneEnd::kFinish)->size(), 2);
+    EXPECT_NE(lane->GetOngoingBranches(api::LaneEnd::kStart), nullptr);
+    EXPECT_EQ(lane->GetOngoingBranches(api::LaneEnd::kStart)->size(), 1);
+    EXPECT_NE(lane->GetOngoingBranches(api::LaneEnd::kFinish), nullptr);
+    EXPECT_EQ(lane->GetOngoingBranches(api::LaneEnd::kFinish)->size(), 1);
 
     auto *start_branch = lane->GetBranchPoint(api::LaneEnd::kStart);
     EXPECT_NE(start_branch, nullptr);
