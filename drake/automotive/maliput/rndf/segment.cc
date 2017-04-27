@@ -18,7 +18,7 @@ SplineLane* Segment::NewSplineLane(const api::LaneId& id,
                         ignition::math::Vector3d>> &control_points,
                       const api::RBounds& lane_bounds,
                       const api::RBounds& driveable_bounds) {
-  DRAKE_DEMAND(lane_.get() == nullptr);
+  DRAKE_THROW_UNLESS(lane_.get() == nullptr);
   std::unique_ptr<SplineLane> lane = std::make_unique<SplineLane>(
       id, this,
       control_points,

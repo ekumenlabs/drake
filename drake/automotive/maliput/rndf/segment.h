@@ -29,13 +29,15 @@ class Segment : public api::Segment {
 
   /// Constructs a new Segment.
   ///
-  /// The Segment is not fully initialized until one of NewLineLane()
-  /// or NewArcLane() is called exactly once.  @p junction must remain
-  /// valid for the lifetime of this class.
+  /// The Segment is not fully initialized until NewSplineLane() method is called.
+  /// Right now, we don't have support for multilane, so just call
+  ///  NewSplineLane() once in the lifespan of the object.
+  /// @p junction must remain valid for the lifetime of this class.
   Segment(const api::SegmentId& id, api::Junction* junction)
       : id_(id), junction_(junction) {}
 
   /// Gives the segment a newly constructed SplineLane.
+  /// @throw An exception if the object already has created a lane.
   SplineLane* NewSplineLane(const api::LaneId& id,
                       const std::vector<std::tuple<ignition::math::Vector3d,
                         ignition::math::Vector3d>> &control_points,
@@ -49,7 +51,11 @@ class Segment : public api::Segment {
 
   const api::Junction* do_junction() const override;
 
-  int do_num_lanes() const override { return 1; }
+  int do_num_lanes() const override {
+    id (lane_.get() == nullptr)
+      return 0;
+    return 1;
+  }
 
   const api::Lane* do_lane(int index) const override;
 
