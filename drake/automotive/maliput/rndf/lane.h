@@ -58,50 +58,21 @@ class Lane : public api::Lane {
   ///        reference path, which must be a subset of @p driveable_bounds
   /// @param driveable_bounds driveable bounds of the lane, uniform along the
   ///        entire reference path
-  /// @param p_scale isotropic scale factor for elevation and superelevation
-  /// @param elevation elevation function (see below)
-  /// @param superelevation superelevation function (see below)
   ///
   /// This is the base class for subclasses, each of which describe a
   /// primitive reference curve in the xy ground-plane of the world frame.
   /// The specific curve is expressed by a subclass's implementations of
-  /// private virtual functions; see the private method xy_of_p().
+  /// private virtual functions.
   ///
-  /// @p elevation and @p superelevation are cubic-polynomial functions which
-  /// define the elevation and superelevation as a function of position along
-  /// the planar reference curve.  @p elevation specifies the z-component of
-  /// the surface at (r,h) = (0,0).  @p superelevation specifies the angle
-  /// of the r-axis with respect to the horizon, i.e., how the road twists.
-  /// Thus, non-zero @p superelevation contributes to the z-component at
-  /// r != 0.
-  ///
-  /// These two functions (@p elevation and @p superelevation) must be
-  /// isotropically scaled to operate over the domain p in [0, 1], where
-  /// p is linear in the path-length of the planar reference curve,
-  /// p = 0 corresponds to the start and p = 1 to the end.  @p p_scale is
-  /// the scale factor.  In other words...
-  ///
-  /// Given:
-  ///  * a reference curve R(p) parameterized by p in domain [0, 1], which
-  ///    has a path-length q(p) in range [0, q_max], linearly related to p,
-  ///    where q_max is the total path-length of R (in real-world units);
-  ///  * the true elevation function E_true(q), parameterized by the
-  ///    path-length q of R;
-  ///  * the true superelevation function S_true(q), parameterized by the
-  ///    path-length q of R;
-  ///
-  /// then:
-  ///  * @p p_scale is q_max (and p = q / p_scale);
-  ///  * @p elevation is  E_scaled = (1 / p_scale) * E_true(p_scale * p);
-  ///  * @p superelevation is  S_scaled = (1 / p_scale) * S_true(p_scale * p).
+  /// This base implamentation will handle all the non-geometric stuff from the
+  /// lane. All geomtric computation will be moved to each sub lane childs. See
+  /// @class SplineLane for an example.
   Lane(const api::LaneId& id, const api::Segment* segment,
        const api::RBounds& lane_bounds,
-       const api::RBounds& driveable_bounds,
-       double p_scale)
+       const api::RBounds& driveable_bounds)
       : id_(id), segment_(segment),
         lane_bounds_(lane_bounds),
-        driveable_bounds_(driveable_bounds),
-        p_scale_(p_scale) {
+        driveable_bounds_(driveable_bounds) {
     DRAKE_DEMAND(lane_bounds_.r_min >= driveable_bounds_.r_min);
     DRAKE_DEMAND(lane_bounds_.r_max <= driveable_bounds_.r_max);
   }
@@ -151,9 +122,6 @@ class Lane : public api::Lane {
 
   const api::RBounds lane_bounds_;
   const api::RBounds driveable_bounds_;
-
- protected:
-  const double p_scale_{};
 };
 
 

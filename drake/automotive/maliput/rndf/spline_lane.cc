@@ -22,8 +22,8 @@ SplineLane::SplineLane(const api::LaneId& id, const api::Segment* segment,
     Lane(id,
       segment,
       lane_bounds,
-      driveable_bounds,
-      ComputeLength(control_points)) {
+      driveable_bounds) {
+  // It first creates a spline based on the positions and its tangents.
   std::unique_ptr<ignition::math::Spline> spline =
     std::make_unique<ignition::math::Spline>();
   spline->Tension(kTension);
@@ -31,29 +31,31 @@ SplineLane::SplineLane(const api::LaneId& id, const api::Segment* segment,
   for (const auto &point : control_points) {
     spline->AddPoint(std::get<0>(point), std::get<1>(point));
   }
+  // Then we move the spline to the ArcLengthParameterizedSpline to wrap the
+  // inverse function from the t parameter of the ignition::math::Spline to the
+  // Maliput s coordinate.
   spline_ = std::make_unique<ArcLengthParameterizedSpline>(
     std::move(spline),
     kSplinesSamples);
 }
 
 api::LanePosition SplineLane::DoToLanePosition(
-  const api::GeoPosition&,
-  api::GeoPosition*,
-  double*) const {
-    DRAKE_ABORT();
+  const api::GeoPosition&, api::GeoPosition*, double*) const {
+  // TODO We need to find a way to implement it.
+  DRAKE_ABORT();
 }
 
 api::GeoPosition SplineLane::DoToGeoPosition(
   const api::LanePosition& lane_pos) const {
   // RNDF doesn't have any elevation
-  const double z = 0.0;
+  //const double z = 0.0;
   // Calculate x,y of (s,0,0).
   const V2 xy = xy_of_s(lane_pos.s);
   // Calculate orientation of (s,r,h) basis at (s,0,0).
   const Rot3 ypr = Rabg_of_s(lane_pos.s);
   // Rotate (0,r,h) and sum with mapped (s,0,0).
   const V3 xyz =
-      ypr.apply({0., lane_pos.r, lane_pos.h}) + V3(xy.x(), xy.y(), z);
+      ypr.apply({0., lane_pos.r, lane_pos.h}) + V3(xy.x(), xy.y(), lane_pos.h);
   return {xyz.x(), xyz.y(), xyz.z()};
 }
 
@@ -178,6 +180,7 @@ Rot3 SplineLane::Rabg_of_s(const double s) const {
 double SplineLane::ComputeLength(
   const std::vector<std::tuple<ignition::math::Vector3d,
     ignition::math::Vector3d>> &points) {
+  DRAKE_THROW_UNLESS(points.size() >= 2);
   ignition::math::Spline spline;
   spline.AutoCalculate(true);
   spline.Tension(kTension);

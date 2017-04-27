@@ -120,8 +120,6 @@ GTEST_TEST(RNDFSplineLanesTest, FlatLineLane) {
   {
     EXPECT_GEO_NEAR(l1->ToGeoPosition({-1., 0., 0.}), (0., 0., 0.), kLinearTolerance);
     EXPECT_GEO_NEAR(l1->ToGeoPosition({21., 0., 0.}), (20., 0., 0.), kLinearTolerance);
-    // TODO: Need to work on the lateral constraints!!
-    // EXPECT_GEO_NEAR(l1->ToGeoPosition({5., 11., 0.}), (5., 10., 0.), kLinearTolerance);
   }
 
   // Orientation
@@ -238,7 +236,7 @@ GTEST_TEST(RNDFSplineLanesTest, ComputeLength) {
     std::make_tuple(
       ignition::math::Vector3d(0.0, 0.0, 0.0),
       ignition::math::Vector3d(10.0, 0.0, 0.0)));
-  control_points.push_back(add
+  control_points.push_back(
     std::make_tuple(
       ignition::math::Vector3d(20.0, 20.0, 0.0),
       ignition::math::Vector3d(0, 10.0, 0.0)));

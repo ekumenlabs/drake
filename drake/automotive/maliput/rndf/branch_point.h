@@ -16,7 +16,6 @@ namespace rndf {
 class BranchPoint;
 class Lane;
 
-
 /// An implementation of LaneEndSet.
 class LaneEndSet : public api::LaneEndSet {
  public:
