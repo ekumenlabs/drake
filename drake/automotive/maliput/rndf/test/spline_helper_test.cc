@@ -17,7 +17,6 @@ namespace maliput {
 namespace rndf {
 
 const double kLinearTolerance = 1e-4;
-const double kLinearToleranceProportionForModule = 0.05;
 
 #define EXPECT_IGN_VECTOR_NEAR(actual, expected, tolerance)	\
   do {                                                      \
