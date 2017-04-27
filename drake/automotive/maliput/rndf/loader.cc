@@ -15,7 +15,7 @@ Loader::LoadFile(const std::string &file_name) {
 
   std::unique_ptr<ignition::rndf::RNDF> rndfInfo =
     std::make_unique<ignition::rndf::RNDF>(file_name);
-  DRAKE_DEMAND(rndfInfo->Valid());
+  DRAKE_THROW_UNLESS(rndfInfo->Valid());
 
   const auto &segments = rndfInfo->Segments();
   // I get the first waypoint location and build the map
@@ -30,6 +30,9 @@ Loader::LoadFile(const std::string &file_name) {
     location.LongitudeReference().Degree(),
     0.0);
 
+  // We first build all segments so waypoints are populated in Builder class and
+  // then we move to the lane connections which make use of the UniqueIds of the
+  // waypoints to reference them.
   BuildSegments(origin, segments);
   BuildConnections(segments);
 
@@ -39,6 +42,9 @@ Loader::LoadFile(const std::string &file_name) {
 void Loader::BuildSegments(
   const ignition::math::Vector3d &origin,
   const std::vector<ignition::rndf::Segment> &segments) const {
+  // We iterete over each segment, getting the waypoitns and computing the
+  // global coordinates of them. Once all the waypoint information is retrieved,
+  // we create a lane connection with the builder.
   for (const auto &segment : segments) {
     for (const auto &lane : segment.Lanes()) {
       std::vector<ignition::math::Vector3d> waypoint_positions;
@@ -55,6 +61,9 @@ void Loader::BuildSegments(
 
 void Loader::BuildConnections(
   const std::vector<ignition::rndf::Segment> &segments) const {
+  // We iterate over the segments looking for each segment connection. We get
+  // the exit and entry id from them and the builder uses it to build a
+  // connection.
   for (const auto &segment : segments) {
     for (const auto &lane : segment.Lanes()) {
       for (const auto &exit : lane.Exits()) {

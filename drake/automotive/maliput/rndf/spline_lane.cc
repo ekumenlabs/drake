@@ -53,7 +53,7 @@ api::GeoPosition SplineLane::DoToGeoPosition(
   const V2 xy = xy_of_s(lane_pos.s);
   // Calculate orientation of (s,r,h) basis at (s,0,0).
   const Rot3 ypr = Rabg_of_s(lane_pos.s);
-  // Rotate (0,r,h) and sum with mapped (s,0,0).
+  // Rotate (0,r,h) and sum with mapped (s,0,h).
   const V3 xyz =
       ypr.apply({0., lane_pos.r, lane_pos.h}) + V3(xy.x(), xy.y(), lane_pos.h);
   return {xyz.x(), xyz.y(), xyz.z()};
@@ -76,6 +76,7 @@ api::LanePosition SplineLane::DoEvalMotionDerivatives(
 
 V3 SplineLane::s_hat_of_srh(const double s, const double r, const double h,
                       const Rot3& Rabg) const {
+  // We compute the derivative at s, r, h and then get the unit vector.
   const V3 W_prime = W_prime_of_srh(s, r, h, Rabg);
   return W_prime * (1.0 / W_prime.norm());
 }
@@ -133,22 +134,22 @@ V3 SplineLane::W_prime_of_srh(const double s, const double r, const double h,
 }
 
 V2 SplineLane::xy_of_s(const double s) const {
-  // xy_of_p it's called L which is a function
+  // xy_of_s it's called L which is a function
   // R --> R^2. We discard z component right now. We can say
-  // L = f(p) = (x(p) ; y(p))
+  // L = f(s) = (x(s) ; y(s))
   const auto &point = spline_->InterpolateMthDerivative(0, s);
   return {point.X(), point.Y()};
 }
 V2 SplineLane::xy_dot_of_s(const double s) const {
   // We get here the tangent, which is the first derivative of
-  // L --> dL(p) / dp
+  // L --> dL(s) / ds
   const auto &point = spline_->InterpolateMthDerivative(1, s);
   return {point.X(), point.Y()};
 }
 double SplineLane::heading_of_s(const double s) const {
-  // The tangent of the heading is the function of y(p) / x(p).
-  // So, we can say that h(p) = arctg (y(p) / x(p)). This function
-  // is a function like: h(p) = R --> R or h(f(x, y)) where f it's
+  // The tangent of the heading is the function of y(s) / x(s).
+  // So, we can say that h(s) = arctg (y(s) / x(s)). This function
+  // is a function like: h(s) = R --> R or h(f(x, y)) where f it's
   // a function defined like y / x. y and x are the components
   // of the first derivative of L. Then, we got: f: R^2 --> R
   const auto tangent = xy_dot_of_s(s);
@@ -156,11 +157,11 @@ double SplineLane::heading_of_s(const double s) const {
 }
 
 double SplineLane::heading_dot_of_s(const double s) const {
-  // Based on the explanation of heading_of_p, we got applying the chain rule:
-  // dh / dp = d/dp {arctg (f(x(p), y(p)))}
-  //  = 1 / (1 + f(x(p), y(p))^2) * d/dp {f(x(p), y(p))}
-  // As x(p) and y(p) and independant polynomials, we can say that:
-  // df(x(p), y(p)) / dp = (y' * x - y * x') / x^2
+  // Based on the explanation of heading_of_s, we got applying the chain rule:
+  // dh / ds = d/ds {arctg (f(x(s), y(s)))}
+  //  = 1 / (1 + f(x(s), y(s))^2) * d/ds {f(x(s), y(s))}
+  // As x(s) and y(s) and independant polynomials, we can say that:
+  // df(x(s), y(s)) / dp = (y' * x - y * x') / x^2
   // Where y and x are the components of the L' and, x' and y' are
   // the components of L'' as they are independant.
   const double heading = heading_of_s(s);
