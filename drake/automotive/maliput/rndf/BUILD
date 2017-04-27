@@ -122,4 +122,25 @@ drake_cc_googletest(
     ],
 )
 
+drake_cc_binary(
+    name = "rndf_load",
+    testonly = 1,
+    srcs = ["test/rndf_load.cc"],
+    deps = [
+        ":loader",
+        "//drake/common:text_logging_gflags",
+    ],
+)
+
+py_test(
+    name = "rndf_load_test",
+    size = "small",
+    srcs = ["test/rndf_load_test.py"],
+    args = ["drake/automotive/maliput/rndf/rndf_load"],
+    data = [
+        ":rndf_load",
+        ":rndfs",
+    ],
+)
+
 cpplint()
