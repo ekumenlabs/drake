@@ -33,7 +33,8 @@ api::RoadPosition RoadGeometry::DoToRoadPosition(
     const api::RoadPosition*,
     api::GeoPosition*,
     double*) const {
-  DRAKE_ABORT();  // TODO(maddog@tri.global) Implement me.
+  // TODO We need to find a way of implement this.
+  DRAKE_ABORT();
 }
 
 }  // namespace rndf

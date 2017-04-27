@@ -14,14 +14,17 @@ namespace drake {
 namespace maliput {
 namespace rndf {
 
-/// A simple api::RoadGeometry implementation that only supports a single
-/// lane per segment.  Use the Builder interface to actually assemble
-/// a sensible road network.
+/// A simple api::RoadGeometry implementation for RNDF specification.
+/// Use the Builder interface to actually assemble a sensible road network.
+/// Further information on RNDF specification can be found:
+/// https://www.grandchallenge.org/grandchallenge/docs/RNDF_MDF_Formats_031407.pdf
 class RoadGeometry : public api::RoadGeometry {
  public:
   DRAKE_NO_COPY_NO_MOVE_NO_ASSIGN(RoadGeometry)
 
-  /// Constructs an empty RoadGeometry with the specified tolerances.
+  /// Constructs an empty RoadGeometry with the specified tolerances. It will
+  /// use @p to set a name to the object, and @linear_tolerance
+  /// and @p angular_tolerance for the CheckInvartiants constraints checks.
   RoadGeometry(const api::RoadGeometryId& id,
                const double linear_tolerance,
                const double angular_tolerance)
