@@ -16,8 +16,8 @@ namespace drake {
 namespace maliput {
 namespace rndf {
 
-const double kLinearTolerance = 1e-3;
-const double kAngularTolerance = 1e-3;
+const double kLinearTolerance = 1e-6;
+const double kAngularTolerance = 1e-6;
 const double kVeryExact = 1e-12;
 
 std::unique_ptr<ignition::math::Spline>
@@ -37,11 +37,11 @@ CreateSpline(
 #define EXPECT_GEO_NEAR(actual, expected, tolerance)         \
   do {                                                       \
     const api::GeoPosition _actual(actual);                  \
-    const api::GeoPosition _expected expected;               \
+    const api::GeoPosition _expected(expected);               \
     const double _tolerance = (tolerance);                   \
-    EXPECT_NEAR(_actual.x, _expected.x, _tolerance);         \
-    EXPECT_NEAR(_actual.y, _expected.y, _tolerance);         \
-    EXPECT_NEAR(_actual.z, _expected.z, _tolerance);         \
+    EXPECT_NEAR(_actual.x(), _expected.x(), _tolerance);         \
+    EXPECT_NEAR(_actual.y(), _expected.y(), _tolerance);         \
+    EXPECT_NEAR(_actual.z(), _expected.z(), _tolerance);         \
   } while (0)
 
 #define EXPECT_LANE_NEAR(actual, expected, tolerance)         \
@@ -49,9 +49,9 @@ CreateSpline(
     const api::LanePosition _actual(actual);                  \
     const api::LanePosition _expected expected;               \
     const double _tolerance = (tolerance);                    \
-    EXPECT_NEAR(_actual.s, _expected.s, _tolerance);          \
-    EXPECT_NEAR(_actual.r, _expected.r, _tolerance);          \
-    EXPECT_NEAR(_actual.h, _expected.h, _tolerance);          \
+    EXPECT_NEAR(_actual.s(), _expected.s(), _tolerance);          \
+    EXPECT_NEAR(_actual.r(), _expected.r(), _tolerance);          \
+    EXPECT_NEAR(_actual.h(), _expected.h(), _tolerance);          \
   } while (0)
 
 #define EXPECT_ROT_NEAR(actual, expected, tolerance)                 \
@@ -106,41 +106,41 @@ GTEST_TEST(RNDFSplineLanesTest, FlatLineLane) {
   // Reference line
   // At the beginning, end and middle
   {
-    EXPECT_GEO_NEAR(l1->ToGeoPosition({0., 0., 0.}),
-      (0., 0., 0.), kLinearTolerance);
-    EXPECT_GEO_NEAR(l1->ToGeoPosition({20., 0., 0.}),
-      (20., 0., 0.), kLinearTolerance);
-    EXPECT_GEO_NEAR(l1->ToGeoPosition({10., 0., 0.}),
-      (10., 0., 0.), kLinearTolerance);
+    EXPECT_GEO_NEAR(l1->ToGeoPosition(api::LanePosition(0., 0., 0.)),
+      api::GeoPosition(0., 0., 0.), kLinearTolerance);
+    EXPECT_GEO_NEAR(l1->ToGeoPosition(api::LanePosition(20., 0., 0.)),
+      api::GeoPosition(20., 0., 0.), kLinearTolerance);
+    EXPECT_GEO_NEAR(l1->ToGeoPosition(api::LanePosition(10., 0., 0.)),
+      api::GeoPosition(10., 0., 0.), kLinearTolerance);
   }
 
   // A couple of meters away of the reference baseline
   {
-    EXPECT_GEO_NEAR(l1->ToGeoPosition({5., 2., 0.}),
-      (5., 2., 0.), kLinearTolerance);
-    EXPECT_GEO_NEAR(l1->ToGeoPosition({12., -2., 0.}),
-      (12., -2., 0.), kLinearTolerance);
-    EXPECT_GEO_NEAR(l1->ToGeoPosition({18., 1.234567, 0.}),
-      (18., 1.234567, 0.), kLinearTolerance);
+    EXPECT_GEO_NEAR(l1->ToGeoPosition(api::LanePosition(5., 2., 0.)),
+      api::GeoPosition(5., 2., 0.), kLinearTolerance);
+    EXPECT_GEO_NEAR(l1->ToGeoPosition(api::LanePosition(12., -2., 0.)),
+      api::GeoPosition(12., -2., 0.), kLinearTolerance);
+    EXPECT_GEO_NEAR(l1->ToGeoPosition(api::LanePosition(18., 1.234567, 0.)),
+      api::GeoPosition(18., 1.234567, 0.), kLinearTolerance);
   }
 
   // Outside the lane constraints
   {
-    EXPECT_GEO_NEAR(l1->ToGeoPosition({-1., 0., 0.}),
-      (0., 0., 0.), kLinearTolerance);
-    EXPECT_GEO_NEAR(l1->ToGeoPosition({21., 0., 0.}),
-      (20., 0., 0.), kLinearTolerance);
+    EXPECT_THROW(l1->ToGeoPosition(api::LanePosition(-1., 0., 0.)),
+      std::runtime_error);
+    EXPECT_THROW(l1->ToGeoPosition(api::LanePosition(21., 0., 0.)),
+      std::runtime_error);
   }
 
   // Orientation
   {
-    EXPECT_ROT_NEAR(l1->GetOrientation({0., 0., 0.}),
+    EXPECT_ROT_NEAR(l1->GetOrientation(api::LanePosition(0., 0., 0.)),
       (0., 0., 0.), kAngularTolerance);
-    EXPECT_ROT_NEAR(l1->GetOrientation({20., 0., 0.}),
+    EXPECT_ROT_NEAR(l1->GetOrientation(api::LanePosition(20., 0., 0.)),
       (0., 0., 0.), kAngularTolerance);
-    EXPECT_ROT_NEAR(l1->GetOrientation({10., 2., 0.}),
+    EXPECT_ROT_NEAR(l1->GetOrientation(api::LanePosition(10., 2., 0.)),
       (0., 0., 0.), kAngularTolerance);
-    EXPECT_ROT_NEAR(l1->GetOrientation({10., -2., 0.}),
+    EXPECT_ROT_NEAR(l1->GetOrientation(api::LanePosition(10., -2., 0.)),
      (0., 0., 0.), kAngularTolerance);
   }
 
@@ -185,7 +185,7 @@ GTEST_TEST(RNDFSplineLanesTest, CurvedLineLane) {
   auto spline = CreateSpline(control_points);
   auto arc_length_interpolator =
     std::make_unique<ArcLengthParameterizedSpline>(
-      std::move(spline), SplineLane::SplinesSamples());
+      std::move(spline), SplineLane::SplineErrorBound());
   // Check length
   const double s_total = arc_length_interpolator->BaseSpline()->ArcLength();
   {
@@ -204,14 +204,14 @@ GTEST_TEST(RNDFSplineLanesTest, CurvedLineLane) {
   // Reference line
   // At the beginning, end and middle
   {
-    EXPECT_GEO_NEAR(l1->ToGeoPosition({0., 0., 0.}),
-      (0., 0., 0.), kLinearTolerance);
-    EXPECT_GEO_NEAR(l1->ToGeoPosition({s_total, 0., 0.}),
-      (20., 20.0, 0.), kLinearTolerance);
+    EXPECT_GEO_NEAR(l1->ToGeoPosition(api::LanePosition(0., 0., 0.)),
+      api::GeoPosition(0., 0., 0.), kLinearTolerance);
+    EXPECT_GEO_NEAR(l1->ToGeoPosition(api::LanePosition(s_total, 0., 0.)),
+      api::GeoPosition(20., 20.0, 0.), kLinearTolerance);
     const auto point =
       arc_length_interpolator->InterpolateMthDerivative(0, s_total/2.);
-    EXPECT_GEO_NEAR(l1->ToGeoPosition({s_total/2., 0., 0.}),
-      (point.X(), point.Y(), 0.), kLinearTolerance);
+    EXPECT_GEO_NEAR(l1->ToGeoPosition(api::LanePosition(s_total/2., 0., 0.)),
+      api::GeoPosition(point.X(), point.Y(), 0.), kLinearTolerance);
   }
 
   // On the plane but at any point over the road
@@ -221,10 +221,11 @@ GTEST_TEST(RNDFSplineLanesTest, CurvedLineLane) {
     const auto tangent =
       arc_length_interpolator->InterpolateMthDerivative(1, s_total/2.);
     const double yaw = std::atan2(tangent.Y(), tangent.X());
-    const double x_offset = -2. * std::cos(yaw);
-    const double y_offset = 2. * std::sin(yaw);
-    EXPECT_GEO_NEAR(l1->ToGeoPosition({s_total/2., 2., 0.}),
-     (point.X() + x_offset, point.Y() + y_offset, 0.), kLinearTolerance);
+    const double x_offset = -2. * std::sin(yaw);
+    const double y_offset = 2. * std::cos(yaw);
+    EXPECT_GEO_NEAR(l1->ToGeoPosition(api::LanePosition(s_total/2., 2., 0.)),
+      api::GeoPosition(point.X() + x_offset, point.Y() + y_offset, 0.),
+      kLinearTolerance);
   }
   // Outside the lane constraints
   {
@@ -233,18 +234,20 @@ GTEST_TEST(RNDFSplineLanesTest, CurvedLineLane) {
     const auto tangent =
       arc_length_interpolator->InterpolateMthDerivative(1, s_total/2.);
     const double yaw = std::atan2(tangent.Y(), tangent.X());
-    const double x_offset = -15. * std::cos(yaw);
-    const double y_offset = 15. * std::sin(yaw);
-    EXPECT_GEO_NEAR(l1->ToGeoPosition({s_total/2., 15., 0.}),
-      (point.X() + x_offset, point.Y() + y_offset, 0.), kLinearTolerance);
+    const double x_offset = -15. * std::sin(yaw);
+    const double y_offset = 15. * std::cos(yaw);
+    EXPECT_GEO_NEAR(l1->ToGeoPosition(api::LanePosition(s_total/2., 15., 0.)),
+      api::GeoPosition(point.X() + x_offset, point.Y() + y_offset, 0.),
+      kLinearTolerance);
   }
   // Orientation
   {
-    EXPECT_ROT_NEAR(l1->GetOrientation({0., 0., 0.}), (0., 0., 0.),
-      kAngularTolerance);
+    EXPECT_ROT_NEAR(l1->GetOrientation(api::LanePosition(0., 0., 0.)),
+      (0., 0., 0.), kAngularTolerance);
     EXPECT_ROT_NEAR(
       l1->GetOrientation(
-        {arc_length_interpolator->BaseSpline()->ArcLength(), 0., 0.}),
+        api::LanePosition(
+          arc_length_interpolator->BaseSpline()->ArcLength(), 0., 0.)),
       (0., 0., M_PI/2.), kAngularTolerance);
     const auto point =
       arc_length_interpolator->InterpolateMthDerivative(1,
@@ -252,15 +255,18 @@ GTEST_TEST(RNDFSplineLanesTest, CurvedLineLane) {
     const double yaw = std::atan2(point.Y(), point.X());
     EXPECT_ROT_NEAR(
       l1->GetOrientation(
-        {arc_length_interpolator->BaseSpline()->ArcLength() / 2., 0., 0.}),
+        api::LanePosition(
+          arc_length_interpolator->BaseSpline()->ArcLength() / 2., 0., 0.)),
        (0., 0., yaw), kAngularTolerance);
     EXPECT_ROT_NEAR(
       l1->GetOrientation(
-        {arc_length_interpolator->BaseSpline()->ArcLength() / 2., 2., 0.}),
+        api::LanePosition(
+          arc_length_interpolator->BaseSpline()->ArcLength() / 2., 2., 0.)),
       (0., 0., yaw), kAngularTolerance);
     EXPECT_ROT_NEAR(
       l1->GetOrientation(
-        {arc_length_interpolator->BaseSpline()->ArcLength() / 2., -2., 0.}),
+        api::LanePosition(
+          arc_length_interpolator->BaseSpline()->ArcLength() / 2., -2., 0.)),
       (0., 0., yaw), kAngularTolerance);
   }
   // EvalMotionDerivatives

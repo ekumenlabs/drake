@@ -1,13 +1,13 @@
 #pragma once
 
+#include <algorithm>
 #include <cmath>
+#include <map>
 #include <memory>
-#include <vector>
-#include <tuple>
 #include <sstream>
 #include <string>
-#include <map>
-#include <algorithm>
+#include <vector>
+#include <tuple>
 
 #include "ignition/math/Vector3.hh"
 #include "ignition/math/SphericalCoordinates.hh"
@@ -41,7 +41,7 @@ struct RoadCharacteristics {
       : lane_width(lw), driveable_width(dw) {}
 
   const double lane_width{4.};
-  const double driveable_width{8.};
+  const double driveable_width{4.};
 
   const api::RBounds lane_bounds{
     -lane_width / 2.,

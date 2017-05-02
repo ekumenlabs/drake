@@ -13,6 +13,10 @@ namespace drake {
 namespace maliput {
 namespace rndf {
 
+const double Builder::kWaypointDistancePhase = 0.;
+
+const double Builder::kLinearStep = 1e-2;
+
 Builder::Builder(const api::RBounds& lane_bounds,
                  const api::RBounds& driveable_bounds,
                  const double linear_tolerance,
@@ -39,13 +43,15 @@ void Builder::CreateConnection(
     exit_it->second,
     entry_it->second
   };
-  CreateLane(lane_bounds_, driveable_bounds_, control_points);
+  CreateLane(lane_bounds, driveable_bounds, control_points);
 }
 
 void Builder::CreateLaneConnections(
   const uint segment_id,
   const uint lane_id,
-  const std::vector<ignition::math::Vector3d> &points) {
+  const std::vector<DirectedWaypoint> &points,
+  const api::RBounds& lane_bounds,
+  const api::RBounds& driveable_bounds) {
   DRAKE_THROW_UNLESS(points.size() >= 2);
   // We generate the spline
   ignition::math::Spline spline;
@@ -53,28 +59,246 @@ void Builder::CreateLaneConnections(
   spline.Tension(SplineLane::Tension());
 
   for (const auto &point : points) {
-    spline.AddPoint(ignition::math::Vector3d(point.X(), point.Y(), 0.));
+    spline.AddPoint(ignition::math::Vector3d(
+      point.Position().X(), point.Position().Y(), 0.));
   }
 
   // We move the spline to connections
-  for (uint i = 0; i < (points.size() - 1); i++) {
-    // Create the directed waypoints
-    const DirectedWaypoint init_wp(
-      ignition::rndf::UniqueId(segment_id, lane_id, i + 1),
-      spline.Point(i),
-      spline.Tangent(i));
-    const DirectedWaypoint end_wp(
-      ignition::rndf::UniqueId(segment_id, lane_id, i + 2),
-      spline.Point(i + 1),
-      spline.Tangent(i + 1));
-    // Add the waypoints to the map so as to use them later
-    // for connections
-    directed_waypoints_[init_wp.Id().String()] = init_wp;
-    directed_waypoints_[end_wp.Id().String()] = end_wp;
+  std::vector<DirectedWaypoint> wps;
+  for (uint i = 0; i < points.size(); i++) {
+    DirectedWaypoint dw = points[i];
+    dw.Tangent() = spline.Tangent(i);
+    directed_waypoints_[dw.Id().String()] = dw;
+    wps.push_back(dw);
 
-    // Create the vector and build the name of the road
-    const std::vector<DirectedWaypoint> wps = {init_wp, end_wp};
-    CreateLane(lane_bounds_, driveable_bounds_, wps);
+    if (i == 0)
+      continue;
+    if (dw.is_exit() || dw.is_entry() || i == (points.size() - 1)) {
+      CreateLane(lane_bounds, driveable_bounds, wps);
+      wps.clear();
+      wps.push_back(dw);
+    }
+  }
+}
+
+void Builder::CreateSegmentConnections(
+    const uint segment_id,
+    std::vector<ConnectedLane> *lanes) {
+  DRAKE_DEMAND(lanes != nullptr);
+  // Build the vector of waypoints
+  std::vector<std::vector<DirectedWaypoint>> lane_waypoints;
+  for (ConnectedLane &lane : *lanes) {
+    lane_waypoints.push_back(lane.waypoints);
+  }
+  // Build the intermediate control points
+  CreateNewControlPointsForLanes(&lane_waypoints);
+  // Fill in the map the waypoints
+  for (uint j = 0; j < lanes->size(); j++) {
+    ConnectedLane &lane = lanes->at(j);
+    const std::vector<DirectedWaypoint> &lane_waypoint_list = lane_waypoints[j];
+    for (uint i = 0; i < (lane_waypoint_list.size() - 1); i ++) {
+      if (lane_waypoint_list[i].Id().Valid() &&
+        lane_waypoint_list[i + 1].Id().Valid()) {
+        // Create the lane
+        std::vector<DirectedWaypoint> wps;
+        wps.push_back(lane_waypoint_list[i]);
+        wps.push_back(lane_waypoint_list[i + 1]);
+        CreateLane(lane.lane_bounds, lane.driveable_bounds, wps);
+        // Add the pair of waypoints to the map
+        directed_waypoints_[lane_waypoint_list[i].Id().String()] =
+          lane_waypoint_list[i];
+        directed_waypoints_[lane_waypoint_list[i + 1].Id().String()] =
+          lane_waypoint_list[i + 1];
+      }
+    }
+  }
+}
+
+std::unique_ptr<ignition::math::Spline> Builder::CreateSpline(
+  const std::vector<DirectedWaypoint> *waypoints) {
+  DRAKE_DEMAND(waypoints != nullptr);
+  // We generate the spline
+  std::unique_ptr<ignition::math::Spline> spline =
+    std::make_unique<ignition::math::Spline>();
+  spline->AutoCalculate(true);
+  spline->Tension(SplineLane::Tension());
+  // Add only valid waypoints
+  for (const auto &point : *waypoints) {
+    if (point.Id().String() == "-1.-1.-1")
+      continue;
+    spline->AddPoint(ignition::math::Vector3d(
+      point.Position().X(), point.Position().Y(), 0.));
+  }
+  return spline;
+}
+
+void Builder::BuildTangentsForWaypoints(
+  std::vector<DirectedWaypoint> *waypoints) {
+  DRAKE_DEMAND(waypoints != nullptr);
+  // We generate the spline
+  std::unique_ptr<ignition::math::Spline> spline = CreateSpline(waypoints);
+  uint base_id = 0;
+  for (uint i = 0; i < waypoints->size(); i++) {
+    if (waypoints->at(i).Id().String() == "-1.-1.-1") {
+      base_id = i;
+      continue;
+    } else {
+      waypoints->at(i).Tangent() = spline->Tangent(i - base_id);
+    }
+  }
+}
+
+
+double Builder::ComputeDistance(
+  const DirectedWaypoint &base,
+  const DirectedWaypoint &destiny) {
+  return (destiny.Position() - base.Position()).Dot(
+    ignition::math::Vector3d(base.Tangent()).Normalize());
+}
+
+std::vector<int> Builder::GetInitialLaneToProcess(
+  std::vector<std::vector<DirectedWaypoint>> *lanes,
+  const int index) {
+  DRAKE_DEMAND(lanes != nullptr);
+  // Compute the distance matrix
+  std::vector<std::vector<double>> distances_matrix;
+  for (uint i = 0; i < lanes->size(); i++) {
+    distances_matrix.push_back(std::vector<double>());
+    for (uint j = 0; j < lanes->size(); j++) {
+      if (i == j) {
+        // It is the distance against the same point
+        distances_matrix[i].push_back(-1.);
+      } else if (index >= static_cast<int>(lanes->at(i).size()) ||
+        index >= static_cast<int>(lanes->at(j).size())) {
+        // In this case it's none sense to compute the distance as one of the
+        // lanes is shorter that the other at least in terms of waypoints.
+        distances_matrix[i].push_back(-2.);
+      } else {
+        // We compute the distance and in case it's less than zero we
+        // truncate it to zero to set mean that this point is further
+        // than the other.
+        distances_matrix[i].push_back(
+          ComputeDistance(lanes->at(i)[index], lanes->at(j)[index]));
+      }
+    }
+  }
+  // Compute the number of valid distances
+  std::vector<std::tuple<int, int>> index_valid_distances;
+  int i = 0;
+  for (const auto distances : distances_matrix) {
+    int number_of_valid_distances = 0;
+    for (const auto d : distances) {
+      if (d > kWaypointDistancePhase) {
+        number_of_valid_distances++;
+      }
+    }
+    index_valid_distances.push_back(std::make_tuple(i,
+      number_of_valid_distances));
+    i++;
+  }
+
+  // Sort the tuple vector by increasing number of valid distances.
+  // This gives us the first values of the vectors with the lane ids with
+  // waypoints that appear first
+  std::sort(std::begin(index_valid_distances), std::end(index_valid_distances),
+    [](auto const &t_a, auto const &t_b) {
+      return std::get<1>(t_a) > std::get<1>(t_b);
+    });
+
+  // Create a vector with all the lane ids that appear first and then return it
+  std::vector<int> ids;
+  for (const auto id_zeros : index_valid_distances) {
+    if (std::get<1>(id_zeros) == std::get<1>(index_valid_distances[0]))
+      ids.push_back(std::get<0>(id_zeros));
+  }
+  // In case we have all the lane ids, no one is first, all are on the same
+  // line.
+  if (ids.size() == index_valid_distances.size()) {
+    ids.clear();
+  }
+  return ids;
+}
+
+void Builder::AddWaypointIfNecessary(const std::vector<int> &ids,
+  std::vector<std::vector<DirectedWaypoint>> *lanes,
+  const int index) {
+  DRAKE_DEMAND(lanes != nullptr);
+
+  for (int i = 0; i < static_cast<int>(lanes->size()); i++) {
+    std::vector<DirectedWaypoint> &lane = lanes->at(i);
+    // Check id the id is in the ids (first-to-appear vector)
+    if (std::find(ids.begin(), ids.end(), i) != ids.end()) {
+      continue;
+    }
+
+    if (ids.size() == 0 && static_cast<int>(lane.size()) > index) {
+      continue;
+    }
+    if (static_cast<int>(lane.size()) <= index) {
+      // No more lane, so we add a new blank directed waypoint
+      lane.push_back(DirectedWaypoint());
+    } else if (lane[index].Id().Z() == 1) {
+      // As the waypoint is first one, we need to add one blank at the
+      // beginning.
+      std::vector<DirectedWaypoint> new_lane;
+      new_lane.insert(new_lane.begin(), lane.begin(), lane.begin() + index);
+      new_lane.push_back(DirectedWaypoint());
+      new_lane.insert(new_lane.end(), lane.begin() + index, lane.end());
+      lane = new_lane;
+    } else {
+      // Here we need to add a waypoint to the respective position of the side
+      // lane.
+      // Build the spline
+      auto spline = CreateSpline(&(lanes->at(i)));
+      std::unique_ptr<ArcLengthParameterizedSpline> arc_lenght_param_spline =
+        std::make_unique<ArcLengthParameterizedSpline>(std::move(spline),
+          linear_tolerance_);
+      double s = arc_lenght_param_spline->FindClosestPointTo(
+        lanes->at(ids[0])[index].Position(), kLinearStep);
+      // Build the waypoint
+      DirectedWaypoint new_wp(
+        ignition::rndf::UniqueId(lanes->at(i)[index-1].Id().X(),
+          lanes->at(i)[index-1].Id().Y(),
+          lanes->at(i).size() + 1),
+        arc_lenght_param_spline->InterpolateMthDerivative(0, s),
+        false,
+        false,
+        arc_lenght_param_spline->InterpolateMthDerivative(1, s));
+      // Insert it into the vector.
+      std::vector<DirectedWaypoint> new_lane;
+      new_lane.insert(new_lane.begin(), lane.begin(), lane.begin() + index);
+      new_lane.push_back(new_wp);
+      new_lane.insert(new_lane.end(), lane.begin() + index, lane.end());
+      lane = new_lane;
+    }
+  }
+}
+
+void Builder::CreateNewControlPointsForLanes(
+  std::vector<std::vector<DirectedWaypoint>> *lanes) {
+  DRAKE_DEMAND(lanes != nullptr);
+  // Load the tangents for each lane waypoints
+  for (std::vector<DirectedWaypoint> &lane : *lanes) {
+    BuildTangentsForWaypoints(&lane);
+  }
+  int i = 0;
+
+  bool should_continue = true;
+  while (should_continue && i < 10) {
+    // Get the lanes ids which appear first
+    auto ids = GetInitialLaneToProcess(lanes, i);
+    // We need to check if we need to create a waypoint for the other lane and
+    // add them if necessary.
+    AddWaypointIfNecessary(ids, lanes, i);
+    // Check if index is bounded to any of the lanes
+    i++;
+    should_continue = false;
+    for (const auto lane : *lanes) {
+        if (i < static_cast<int>(lane.size())) {
+          should_continue = true;
+          break;
+        }
+    }
   }
 }
 
@@ -125,7 +349,14 @@ void Builder::CreateLane(
     BuildName(start_id.X(), start_id.Y(), start_id.Z()) +
     "-" +
     BuildName(end_id.X(), end_id.Y(), end_id.Z());
-  connections_.push_back(std::make_unique<Connection>(name, control_points));
+  if (name.find("1_2_") != std::string::npos)  {
+    std::cout << name << std::endl;
+  }
+  connections_.push_back(std::make_unique<Connection>(
+    name,
+    control_points,
+    lane_bounds,
+    driveable_bounds));
   DRAKE_DEMAND(connections_.back() != nullptr);
 }
 
@@ -212,8 +443,8 @@ Lane* Builder::BuildConnection(
       }
       lane = segment->NewSplineLane(lane_id,
         points_tangents,
-        lane_bounds_,
-        driveable_bounds_);
+        connection->lane_bounds(),
+        connection->driveable_bounds());
       break;
     }
     default: {

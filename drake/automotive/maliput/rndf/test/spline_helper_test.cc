@@ -17,6 +17,7 @@ namespace maliput {
 namespace rndf {
 
 const double kLinearTolerance = 1e-4;
+const double kLinearStep = 1e-2;
 
 #define EXPECT_IGN_VECTOR_NEAR(actual, expected, tolerance)  \
   do {                                                      \
@@ -60,7 +61,8 @@ GTEST_TEST(RNDFSplineHelperTest, StraightLine) {
   std::unique_ptr<ignition::math::Spline> spline =
     CreateSpline(control_points);
   std::unique_ptr<ArcLengthParameterizedSpline> arc_lenght_param_spline =
-    std::make_unique<ArcLengthParameterizedSpline>(std::move(spline), 500);
+    std::make_unique<ArcLengthParameterizedSpline>(
+      std::move(spline), kLinearTolerance);
 
   const double length = arc_lenght_param_spline->BaseSpline()->ArcLength();
   ignition::math::Vector3d p(0.0, 0.0, 0.0);
@@ -71,6 +73,53 @@ GTEST_TEST(RNDFSplineHelperTest, StraightLine) {
       p,
       kLinearTolerance);
   }
+}
+
+GTEST_TEST(RNDFSplineHelperTest, StraightSplineFindClosesPointTo) {
+  std::vector<
+    std::tuple<ignition::math::Vector3d, ignition::math::Vector3d>>
+      control_points;
+  control_points.push_back(
+    std::make_tuple(
+      ignition::math::Vector3d(0.0, 0.0, 0.0),
+      ignition::math::Vector3d(10.0, 0.0, 0.0)));
+  control_points.push_back(
+    std::make_tuple(
+      ignition::math::Vector3d(20.0, 0.0, 0.0),
+      ignition::math::Vector3d(10.0, 0.0, 0.0)));
+
+  std::unique_ptr<ignition::math::Spline> spline =
+    CreateSpline(control_points);
+  std::unique_ptr<ArcLengthParameterizedSpline> arc_lenght_param_spline =
+    std::make_unique<ArcLengthParameterizedSpline>(
+      std::move(spline), kLinearTolerance);
+  // Border checks
+  EXPECT_NEAR(arc_lenght_param_spline->FindClosestPointTo(
+    ignition::math::Vector3d(0.0, 5.0, 0.0), kLinearStep), 0.,
+    kLinearTolerance);
+  EXPECT_NEAR(arc_lenght_param_spline->FindClosestPointTo(
+    ignition::math::Vector3d(0.0, -5.0, 0.0), kLinearStep), 0.,
+    kLinearTolerance);
+  EXPECT_NEAR(arc_lenght_param_spline->FindClosestPointTo(
+    ignition::math::Vector3d(20.0, 5.0, 0.0), kLinearStep), 20.,
+    kLinearTolerance);
+  EXPECT_NEAR(arc_lenght_param_spline->FindClosestPointTo(
+    ignition::math::Vector3d(20.0, -5.0, 0.0), kLinearStep), 20.,
+    kLinearTolerance);
+  // Middle checks
+  EXPECT_NEAR(arc_lenght_param_spline->FindClosestPointTo(
+    ignition::math::Vector3d(10.0, 5.0, 0.0), kLinearStep), 10.,
+    kLinearTolerance);
+  EXPECT_NEAR(arc_lenght_param_spline->FindClosestPointTo(
+    ignition::math::Vector3d(10.0, -5.0, 0.0), kLinearStep), 10.,
+    kLinearTolerance);
+  // Before and after checks
+  EXPECT_NEAR(arc_lenght_param_spline->FindClosestPointTo(
+    ignition::math::Vector3d(-5, -5.0, 0.0), kLinearStep), 0.,
+    kLinearTolerance);
+  EXPECT_NEAR(arc_lenght_param_spline->FindClosestPointTo(
+    ignition::math::Vector3d(25, 5.0, 0.0), kLinearStep), 20.,
+    kLinearTolerance);
 }
 
 }  // namespace rndf

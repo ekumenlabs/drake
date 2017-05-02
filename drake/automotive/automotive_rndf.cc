@@ -282,8 +282,8 @@ void AddVehicles(RoadNetworkType road_network_type,
         const maliput::api::GeoPosition position = lane->ToGeoPosition(
             {lane->length() /* s */, 0 /* r */, 0 /* h */});
         SimpleCarState<double> state;
-        state.set_x(position.x);
-        state.set_y(position.y);
+        state.set_x(position.x());
+        state.set_y(position.y());
         simulator->AddPriusSimpleCar("StalledCar" + std::to_string(i),
             "StalledCarChannel" + std::to_string(i), state);
       }
@@ -291,13 +291,15 @@ void AddVehicles(RoadNetworkType road_network_type,
   } else if (road_network_type == RoadNetworkType::rndf) {
     DRAKE_DEMAND(road_geometry != nullptr);
 
-    const maliput::rndf::RoadGeometry* rndf_road_geometry =
-        dynamic_cast<const maliput::rndf::RoadGeometry*>(road_geometry);
-    DRAKE_DEMAND(rndf_road_geometry != nullptr);
-    // Load MaliputRailCars as needed.
-    AddMaliputRailcar(0.0 /* Initial position at the lane*/,
-      rndf_road_geometry /* RoadGeometry pointer*/,
-      simulator /* Simulator pointer */);
+    if (FLAGS_num_maliput_railcar != 0) {
+      const maliput::rndf::RoadGeometry* rndf_road_geometry =
+          dynamic_cast<const maliput::rndf::RoadGeometry*>(road_geometry);
+      DRAKE_DEMAND(rndf_road_geometry != nullptr);
+      // Load MaliputRailCars as needed.
+      AddMaliputRailcar(0.0 /* Initial position at the lane*/,
+        rndf_road_geometry /* RoadGeometry pointer*/,
+        simulator /* Simulator pointer */);
+    }
   } else if (road_network_type == RoadNetworkType::onramp) {
     DRAKE_DEMAND(road_geometry != nullptr);
     for (int i = 0; i < FLAGS_num_maliput_railcar; ++i) {

@@ -11,8 +11,8 @@ namespace drake {
 namespace maliput {
 namespace rndf {
 
-const double SplineLane::kSplinesSamples = 100.0;
-const double SplineLane::kTension = 0.8;
+const double SplineLane::kSplineErrorBound = 1e-6;
+const double SplineLane::kTension = 0.9;
 
 SplineLane::SplineLane(const api::LaneId& id, const api::Segment* segment,
   const std::vector<std::tuple<ignition::math::Vector3d,
@@ -36,7 +36,7 @@ SplineLane::SplineLane(const api::LaneId& id, const api::Segment* segment,
   // Maliput s coordinate.
   spline_ = std::make_unique<ArcLengthParameterizedSpline>(
     std::move(spline),
-    kSplinesSamples);
+    kSplineErrorBound);
 }
 
 api::LanePosition SplineLane::DoToLanePosition(
@@ -48,19 +48,20 @@ api::LanePosition SplineLane::DoToLanePosition(
 api::GeoPosition SplineLane::DoToGeoPosition(
   const api::LanePosition& lane_pos) const {
   // Calculate x,y of (s,0,0).
-  const V2 xy = xy_of_s(lane_pos.s);
+  const V2 xy = xy_of_s(lane_pos.s());
   // Calculate orientation of (s,r,h) basis at (s,0,0).
-  const Rot3 ypr = Rabg_of_s(lane_pos.s);
+  const Rot3 ypr = Rabg_of_s(lane_pos.s());
   // Rotate (0,r,h) and sum with mapped (s,0,h).
   const V3 xyz =
-      ypr.apply({0., lane_pos.r, lane_pos.h}) + V3(xy.x(), xy.y(), lane_pos.h);
+    ypr.apply({0., lane_pos.r(), lane_pos.h()}) +
+    V3(xy.x(), xy.y(), lane_pos.h());
   return {xyz.x(), xyz.y(), xyz.z()};
 }
 
 api::Rotation SplineLane::DoGetOrientation(
   const api::LanePosition& lane_pos) const {
   // Recover linear parameter p from arc-length position s.
-  const Rot3 Rabg = Rabg_of_s(lane_pos.s);
+  const Rot3 Rabg = Rabg_of_s(lane_pos.s());
   return api::Rotation(0.0, 0.0, Rabg.yaw());
 }
 
@@ -169,7 +170,7 @@ double SplineLane::heading_dot_of_s(const double s) const {
     (second_derivative.Y() * first_derivative.X() -
       first_derivative.Y() * second_derivative.X() ) /
     (first_derivative.X() * first_derivative.X());
-  return (1.0 / (1.0 + heading * heading) * m);
+  return (m / (1.0 + heading * heading));
 }
 
 Rot3 SplineLane::Rabg_of_s(const double s) const {

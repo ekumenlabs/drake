@@ -42,25 +42,63 @@ Loader::LoadFile(const std::string &file_name) {
 void Loader::BuildSegments(
   const ignition::math::Vector3d &origin,
   const std::vector<ignition::rndf::Segment> &segments) const {
-  // We iterete over each segment, getting the waypoitns and computing the
-  // global coordinates of them. Once all the waypoint information is retrieved,
-  // we create a lane connection with the builder.
-  for (const auto &segment : segments) {
-    for (const auto &lane : segment.Lanes()) {
-      std::vector<ignition::math::Vector3d> waypoint_positions;
-      for (auto &waypoint : lane.Waypoints()) {
-        waypoint_positions.push_back(
-          ToGlobalCoordinates(origin, waypoint.Location()));
-      }
-      builder->CreateLaneConnections(segment.Id(),
-        lane.Id(),
-        waypoint_positions);
+  auto build_lane_bounds = [this](const double width) {
+    if (width == 0.0) {
+      return std::make_tuple(
+        this->rc_.lane_bounds, this->rc_.driveable_bounds);
     }
+    return std::make_tuple(
+      api::RBounds(-width / 2.0, width / 2.0),
+      api::RBounds(-width / 2.0, width / 2.0));
+  };
+  // We iterate over the segments, lanes and waypoints to build the lanes.
+  for (const auto &segment : segments) {
+    std::vector<ConnectedLane> segment_lanes;
+    for (const auto &lane : segment.Lanes()) {
+      ConnectedLane connected_lane;
+      for (auto &waypoint : lane.Waypoints()) {
+        connected_lane.waypoints.push_back(DirectedWaypoint(
+          ignition::rndf::UniqueId(segment.Id(), lane.Id(), waypoint.Id()),
+          ToGlobalCoordinates(origin, waypoint.Location()),
+          waypoint.IsEntry(),
+          waypoint.IsExit()));
+      }
+      auto lane_bounds = build_lane_bounds(lane.Width());
+      connected_lane.lane_bounds = std::get<0>(lane_bounds);
+      connected_lane.driveable_bounds = std::get<1>(lane_bounds);
+      segment_lanes.push_back(connected_lane);
+    }
+    builder->CreateSegmentConnections(segment.Id(), &segment_lanes);
   }
 }
 
 void Loader::BuildConnections(
   const std::vector<ignition::rndf::Segment> &segments) const {
+  auto build_connection_bounds = [segments, this](const double exit_width,
+    const ignition::rndf::UniqueId &entry_id) {
+    for (const auto &segment : segments) {
+      if (segment.Id() != entry_id.X())
+        continue;
+      for (const auto &lane : segment.Lanes()) {
+        if (lane.Id() != entry_id.Y())
+          continue;
+        const double entry_width = lane.Width();
+        double width = std::min(exit_width, entry_width);
+        if (width == 0.0) {
+          return std::make_tuple(
+            this->rc_.lane_bounds, this->rc_.driveable_bounds);
+        } else {
+          return std::make_tuple(
+            api::RBounds(-width / 2.0, width / 2.0),
+            api::RBounds(-width / 2.0, width / 2.0));
+        }
+      }
+      DRAKE_ABORT_MSG(
+        (entry_id.String() + std::string("was not found.")).c_str());
+    }
+    DRAKE_ABORT_MSG(
+      (entry_id.String() + std::string("was not found.")).c_str());
+  };
   // We iterate over the segments looking for each segment connection. We get
   // the exit and entry id from them and the builder uses it to build a
   // connection.
@@ -69,9 +107,12 @@ void Loader::BuildConnections(
       for (const auto &exit : lane.Exits()) {
         const auto &exit_id = exit.ExitId();
         const auto &entry_id = exit.EntryId();
+        // We define the bounds for the connection
+        const auto bounds = build_connection_bounds(lane.Width(), entry_id);
+        // We set a default value for the width
         builder->CreateConnection(
-          rc_.lane_bounds,
-          rc_.driveable_bounds,
+          std::get<0>(bounds),
+          std::get<1>(bounds),
           exit_id,
           entry_id);
       }

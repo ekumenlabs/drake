@@ -78,17 +78,15 @@ filegroup(
 # === test/ ===
 
 drake_cc_googletest(
-    name = "ignition_math_test",
-    srcs = ["test/ignition_math_test.cc"],
+    name = "ignition_rndf_test",
     deps = [
-        "@ignition_math",
+        "@ignition_rndf",
     ],
 )
 
 drake_cc_googletest(
     name = "lane_test",
     size = "small",
-    srcs = ["test/lane_test.cc"],
     deps = [
         ":lanes",
     ],
@@ -97,7 +95,6 @@ drake_cc_googletest(
 drake_cc_googletest(
     name = "spline_lane_test",
     size = "small",
-    srcs = ["test/spline_lane_test.cc"],
     deps = [
         ":lanes",
     ],
@@ -106,7 +103,6 @@ drake_cc_googletest(
 drake_cc_googletest(
     name = "spline_helper_test",
     size = "small",
-    srcs = ["test/spline_helper_test.cc"],
     deps = [
         ":lanes",
     ],
@@ -115,7 +111,6 @@ drake_cc_googletest(
 drake_cc_googletest(
     name = "builder_test",
     size = "small",
-    srcs = ["test/builder_test.cc"],
     deps = [
         ":builder",
     ],
@@ -124,7 +119,6 @@ drake_cc_googletest(
 drake_cc_googletest(
     name = "segment_test",
     size = "small",
-    srcs = ["test/segment_test.cc"],
     deps = [
         ":lanes",
     ],

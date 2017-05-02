@@ -1,5 +1,6 @@
 #pragma once
 
+#include <limits>
 #include <memory>
 #include <vector>
 #include <utility>
@@ -13,41 +14,67 @@ namespace drake {
 namespace maliput {
 namespace rndf {
 
-/// An interpolator for inverse arc length functions
-/// of arbitrary ignition::math::Splines. Helpful for arc length
-/// parameterization.
-class InverseArcLengthInterpolator {
- public:
-  DRAKE_NO_COPY_NO_MOVE_NO_ASSIGN(InverseArcLengthInterpolator)
+/// A segment of a single-variable
+/// function graph.
+struct FunctionGraphSegment {
+  double xmin;  ///< Lower x bound.
+  double xmax;  ///< Upper x bound.
+  double ymin;  ///< Lower y bound.
+  double ymax;  ///< Upper y bound.
+};
 
-  /// Constructor that takes the number of segments to
-  /// use for piecewise interpolation.
-  /// @param[in] _num_of_segments a positive integer describing
-  /// the amount of segments to be used for piecewise interpolation
+/// A partition of a single-variable
+/// function graph, as a segment plus
+/// a set of sub partitions.
+struct FunctionGraphPartition {
+  /// Segment covered.
+  FunctionGraphSegment segment;
+  /// Sub-partitions covered.
+  std::vector<std::unique_ptr<
+    FunctionGraphPartition>> partitions;
+};
+
+/// An interpolator for arbitrary inverse functions.
+/// Helpful for arc length parameterization with
+/// ignition::math::Splines.
+class InverseFunctionInterpolator {
+ public:
+  DRAKE_NO_COPY_NO_MOVE_NO_ASSIGN(InverseFunctionInterpolator)
+
+  /// Constructor that takes the function, its domain
+  /// interval and an error boundary for the interpolation.
+  /// @param[in] _function arbitrary function for which to
+  /// interpolate an inverse
+  /// @param[in] _xmin domain interval low bound.
+  /// @param[in] _xmax domain interval upper bound.
+  /// @param[in] _error_boundary a positive constrain on the
+  /// maximum error allowed when approximating the inverse
+  /// function.
   /// @throws whenever arguments constrains are not
   /// satisfied.
-  explicit InverseArcLengthInterpolator(const int _num_of_segments);
+  explicit InverseFunctionInterpolator(
+      const std::function<double(double)> _function,
+      const double _xmin, const double _xmax,
+      const double _error_boundary);
 
-  /// Fits this interpolator to match the inverse of
-  /// the given spline arc length function @f$ s(t) @f$.
-  /// @param[in] _spline to interpolate for
-  void Fit(const ignition::math::Spline& _spline);
-
-  /// Interpolates @f$ t(s) @f$, that is, the inverse arc length
-  /// function fitted.
+  /// Interpolates @f$ x(y) @f$, that is, the inverse of the given
+  /// function.
   /// @param[in] _mth a positive plus 0 integer describing
-  /// the order of the function derivative to interpolate.
-  /// @param[in] _s arc length to interpolate at, constrained.
-  /// by the curve dimensions [0, arc_length].
-  /// @return interpolated mth derivative @f$ t^m(s) @f$ .
+  /// the order of the inverse function derivative to interpolate.
+  /// @param[in] _y to interpolate at, constrained by the function image.
+  /// @return interpolated mth derivative @f$ x^m(y) @f$ .
   /// @throws whenever arguments constrains are not
   /// satisfied.
   double InterpolateMthDerivative(const int _mth,
-                                  const double _s) const;
+                                  const double _y) const;
 
  private:
-  std::vector<double> s_t_;  ///< Arc length function s(t) as a table.
-  double dt_;  ///< Step value in the independent variable t.
+  const std::function<double(double)> function_;  ///< Base function.
+  double error_boundary_;  ///< Error boundary for interpolation.
+  std::unique_ptr<
+    FunctionGraphPartition> partition_tree_;  ///< Function partition tree.
+  int partition_tree_degree_;  ///< Function partition tree degree.
+  int partition_tree_max_depth_;  ///< Function partition tree max depth.
 };
 
 /// An extension for ignition::math::Splines that reparameterizes
@@ -56,15 +83,16 @@ class ArcLengthParameterizedSpline {
  public:
   DRAKE_NO_COPY_NO_MOVE_NO_ASSIGN(ArcLengthParameterizedSpline)
 
-  /// Constructor that takes a spline and a number of segments
+  /// Constructor that takes a spline and an error bound
   /// for arc length parameterization approximations.
   /// @param[in] _spline to interpolate for.
-  /// @param[in] _num_of_segments a positive integer describing
-  /// the amount of segments to be used for piecewise interpolation.
+  /// @param[in] _error_boundary a positive constrain on the
+  /// maximum error allowed when approximating the arc length
+  /// parameterization.
   /// @throws whenever arguments constrains are not satisfied.
   explicit ArcLengthParameterizedSpline(
     std::unique_ptr<ignition::math::Spline> _spline,
-    const int _num_of_segments);
+    const double _error_boundary);
 
   /// Interpolates @f$ Q(s) @f$, that is, the spline parameterized
   /// by arc length.
@@ -82,9 +110,13 @@ class ArcLengthParameterizedSpline {
     return this->q_t_.get();
   }
 
+  double FindClosestPointTo(
+    const ignition::math::Vector3d &point, const double step) const;
+
  private:
   std::unique_ptr<ignition::math::Spline> q_t_;  ///< Parameterized curve Q(t).
-  InverseArcLengthInterpolator t_s_;  ///< Inverse arc length function t(s).
+  std::unique_ptr<
+    InverseFunctionInterpolator> t_s_;  ///< Inverse arc length function t(s).
 };
 
 }  // namespace rndf

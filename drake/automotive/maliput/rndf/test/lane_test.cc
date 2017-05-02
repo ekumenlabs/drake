@@ -15,11 +15,22 @@ namespace drake {
 namespace maliput {
 namespace rndf {
 
-const double kLinearTolerance = 1e-3;
-const double kAngularTolerance = 1e-3;
+const double kLinearTolerance = 1e-6;
+const double kAngularTolerance = 1e-6;
+
+
+#define EXPECT_RBOUNDS_EQ(actual, expected)                       \
+  do {                                                            \
+    const api::RBounds _actual(actual.r_min, actual.r_max);       \
+    const api::RBounds _expected(expected.r_min, expected.r_max); \
+    EXPECT_EQ(_actual.r_min, _expected.r_min);                    \
+    EXPECT_EQ(_actual.r_max, _expected.r_max);                    \
+  } while (0)
 
 // Check the metadata of a lane and see if it behaves OK
 GTEST_TEST(RNDFSplineLanesTest, MetadataLane) {
+  const api::RBounds lane_bounds(-5., 5.);
+  const api::RBounds driveable_bounds(-5., 5.);
   RoadGeometry rg({"FlatLineLane"}, kLinearTolerance, kAngularTolerance);
   Segment* s1 = rg.NewJunction({"j1"})->NewSegment({"s1"});
   std::vector<
@@ -36,8 +47,8 @@ GTEST_TEST(RNDFSplineLanesTest, MetadataLane) {
   Lane *l1 = s1->NewSplineLane(
     {"l1"},
     control_points,
-    {-5., 5.},
-    {-10., 10.});
+    lane_bounds,
+    driveable_bounds);
 
   // Check road geometry invariants
   EXPECT_EQ(rg.CheckInvariants(), std::vector<std::string>());
@@ -49,13 +60,24 @@ GTEST_TEST(RNDFSplineLanesTest, MetadataLane) {
     EXPECT_EQ(l1->index(), 0);
     EXPECT_EQ(l1->to_left(), nullptr);
     EXPECT_EQ(l1->to_right(), nullptr);
+    EXPECT_RBOUNDS_EQ(l1->lane_bounds(0.), lane_bounds);
+    EXPECT_RBOUNDS_EQ(l1->driveable_bounds(0.), driveable_bounds);
+  }
+
+  {
+    EXPECT_THROW(s1->NewSplineLane(
+        {"l1"},
+        control_points,
+        driveable_bounds,
+        lane_bounds),
+      std::runtime_error);
   }
 }
 // We create a -.- connection and check its creation and correct invariants from
 // the road geometry. It will look like:
-//
+
 // 1.1.1 ----->1.1.2------>1.1.3
-//
+
 // This simple example is useful for checking several Lane and BranchPoint
 // functions.
 GTEST_TEST(RNDFSplineLanesTest, BranchpointsLane) {
