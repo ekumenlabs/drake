@@ -40,7 +40,8 @@ class SplineLane : public Lane {
           const std::vector<std::tuple<ignition::math::Vector3d,
             ignition::math::Vector3d>> &control_points,
           const api::RBounds& lane_bounds,
-          const api::RBounds& driveable_bounds);
+          const api::RBounds& driveable_bounds,
+          const int index);
 
   ~SplineLane() override = default;
 

@@ -213,17 +213,6 @@ class Builder {
           const double linear_tolerance,
           const double angular_tolerance);
 
-  /// Loads a set of connections that build a RNDF lane. @p segment_id and
-  /// @p lane_id make the id of the lane and @p points are used to set the
-  /// extents in terms of s coordinate of the lane. @p lane_bounds and
-  /// @p driveable_bounds are the necessary values for the @class Lane.
-  void CreateLaneConnections(
-    const uint segment_id,
-    const uint lane_id,
-    const std::vector<DirectedWaypoint> &points,
-    const api::RBounds& lane_bounds,
-    const api::RBounds& driveable_bounds);
-
   /// If you have a segment with multiple lanes, you should call this function
   /// so as to build the lanes. It will create an extra control point on a
   /// lane when a not waypoint appears on another. @p segment_id is the id of
@@ -231,6 +220,8 @@ class Builder {
   /// information regarding the lanes.
   /// It may throw a std::runtime exception in case there is a bad pointer
   /// reference or any of the conditions of the internal API calls is not met.
+  /// Also if the vector does not contain at least one lane or if the lanes do
+  /// not contain at least two waypoints an exception is thrown.
   void CreateSegmentConnections(
     const uint segment_id,
     std::vector<ConnectedLane> *lanes);
@@ -257,7 +248,10 @@ class Builder {
     const uint lane_id,
     const uint waypoint_id) const;
 
+  std::string BuildName(const ignition::rndf::UniqueId &id) const;
+
   void CreateLane(
+    const std::string &key_id,
     const api::RBounds& lane_bounds,
     const api::RBounds& driveable_bounds,
     const std::vector<DirectedWaypoint> &control_points);
@@ -274,7 +268,7 @@ class Builder {
     RoadGeometry *road_geometry);
 
   Lane* BuildConnection(
-    Junction *junction,
+    Segment *segment,
     const Connection *connection);
 
   /// Given a vector of @p waypoints, it will construct and
@@ -282,6 +276,7 @@ class Builder {
   /// valid, it won't be taken into account.
   std::unique_ptr<ignition::math::Spline> CreateSpline(
     const std::vector<DirectedWaypoint> *waypoints);
+
   /// Given the waypoints of the lanes (@p lanes) and @p index which is the item
   /// from zero to pick on each vector and test the distance against all the
   /// other lanes. Basically, it will look for a waypoint which is first in the
@@ -291,15 +286,18 @@ class Builder {
   std::vector<int> GetInitialLaneToProcess(
     std::vector<std::vector<DirectedWaypoint>> *lanes,
     const int index);
+
   /// It loads the tangents into each of the @p waypoints using
   /// @function CreateSpline API.
   void BuildTangentsForWaypoints(
     std::vector<DirectedWaypoint> *waypoints);
+
   /// It computes a vector that joins @p base to @p destiny and then computes
   /// the projection of it against @p base tangent. It @return a double with
   /// that value
   double ComputeDistance(
     const DirectedWaypoint &base, const DirectedWaypoint &destiny);
+
   /// It checks if we need to add a dummy or an interpolated waypoint on the
   /// @p lanes given the @p ids of the lanes that have for @p index a control
   /// point before the others.
@@ -307,15 +305,32 @@ class Builder {
     const std::vector<int> &ids,
     std::vector<std::vector<DirectedWaypoint>> *lanes,
     const int index);
+
+  /// It is the base function that wraps all the process of adding waypoints
+  /// when necessary for the @p lanes.
+  /// It will @throw std::runtime_error if @p lanes vector is nullptr or if any
+  /// of the called functions constraints are not met.
   void CreateNewControlPointsForLanes(
     std::vector<std::vector<DirectedWaypoint>> *lanes);
+
+  /// This function checks the list of lanes their waypoints (@p lane_waypoints)
+  /// and copies all the waypoints in @p index position from @p lane_ids
+  /// respective lanes. Then, it orders them following the direction of each
+  /// control point from right to left. It will @return lane_ids with the
+  /// correct order of the ids. In case @p lane_ids is nullptr or its size is 0
+  /// it will @throw std::runtime_error. If the size of @p lane_ids just one, it
+  /// will return without doing anything.
+  void OrderLaneIds(
+    const std::vector<std::vector<DirectedWaypoint>> &lane_waypoints,
+    std::vector<int> *lane_ids,
+    const int index);
 
 
   api::RBounds lane_bounds_;
   api::RBounds driveable_bounds_;
   double linear_tolerance_{};
   double angular_tolerance_{};
-  std::vector<std::unique_ptr<Connection>> connections_;
+  std::map<std::string, std::vector<std::unique_ptr<Connection>>> connections_;
   std::map<std::string, DirectedWaypoint> directed_waypoints_;
   static const double kWaypointDistancePhase;
   static const double kLinearStep;

@@ -49,16 +49,14 @@ class Segment : public api::Segment {
   const api::Junction* do_junction() const override;
 
   int do_num_lanes() const override {
-    if (lane_.get() == nullptr)
-      return 0;
-    return 1;
+    return lanes_.size();
   }
 
   const api::Lane* do_lane(int index) const override;
 
   api::SegmentId id_;
   api::Junction* junction_{};
-  std::unique_ptr<Lane> lane_;
+  std::vector<std::unique_ptr<Lane>> lanes_;
 };
 
 }  // namespace rndf

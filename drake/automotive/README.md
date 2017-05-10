@@ -80,7 +80,7 @@ The following demos are available:
    bazel run drake/automotive:demo_rndf -- \
     -num_maliput_railcar=3 \
     -rndf_base_speed=10 \
-    -rndf_first_lane=l:1_2_1-1_2_2 \
+    -rndf_first_lane=l:1_2_1-1_2_7 \
     -rndf_file_path=drake/automotive/maliput/rndf/maps/darpa.rndf
    ```
 

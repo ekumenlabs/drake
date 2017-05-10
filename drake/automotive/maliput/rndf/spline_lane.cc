@@ -12,17 +12,19 @@ namespace maliput {
 namespace rndf {
 
 const double SplineLane::kSplineErrorBound = 1e-6;
-const double SplineLane::kTension = 0.9;
+const double SplineLane::kTension = 0.8;
 
 SplineLane::SplineLane(const api::LaneId& id, const api::Segment* segment,
   const std::vector<std::tuple<ignition::math::Vector3d,
     ignition::math::Vector3d>> &control_points,
   const api::RBounds& lane_bounds,
-  const api::RBounds& driveable_bounds):
+  const api::RBounds& driveable_bounds,
+  const int index):
     Lane(id,
       segment,
       lane_bounds,
-      driveable_bounds) {
+      driveable_bounds,
+      index) {
   // It first creates a spline based on the positions and its tangents.
   std::unique_ptr<ignition::math::Spline> spline =
     std::make_unique<ignition::math::Spline>();

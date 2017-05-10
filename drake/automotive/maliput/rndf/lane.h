@@ -69,10 +69,12 @@ class Lane : public api::Lane {
   /// @class SplineLane for an example.
   Lane(const api::LaneId& id, const api::Segment* segment,
        const api::RBounds& lane_bounds,
-       const api::RBounds& driveable_bounds)
+       const api::RBounds& driveable_bounds,
+       const int index)
       : id_(id), segment_(segment),
         lane_bounds_(lane_bounds),
-        driveable_bounds_(driveable_bounds) {
+        driveable_bounds_(driveable_bounds),
+        index_(index) {
     DRAKE_DEMAND(lane_bounds_.r_min >= driveable_bounds_.r_min);
     DRAKE_DEMAND(lane_bounds_.r_max <= driveable_bounds_.r_max);
   }
@@ -91,11 +93,21 @@ class Lane : public api::Lane {
 
   const api::Segment* do_segment() const override;
 
-  int do_index() const override { return 0; }  // Only one lane per segment!
+  int do_index() const override { return index_; }
 
-  const api::Lane* do_to_left() const override { return nullptr; }
+  const api::Lane* do_to_left() const override {
+    if ((segment_->num_lanes() - 1) == index_) {
+      return nullptr;
+    }
+    return segment_->lane(index_ + 1);
+  }
 
-  const api::Lane* do_to_right() const override { return nullptr; }
+  const api::Lane* do_to_right() const override {
+    if (index_ == 0) {
+      return nullptr;
+    }
+    return segment_->lane(index_ - 1);
+  }
 
   const api::BranchPoint* DoGetBranchPoint(
       const api::LaneEnd::Which which_end) const override;
@@ -122,6 +134,7 @@ class Lane : public api::Lane {
 
   const api::RBounds lane_bounds_;
   const api::RBounds driveable_bounds_;
+  const int index_;
 };
 
 

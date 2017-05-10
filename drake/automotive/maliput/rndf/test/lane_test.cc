@@ -65,12 +65,93 @@ GTEST_TEST(RNDFSplineLanesTest, MetadataLane) {
   }
 
   {
-    EXPECT_THROW(s1->NewSplineLane(
-        {"l1"},
+    EXPECT_NO_THROW(s1->NewSplineLane(
+        {"l2"},
         control_points,
         driveable_bounds,
-        lane_bounds),
-      std::runtime_error);
+        lane_bounds));
+  }
+}
+
+// Check if left and right sides are resolved OK
+// 1.1.1 ----->1.1.2
+// 1.2.1 ----->1.2.2
+// 1.3.1 ----->1.3.2
+GTEST_TEST(RNDFSplineLanesTest, RigthLeftTest) {
+  const api::RBounds lane_bounds(-5., 5.);
+  const api::RBounds driveable_bounds(-5., 5.);
+  RoadGeometry rg({"FlatLineLane"}, kLinearTolerance, kAngularTolerance);
+  Segment* s1 = rg.NewJunction({"j1"})->NewSegment({"s1"});
+  // Lane 1.1
+  {
+    std::vector<
+      std::tuple<ignition::math::Vector3d, ignition::math::Vector3d>>
+        control_points;
+    control_points.push_back(
+      std::make_tuple(
+        ignition::math::Vector3d(0.0, 0.0, 0.0),
+        ignition::math::Vector3d(10.0, 0.0, 0.0)));
+    control_points.push_back(
+      std::make_tuple(
+        ignition::math::Vector3d(20.0, 0.0, 0.0),
+        ignition::math::Vector3d(10.0, 0.0, 0.0)));
+    s1->NewSplineLane(
+      {"l1"},
+      control_points,
+      lane_bounds,
+      driveable_bounds);
+  }
+  // Lane 1.2
+  {
+    std::vector<
+      std::tuple<ignition::math::Vector3d, ignition::math::Vector3d>>
+        control_points;
+    control_points.push_back(
+      std::make_tuple(
+        ignition::math::Vector3d(0.0, 5.0, 0.0),
+        ignition::math::Vector3d(10.0, 0.0, 0.0)));
+    control_points.push_back(
+      std::make_tuple(
+        ignition::math::Vector3d(20.0, 5.0, 0.0),
+        ignition::math::Vector3d(10.0, 0.0, 0.0)));
+    s1->NewSplineLane(
+      {"l2"},
+      control_points,
+      lane_bounds,
+      driveable_bounds);
+  }
+  // Lane 1.3
+  {
+    std::vector<
+      std::tuple<ignition::math::Vector3d, ignition::math::Vector3d>>
+        control_points;
+    control_points.push_back(
+      std::make_tuple(
+        ignition::math::Vector3d(0.0, 10.0, 0.0),
+        ignition::math::Vector3d(10.0, 0.0, 0.0)));
+    control_points.push_back(
+      std::make_tuple(
+        ignition::math::Vector3d(20.0, 10.0, 0.0),
+        ignition::math::Vector3d(10.0, 0.0, 0.0)));
+    s1->NewSplineLane(
+      {"l3"},
+      control_points,
+      lane_bounds,
+      driveable_bounds);
+  }
+  // Check road geometry invariants
+  EXPECT_EQ(rg.CheckInvariants(), std::vector<std::string>());
+
+  // Check meta properties
+  {
+    EXPECT_EQ(s1->lane(0)->to_left(), s1->lane(1));
+    EXPECT_EQ(s1->lane(0)->to_right(), nullptr);
+
+    EXPECT_EQ(s1->lane(1)->to_left(), s1->lane(2));
+    EXPECT_EQ(s1->lane(1)->to_right(), s1->lane(0));
+
+    EXPECT_EQ(s1->lane(2)->to_left(), nullptr);
+    EXPECT_EQ(s1->lane(2)->to_right(), s1->lane(1));
   }
 }
 // We create a -.- connection and check its creation and correct invariants from
