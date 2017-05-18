@@ -36,12 +36,12 @@ GTEST_TEST(RNDFSegmentTest, MetadataLane) {
     std::make_tuple(
       ignition::math::Vector3d(20.0, 0.0, 0.0),
       ignition::math::Vector3d(10.0, 0.0, 0.0)));
-  s1->NewSplineLane({"l1"}, control_points, {-5., 5.}, {-10., 10.});
+  s1->NewSplineLane({"l1"}, control_points, 5.);
 
   EXPECT_EQ(s1->num_lanes(), 1);
 
   EXPECT_NO_THROW(
-    s1->NewSplineLane({"l2"}, control_points, {-5., 5.}, {-10., 10.}));
+    s1->NewSplineLane({"l2"}, control_points, 5.));
 }
 
 

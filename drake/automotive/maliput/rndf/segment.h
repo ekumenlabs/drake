@@ -38,8 +38,7 @@ class Segment : public api::Segment {
   SplineLane* NewSplineLane(const api::LaneId& id,
                       const std::vector<std::tuple<ignition::math::Vector3d,
                         ignition::math::Vector3d>> &control_points,
-                      const api::RBounds& lane_bounds,
-                      const api::RBounds& driveable_bounds);
+                      const double width);
 
   ~Segment() override = default;
 

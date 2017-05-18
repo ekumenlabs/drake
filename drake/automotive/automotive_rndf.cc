@@ -386,7 +386,6 @@ const maliput::api::RoadGeometry* AddOnramp(
 const maliput::api::RoadGeometry* AddTerrain(RoadNetworkType road_network_type,
     AutomotiveSimulator<double>* simulator) {
   const maliput::api::RoadGeometry* road_geometry{nullptr};
-
   switch (road_network_type) {
     case RoadNetworkType::flat: {
       AddFlatTerrain(simulator);

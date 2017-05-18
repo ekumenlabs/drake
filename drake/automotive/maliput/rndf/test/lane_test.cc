@@ -29,8 +29,9 @@ const double kAngularTolerance = 1e-6;
 
 // Check the metadata of a lane and see if it behaves OK
 GTEST_TEST(RNDFSplineLanesTest, MetadataLane) {
-  const api::RBounds lane_bounds(-5., 5.);
-  const api::RBounds driveable_bounds(-5., 5.);
+  const double width = 5.;
+  const api::RBounds lane_bounds(-width / 2., width / 2.);
+  const api::RBounds driveable_bounds(-width / 2., width / 2.);
   RoadGeometry rg({"FlatLineLane"}, kLinearTolerance, kAngularTolerance);
   Segment* s1 = rg.NewJunction({"j1"})->NewSegment({"s1"});
   std::vector<
@@ -47,8 +48,7 @@ GTEST_TEST(RNDFSplineLanesTest, MetadataLane) {
   Lane *l1 = s1->NewSplineLane(
     {"l1"},
     control_points,
-    lane_bounds,
-    driveable_bounds);
+    width);
 
   // Check road geometry invariants
   EXPECT_EQ(rg.CheckInvariants(), std::vector<std::string>());
@@ -68,8 +68,7 @@ GTEST_TEST(RNDFSplineLanesTest, MetadataLane) {
     EXPECT_NO_THROW(s1->NewSplineLane(
         {"l2"},
         control_points,
-        driveable_bounds,
-        lane_bounds));
+        width));
   }
 }
 
@@ -78,8 +77,9 @@ GTEST_TEST(RNDFSplineLanesTest, MetadataLane) {
 // 1.2.1 ----->1.2.2
 // 1.3.1 ----->1.3.2
 GTEST_TEST(RNDFSplineLanesTest, RigthLeftTest) {
-  const api::RBounds lane_bounds(-5., 5.);
-  const api::RBounds driveable_bounds(-5., 5.);
+  const double width = 5.;
+  const api::RBounds lane_bounds(-width / 2., width / 2.);
+  const api::RBounds driveable_bounds(-width / 2., width / 2.);
   RoadGeometry rg({"FlatLineLane"}, kLinearTolerance, kAngularTolerance);
   Segment* s1 = rg.NewJunction({"j1"})->NewSegment({"s1"});
   // Lane 1.1
@@ -98,8 +98,7 @@ GTEST_TEST(RNDFSplineLanesTest, RigthLeftTest) {
     s1->NewSplineLane(
       {"l1"},
       control_points,
-      lane_bounds,
-      driveable_bounds);
+      width);
   }
   // Lane 1.2
   {
@@ -117,8 +116,7 @@ GTEST_TEST(RNDFSplineLanesTest, RigthLeftTest) {
     s1->NewSplineLane(
       {"l2"},
       control_points,
-      lane_bounds,
-      driveable_bounds);
+      width);
   }
   // Lane 1.3
   {
@@ -136,8 +134,7 @@ GTEST_TEST(RNDFSplineLanesTest, RigthLeftTest) {
     s1->NewSplineLane(
       {"l3"},
       control_points,
-      lane_bounds,
-      driveable_bounds);
+      width);
   }
   // Check road geometry invariants
   EXPECT_EQ(rg.CheckInvariants(), std::vector<std::string>());
@@ -162,6 +159,7 @@ GTEST_TEST(RNDFSplineLanesTest, RigthLeftTest) {
 // This simple example is useful for checking several Lane and BranchPoint
 // functions.
 GTEST_TEST(RNDFSplineLanesTest, BranchpointsLane) {
+  const double width = 5.;
   RoadGeometry rg({"BranchpointsLane"}, kLinearTolerance, kAngularTolerance);
   Lane *l1, *l2;
   {
@@ -180,8 +178,7 @@ GTEST_TEST(RNDFSplineLanesTest, BranchpointsLane) {
   l1 = s1->NewSplineLane(
     {"l1"},
     control_points,
-    {-5., 5.},
-    {-10., 10.});
+    width);
   }
   {
   Segment* s2 = rg.NewJunction({"j2"})->NewSegment({"s2"});
@@ -199,8 +196,7 @@ GTEST_TEST(RNDFSplineLanesTest, BranchpointsLane) {
   l2 = s2->NewSplineLane(
     {"l2"},
     control_points,
-    {-5., 5.},
-    {-10., 10.});
+    width);
   }
   BranchPoint *bp1, *bp2, *bp3;
 

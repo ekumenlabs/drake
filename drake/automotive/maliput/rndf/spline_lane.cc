@@ -12,19 +12,14 @@ namespace maliput {
 namespace rndf {
 
 const double SplineLane::kSplineErrorBound = 1e-6;
-const double SplineLane::kTension = 0.8;
+const double SplineLane::kTension = 0.99;
 
 SplineLane::SplineLane(const api::LaneId& id, const api::Segment* segment,
   const std::vector<std::tuple<ignition::math::Vector3d,
     ignition::math::Vector3d>> &control_points,
-  const api::RBounds& lane_bounds,
-  const api::RBounds& driveable_bounds,
+  const double width,
   const int index):
-    Lane(id,
-      segment,
-      lane_bounds,
-      driveable_bounds,
-      index) {
+    Lane(id, segment, width, index) {
   // It first creates a spline based on the positions and its tangents.
   std::unique_ptr<ignition::math::Spline> spline =
     std::make_unique<ignition::math::Spline>();
@@ -177,6 +172,61 @@ double SplineLane::heading_dot_of_s(const double s) const {
 
 Rot3 SplineLane::Rabg_of_s(const double s) const {
   return Rot3(0.0, 0.0, heading_of_s(s));
+}
+
+api::RBounds SplineLane::do_lane_bounds(double s) const {
+  return api::RBounds(-width_ / 2., width_ / 2.);
+}
+
+api::RBounds SplineLane::do_driveable_bounds(double s) const {
+  if (segment_->num_lanes() == 1) {
+    return api::RBounds(-width_ / 2., width_ / 2.);
+  }
+  // Get the position to the first lane
+  auto position_first_lane = GetPositionToLane(s, 0);
+  auto position_last_lane = GetPositionToLane(s, segment_->num_lanes() - 1);
+  double r_min = -std::abs(
+    (position_first_lane - spline_->InterpolateMthDerivative(0, s)).Length() +
+    segment_->lane(0)->lane_bounds(0.).r_max);
+  double r_max = std::abs(
+    (position_last_lane - spline_->InterpolateMthDerivative(0, s)).Length() +
+    segment_->lane(segment_->num_lanes() - 1)->lane_bounds(0.).r_max);
+
+  return api::RBounds(r_min , r_max);
+}
+
+ignition::math::Vector3d SplineLane::GetPositionToLane(
+  const double s, const int lane_id) const {
+
+  const ignition::math::Vector3d g_l_1 =
+    spline_->InterpolateMthDerivative(0, s);
+
+  // After continue working out the expression, if lane_id points to myself,
+  // I just need to return my position.
+  if (lane_id == index_) {
+    return g_l_1;
+  }
+
+  ignition::math::Vector3d t_1 = spline_->InterpolateMthDerivative(1, s);
+  t_1.Normalize();
+  const ignition::math::Vector3d n_1(-t_1.Y(), t_1.X(), 0.);
+
+  const api::Lane *other_lane = segment_->lane(lane_id);
+  const auto other_lane_beginning =
+    other_lane->ToGeoPosition(api::LanePosition(0., 0., 0.));
+  const auto other_lane_ending =
+    other_lane->ToGeoPosition(api::LanePosition(other_lane->length(), 0., 0.));
+
+  const ignition::math::Vector3d g_l_0_a(
+    other_lane_beginning.x(), other_lane_beginning.y(), 0.);
+  const ignition::math::Vector3d g_l_0_b(
+    other_lane_ending.x(), other_lane_ending.y(), 0.);
+  ignition::math::Vector3d t_0 = (g_l_0_b - g_l_0_a);
+  t_0.Normalize();
+
+  const auto m = g_l_1 +
+    n_1 * (t_0.Cross(g_l_1 - g_l_0_a).Length() / t_0.Cross(n_1).Length());
+  return m;
 }
 
 double SplineLane::ComputeLength(

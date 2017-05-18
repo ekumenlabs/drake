@@ -16,14 +16,9 @@ const api::Junction* Segment::do_junction() const {
 SplineLane* Segment::NewSplineLane(const api::LaneId& id,
                       const std::vector<std::tuple<ignition::math::Vector3d,
                         ignition::math::Vector3d>> &control_points,
-                      const api::RBounds& lane_bounds,
-                      const api::RBounds& driveable_bounds) {
+                      const double width) {
   std::unique_ptr<SplineLane> lane = std::make_unique<SplineLane>(
-      id, this,
-      control_points,
-      lane_bounds,
-      driveable_bounds,
-      lanes_.size());
+    id, this, control_points, width, lanes_.size());
   SplineLane* spline_lane = lane.get();
   lanes_.push_back(std::move(lane));
   return spline_lane;

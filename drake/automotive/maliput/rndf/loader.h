@@ -37,18 +37,10 @@ struct RoadCharacteristics {
   RoadCharacteristics() = default;
 
   /// Constructor for custom road geometries.
-  RoadCharacteristics(const double lw, const double dw)
-      : lane_width(lw), driveable_width(dw) {}
+  explicit RoadCharacteristics(const double default_width)
+      : default_width_(default_width) {}
 
-  const double lane_width{4.};
-  const double driveable_width{4.};
-
-  const api::RBounds lane_bounds{
-    -lane_width / 2.,
-    lane_width / 2.};
-  const api::RBounds driveable_bounds{
-    -driveable_width / 2.,
-    driveable_width / 2.};
+  const double default_width_{4.};
 };
 
 class Loader {
@@ -97,6 +89,9 @@ class Loader {
   /// It builds the connections from one lane to another once all the
   /// @p segments have already been finished through BuildSegments.
   void BuildConnections(
+    const std::vector<ignition::rndf::Segment> &segments) const;
+
+  void BuildBoundingBox(const ignition::math::Vector3d &origin,
     const std::vector<ignition::rndf::Segment> &segments) const;
 
   /// Linear tolerance for RNDF @class RoadGeometry.

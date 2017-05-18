@@ -1,0 +1,57 @@
+RNDF_name	city_1
+num_segments	2
+num_zones	0
+format_version	1.0
+segment	1
+num_lanes	2
+segment_name	trunk_2
+lane	1.1
+num_waypoints	4
+lane_width	13
+exit	1.1.2	2.2.3
+exit	1.1.2	2.1.3
+exit	1.1.2	1.2.3
+1.1.1	9.999982	65.000894
+1.1.2	10.000863	65.000894
+1.1.3	10.000946	65.000894
+1.1.4	10.001826	65.000894
+end_lane
+lane	1.2
+num_waypoints	4
+lane_width	13
+exit	1.2.2	2.2.3
+exit	1.2.2	2.1.3
+exit	1.2.2	1.1.3
+1.2.1	9.999982	65.000930
+1.2.2	10.000863	65.000930
+1.2.3	10.000946	65.000930
+1.2.4	10.001826	65.000930
+end_lane
+end_segment
+segment	2
+num_lanes	2
+segment_name	trunk_3
+lane	2.1
+num_waypoints	4
+lane_width	13
+exit	2.1.2	1.1.3
+exit	2.1.2	1.2.3
+exit	2.1.2	2.2.3
+2.1.1	10.000922	64.999982
+2.1.2	10.000922	65.000870
+2.1.3	10.000922	65.000954
+2.1.4	10.000922	65.001842
+end_lane
+lane	2.2
+num_waypoints	4
+lane_width	13
+exit	2.2.2	1.1.3
+exit	2.2.2	1.2.3
+exit	2.2.2	2.1.3
+2.2.1	10.000886	64.999982
+2.2.2	10.000886	65.000870
+2.2.3	10.000886	65.000954
+2.2.4	10.000886	65.001842
+end_lane
+end_segment
+end_file

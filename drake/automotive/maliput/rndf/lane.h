@@ -68,15 +68,11 @@ class Lane : public api::Lane {
   /// lane. All geomtric computation will be moved to each sub lane childs. See
   /// @class SplineLane for an example.
   Lane(const api::LaneId& id, const api::Segment* segment,
-       const api::RBounds& lane_bounds,
-       const api::RBounds& driveable_bounds,
-       const int index)
-      : id_(id), segment_(segment),
-        lane_bounds_(lane_bounds),
-        driveable_bounds_(driveable_bounds),
+      const double width,
+      const int index) :
+        id_(id), segment_(segment),
+        width_(width),
         index_(index) {
-    DRAKE_DEMAND(lane_bounds_.r_min >= driveable_bounds_.r_min);
-    DRAKE_DEMAND(lane_bounds_.r_max <= driveable_bounds_.r_max);
   }
 
   void SetStartBp(BranchPoint* bp) { start_bp_ = bp; }
@@ -88,7 +84,7 @@ class Lane : public api::Lane {
 
   ~Lane() override = default;
 
- private:
+ protected:
   const api::LaneId do_id() const override { return id_; }
 
   const api::Segment* do_segment() const override;
@@ -121,19 +117,11 @@ class Lane : public api::Lane {
   std::unique_ptr<api::LaneEnd> DoGetDefaultBranch(
       const api::LaneEnd::Which which_end) const override;
 
-  api::RBounds do_lane_bounds(double) const override { return lane_bounds_; }
-
-  api::RBounds do_driveable_bounds(double) const override {
-    return driveable_bounds_;
-  }
-
   const api::LaneId id_;
   const api::Segment* segment_{};
   BranchPoint* start_bp_{};
   BranchPoint* end_bp_{};
-
-  const api::RBounds lane_bounds_;
-  const api::RBounds driveable_bounds_;
+  const double width_;
   const int index_;
 };
 

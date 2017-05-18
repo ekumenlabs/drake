@@ -8,11 +8,8 @@ namespace rndf {
 std::unique_ptr<const maliput::api::RoadGeometry>
 Loader::LoadFile(const std::string &file_name) {
   builder = std::make_unique<maliput::rndf::Builder>(
-    rc_.lane_bounds,
-    rc_.driveable_bounds,
     linear_tolerance_,
     angular_tolerance_);
-
   std::unique_ptr<ignition::rndf::RNDF> rndfInfo =
     std::make_unique<ignition::rndf::RNDF>(file_name);
   DRAKE_THROW_UNLESS(rndfInfo->Valid());
@@ -30,6 +27,7 @@ Loader::LoadFile(const std::string &file_name) {
     location.LongitudeReference().Degree(),
     0.0);
 
+  BuildBoundingBox(origin, segments);
   // We first build all segments so waypoints are populated in Builder class and
   // then we move to the lane connections which make use of the UniqueIds of the
   // waypoints to reference them.
@@ -39,18 +37,25 @@ Loader::LoadFile(const std::string &file_name) {
   return builder->Build({rndfInfo->Name()});
 }
 
+void Loader::BuildBoundingBox(const ignition::math::Vector3d &origin,
+  const std::vector<ignition::rndf::Segment> &segments) const {
+  std::vector<DirectedWaypoint> wps;
+  for (const auto &segment : segments) {
+    for (const auto &lane : segment.Lanes()) {
+      for (auto &waypoint : lane.Waypoints()) {
+        wps.push_back(DirectedWaypoint(
+          ignition::rndf::UniqueId(),
+          ToGlobalCoordinates(origin, waypoint.Location())));
+      }
+    }
+  }
+  const auto bounding_box = DirectedWaypoint::CalculateBoundingBox(wps);
+  builder->SetBoundingBox(bounding_box);
+}
+
 void Loader::BuildSegments(
   const ignition::math::Vector3d &origin,
   const std::vector<ignition::rndf::Segment> &segments) const {
-  auto build_lane_bounds = [this](const double width) {
-    if (width == 0.0) {
-      return std::make_tuple(
-        this->rc_.lane_bounds, this->rc_.driveable_bounds);
-    }
-    return std::make_tuple(
-      api::RBounds(-width / 2.0, width / 2.0),
-      api::RBounds(-width / 2.0, width / 2.0));
-  };
   // We iterate over the segments, lanes and waypoints to build the lanes.
   for (const auto &segment : segments) {
     std::vector<ConnectedLane> segment_lanes;
@@ -63,9 +68,11 @@ void Loader::BuildSegments(
           waypoint.IsEntry(),
           waypoint.IsExit()));
       }
-      auto lane_bounds = build_lane_bounds(lane.Width());
-      connected_lane.lane_bounds = std::get<0>(lane_bounds);
-      connected_lane.driveable_bounds = std::get<1>(lane_bounds);
+      if (lane.Width() == 0.0) {
+        connected_lane.width = rc_.default_width_;
+      } else {
+        connected_lane.width = lane.Width();
+      }
       segment_lanes.push_back(connected_lane);
     }
     builder->CreateSegmentConnections(segment.Id(), &segment_lanes);
@@ -85,12 +92,9 @@ void Loader::BuildConnections(
         const double entry_width = lane.Width();
         double width = std::min(exit_width, entry_width);
         if (width == 0.0) {
-          return std::make_tuple(
-            this->rc_.lane_bounds, this->rc_.driveable_bounds);
+          return this->rc_.default_width_;
         } else {
-          return std::make_tuple(
-            api::RBounds(-width / 2.0, width / 2.0),
-            api::RBounds(-width / 2.0, width / 2.0));
+          return width;
         }
       }
       DRAKE_ABORT_MSG(
@@ -108,13 +112,9 @@ void Loader::BuildConnections(
         const auto &exit_id = exit.ExitId();
         const auto &entry_id = exit.EntryId();
         // We define the bounds for the connection
-        const auto bounds = build_connection_bounds(lane.Width(), entry_id);
+        const double width = build_connection_bounds(lane.Width(), entry_id);
         // We set a default value for the width
-        builder->CreateConnection(
-          std::get<0>(bounds),
-          std::get<1>(bounds),
-          exit_id,
-          entry_id);
+        builder->CreateConnection(width, exit_id, entry_id);
       }
     }
   }

@@ -39,8 +39,7 @@ class SplineLane : public Lane {
   SplineLane(const api::LaneId& id, const api::Segment* segment,
           const std::vector<std::tuple<ignition::math::Vector3d,
             ignition::math::Vector3d>> &control_points,
-          const api::RBounds& lane_bounds,
-          const api::RBounds& driveable_bounds,
+          const double width,
           const int index);
 
   ~SplineLane() override = default;
@@ -127,6 +126,13 @@ class SplineLane : public Lane {
   double do_length() const override {
     return spline_->BaseSpline()->ArcLength();
   }
+
+  api::RBounds do_lane_bounds(double s) const override;
+
+  api::RBounds do_driveable_bounds(double s) const override;
+
+  ignition::math::Vector3d GetPositionToLane(
+  const double s, const int lane_id) const;
 
   std::unique_ptr<ArcLengthParameterizedSpline> spline_;
 

@@ -66,6 +66,7 @@ CreateSpline(
 
 // It makes geometric tests over a straight line lane
 GTEST_TEST(RNDFSplineLanesTest, FlatLineLane) {
+  const double width = 5.;
   RoadGeometry rg({"FlatLineLane"}, kLinearTolerance, kAngularTolerance);
   Segment* s1 = rg.NewJunction({"j1"})->NewSegment({"s1"});
   std::vector<
@@ -82,8 +83,7 @@ GTEST_TEST(RNDFSplineLanesTest, FlatLineLane) {
   Lane *l1 = s1->NewSplineLane(
     {"l1"},
     control_points,
-    {-5., 5.},
-    {-10., 10.});
+    width);
 
   // Check road geometry invariants
   EXPECT_EQ(rg.CheckInvariants(), std::vector<std::string>());
@@ -96,10 +96,10 @@ GTEST_TEST(RNDFSplineLanesTest, FlatLineLane) {
 
   // Check bounds
   {
-    EXPECT_NEAR(l1->lane_bounds(0.).r_min, -5., kVeryExact);
-    EXPECT_NEAR(l1->lane_bounds(0.).r_max,  5., kVeryExact);
-    EXPECT_NEAR(l1->driveable_bounds(0.).r_min, -10., kVeryExact);
-    EXPECT_NEAR(l1->driveable_bounds(0.).r_max,  10., kVeryExact);
+    EXPECT_NEAR(l1->lane_bounds(0.).r_min, -width / 2., kVeryExact);
+    EXPECT_NEAR(l1->lane_bounds(0.).r_max,  width / 2., kVeryExact);
+    EXPECT_NEAR(l1->driveable_bounds(0.).r_min, -width / 2., kVeryExact);
+    EXPECT_NEAR(l1->driveable_bounds(0.).r_max,  width / 2., kVeryExact);
   }
 
   // ToGeoPosition
@@ -161,6 +161,7 @@ GTEST_TEST(RNDFSplineLanesTest, FlatLineLane) {
 
 // It makes geometric tests over a curved spline.
 GTEST_TEST(RNDFSplineLanesTest, CurvedLineLane) {
+  const double width = 5.;
   RoadGeometry rg({"CurvedLineLane"}, kLinearTolerance, kAngularTolerance);
   Segment* s1 = rg.NewJunction({"j1"})->NewSegment({"s1"});
   std::vector<
@@ -177,8 +178,7 @@ GTEST_TEST(RNDFSplineLanesTest, CurvedLineLane) {
   Lane *l1 = s1->NewSplineLane(
     {"l1"},
     control_points,
-    {-5., 5.},
-    {-10., 10.});
+    width);
   // Check road geometry invariants
   EXPECT_EQ(rg.CheckInvariants(), std::vector<std::string>());
 
@@ -194,10 +194,10 @@ GTEST_TEST(RNDFSplineLanesTest, CurvedLineLane) {
 
   // Check bounds
   {
-    EXPECT_NEAR(l1->lane_bounds(0.).r_min, -5., kVeryExact);
-    EXPECT_NEAR(l1->lane_bounds(0.).r_max,  5., kVeryExact);
-    EXPECT_NEAR(l1->driveable_bounds(0.).r_min, -10., kVeryExact);
-    EXPECT_NEAR(l1->driveable_bounds(0.).r_max,  10., kVeryExact);
+    EXPECT_NEAR(l1->lane_bounds(0.).r_min, -width / 2., kVeryExact);
+    EXPECT_NEAR(l1->lane_bounds(0.).r_max,  width / 2., kVeryExact);
+    EXPECT_NEAR(l1->driveable_bounds(0.).r_min, -width / 2., kVeryExact);
+    EXPECT_NEAR(l1->driveable_bounds(0.).r_max,  width / 2., kVeryExact);
   }
 
   // ToGeoPosition

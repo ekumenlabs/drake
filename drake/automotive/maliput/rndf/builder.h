@@ -109,6 +109,10 @@ class DirectedWaypoint {
     return is_exit_;
   }
 
+  static std::tuple<ignition::math::Vector3d, ignition::math::Vector3d>
+    CalculateBoundingBox(
+      const std::vector<DirectedWaypoint> &directed_waypoints);
+
  private:
   ignition::rndf::UniqueId id_;
   ignition::math::Vector3d position_;
@@ -140,15 +144,13 @@ class Connection {
   /// @p points[size-1].
   Connection(const std::string& id,
     const std::vector<DirectedWaypoint>& waypoints,
-    const api::RBounds &lane_bounds,
-    const api::RBounds &driveable_bounds) :
+    const double width) :
       type_(kSpline),
       id_(id),
       start_(waypoints.front()),
       end_(waypoints.back()),
       waypoints_(waypoints),
-      lane_bounds_(lane_bounds.r_min, lane_bounds.r_max),
-      driveable_bounds_(driveable_bounds.r_min, driveable_bounds.r_max) {
+      width_(width) {
     DRAKE_THROW_UNLESS(waypoints_.size() >= 2);
   }
 
@@ -171,12 +173,8 @@ class Connection {
     return waypoints_;
   }
 
-  const api::RBounds& lane_bounds() const {
-    return lane_bounds_;
-  }
-
-  const api::RBounds& driveable_bounds() const {
-    return driveable_bounds_;
+  const double width() const {
+    return width_;
   }
 
  private:
@@ -185,15 +183,14 @@ class Connection {
   DirectedWaypoint start_;
   DirectedWaypoint end_;
   std::vector<DirectedWaypoint> waypoints_;
-  api::RBounds lane_bounds_;
-  api::RBounds driveable_bounds_;
+  double width_;
 };
 
 /// This structure holds all the lane information needed at construction time.
 struct ConnectedLane {
   std::vector<DirectedWaypoint> waypoints;
-  api::RBounds lane_bounds;
-  api::RBounds driveable_bounds;
+  bool inverse_direction{false};
+  double width;
 };
 
 // N.B. The Builder class overview documentation lives at the top of this file.
@@ -208,8 +205,7 @@ class Builder {
   /// to the single lanes of every segment; @p lane_bounds must be a subset
   /// of @p driveable_bounds.  @p linear_tolerance and @p angular_tolerance
   /// specify the respective tolerances for the resulting RoadGeometry.
-  Builder(const api::RBounds& lane_bounds,
-          const api::RBounds& driveable_bounds,
+  Builder(/*const double width,*/
           const double linear_tolerance,
           const double angular_tolerance);
 
@@ -231,14 +227,19 @@ class Builder {
   /// @p lane_bounds and @p driveable_bounds are the necessary values for the
   /// @class Lane .
   void CreateConnection(
-    const api::RBounds& lane_bounds,
-    const api::RBounds& driveable_bounds,
+    const double width,
     const ignition::rndf::UniqueId &exit,
     const ignition::rndf::UniqueId &entry);
 
   /// Produces a RoadGeometry, with the ID @p id.
   std::unique_ptr<const api::RoadGeometry> Build(
       const api::RoadGeometryId& id);
+
+  void SetBoundingBox(
+    const std::tuple<ignition::math::Vector3d,
+      ignition::math::Vector3d> &bounding_box) {
+    bounding_box_ = bounding_box;
+  }
 
  private:
   std::string BuildName(const uint segment_id,
@@ -252,8 +253,7 @@ class Builder {
 
   void CreateLane(
     const std::string &key_id,
-    const api::RBounds& lane_bounds,
-    const api::RBounds& driveable_bounds,
+    const double width,
     const std::vector<DirectedWaypoint> &control_points);
 
   void AttachLaneEndToBranchPoint(
@@ -284,7 +284,7 @@ class Builder {
   /// that are at the same s length from the first one. In case all the lanes
   /// are at the same position, none of them is returned.
   std::vector<int> GetInitialLaneToProcess(
-    std::vector<std::vector<DirectedWaypoint>> *lanes,
+    std::vector<ConnectedLane> *lanes,
     const int index);
 
   /// It loads the tangents into each of the @p waypoints using
@@ -296,14 +296,14 @@ class Builder {
   /// the projection of it against @p base tangent. It @return a double with
   /// that value
   double ComputeDistance(
-    const DirectedWaypoint &base, const DirectedWaypoint &destiny);
+    const DirectedWaypoint &base, const DirectedWaypoint &destiny) const;
 
   /// It checks if we need to add a dummy or an interpolated waypoint on the
   /// @p lanes given the @p ids of the lanes that have for @p index a control
   /// point before the others.
   void AddWaypointIfNecessary(
     const std::vector<int> &ids,
-    std::vector<std::vector<DirectedWaypoint>> *lanes,
+    std::vector<ConnectedLane> *lanes,
     const int index);
 
   /// It is the base function that wraps all the process of adding waypoints
@@ -311,7 +311,7 @@ class Builder {
   /// It will @throw std::runtime_error if @p lanes vector is nullptr or if any
   /// of the called functions constraints are not met.
   void CreateNewControlPointsForLanes(
-    std::vector<std::vector<DirectedWaypoint>> *lanes);
+    std::vector<ConnectedLane> *lanes);
 
   /// This function checks the list of lanes their waypoints (@p lane_waypoints)
   /// and copies all the waypoints in @p index position from @p lane_ids
@@ -321,17 +321,33 @@ class Builder {
   /// it will @throw std::runtime_error. If the size of @p lane_ids just one, it
   /// will return without doing anything.
   void OrderLaneIds(
-    const std::vector<std::vector<DirectedWaypoint>> &lane_waypoints,
+    std::vector<ConnectedLane> *lanes,
     std::vector<int> *lane_ids,
     const int index);
 
+  double CalculateMomentum(const ignition::math::Vector3d &point,
+    const DirectedWaypoint &wp);
+  double CalculateRNDFLaneMomentum(
+    const ignition::math::Vector3d &base_point,
+    const std::vector<DirectedWaypoint> &wps);
+  void SetInvertedLanes(
+  std::vector<ConnectedLane> *lanes);
 
-  api::RBounds lane_bounds_;
-  api::RBounds driveable_bounds_;
+  void FillControlPoints(std::vector<ConnectedLane> *lanes);
+  ignition::math::Vector3d ConstructPointForLane(
+    const DirectedWaypoint &base, const DirectedWaypoint &other_lane_base) const;
+  std::vector<int> GetStartingLaneIds(std::vector<ConnectedLane> *lanes,
+    const bool start_check) const;
+  void GroupLanesByDirection(const std::vector<ConnectedLane> *lanes,
+    std::map<int, std::vector<ConnectedLane>> *segments) const;
+
+
+  /*double width_;*/
   double linear_tolerance_{};
   double angular_tolerance_{};
   std::map<std::string, std::vector<std::unique_ptr<Connection>>> connections_;
   std::map<std::string, DirectedWaypoint> directed_waypoints_;
+  std::tuple<ignition::math::Vector3d, ignition::math::Vector3d> bounding_box_;
   static const double kWaypointDistancePhase;
   static const double kLinearStep;
 };

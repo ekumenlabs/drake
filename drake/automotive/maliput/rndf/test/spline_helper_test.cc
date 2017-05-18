@@ -73,6 +73,10 @@ GTEST_TEST(RNDFSplineHelperTest, StraightLine) {
       p,
       kLinearTolerance);
   }
+  EXPECT_IGN_VECTOR_NEAR(
+  arc_lenght_param_spline->InterpolateMthDerivative(0, length),
+  ignition::math::Vector3d(20.0, 0.0, 0.0),
+  kLinearTolerance);
 }
 
 GTEST_TEST(RNDFSplineHelperTest, StraightSplineFindClosesPointTo) {
