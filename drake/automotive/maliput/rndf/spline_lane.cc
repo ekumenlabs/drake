@@ -191,7 +191,6 @@ api::RBounds SplineLane::do_driveable_bounds(double s) const {
   double r_max = std::abs(
     (position_last_lane - spline_->InterpolateMthDerivative(0, s)).Length() +
     segment_->lane(segment_->num_lanes() - 1)->lane_bounds(0.).r_max);
-
   return api::RBounds(r_min , r_max);
 }
 

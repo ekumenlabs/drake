@@ -32,7 +32,8 @@ Loader::LoadFile(const std::string &file_name) {
   // then we move to the lane connections which make use of the UniqueIds of the
   // waypoints to reference them.
   BuildSegments(origin, segments);
-  BuildConnections(segments);
+  BuildZoneLanes(origin, rndfInfo->Zones());
+  BuildConnections(segments, rndfInfo->Zones());
 
   return builder->Build({rndfInfo->Name()});
 }
@@ -80,8 +81,10 @@ void Loader::BuildSegments(
 }
 
 void Loader::BuildConnections(
-  const std::vector<ignition::rndf::Segment> &segments) const {
-  auto build_connection_bounds = [segments, this](const double exit_width,
+  const std::vector<ignition::rndf::Segment> &segments,
+  const std::vector<ignition::rndf::Zone> &zones) const {
+  auto build_connection_bounds = [segments, zones, this](
+    const double exit_width,
     const ignition::rndf::UniqueId &entry_id) {
     for (const auto &segment : segments) {
       if (segment.Id() != entry_id.X())
@@ -100,8 +103,10 @@ void Loader::BuildConnections(
       DRAKE_ABORT_MSG(
         (entry_id.String() + std::string("was not found.")).c_str());
     }
-    DRAKE_ABORT_MSG(
-      (entry_id.String() + std::string("was not found.")).c_str());
+    if (exit_width == 0.0) {
+      return this->rc_.default_width_;
+    }
+    return exit_width;
   };
   // We iterate over the segments looking for each segment connection. We get
   // the exit and entry id from them and the builder uses it to build a
@@ -117,6 +122,39 @@ void Loader::BuildConnections(
         builder->CreateConnection(width, exit_id, entry_id);
       }
     }
+  }
+
+  for (const auto &zone : zones) {
+    const auto &perimeter = zone.Perimeter();
+    std::vector<DirectedWaypoint> perimeter_waypoints;
+    for (const auto &exit : perimeter.Exits()) {
+      const auto &exit_id = exit.ExitId();
+      const auto &entry_id = exit.EntryId();
+      // We define the bounds for the connection
+      const double width = build_connection_bounds(this->rc_.default_width_,
+        entry_id);
+      // We set a default value for the width
+      builder->CreateConnection(width, exit_id, entry_id);
+    }
+  }
+}
+
+void Loader::BuildZoneLanes(
+  const ignition::math::Vector3d &origin,
+  const std::vector<ignition::rndf::Zone> &zones) const {
+  for (const auto &zone : zones) {
+    const auto &perimeter = zone.Perimeter();
+    std::vector<DirectedWaypoint> perimeter_waypoints;
+    for (const auto &waypoint : perimeter.Points()) {
+      perimeter_waypoints.push_back(DirectedWaypoint(
+        ignition::rndf::UniqueId(zone.Id(),
+          0, waypoint.Id()),
+        ToGlobalCoordinates(origin, waypoint.Location()),
+        waypoint.IsEntry(),
+        waypoint.IsExit()));
+    }
+    builder->BuildConnectionsForZones(this->rc_.default_width_,
+      &perimeter_waypoints);
   }
 }
 

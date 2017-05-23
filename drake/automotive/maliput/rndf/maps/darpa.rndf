@@ -9,7 +9,7 @@
 /*                                                 */
 RNDF_name	Sample_RNDF_Rev_1.5
 num_segments	13
-num_zones	0
+num_zones	1
 format_version	1.0
 creation_date	29-Mar-07
 segment	1
@@ -332,6 +332,7 @@ lane	12.1
 num_waypoints	2
 lane_width	10
 stop	12.1.2
+exit	12.1.2	14.0.2	/*into zone 14*/
 12.1.1	38.872978	-77.202819
 12.1.2	38.872297	-77.202805
 end_lane
@@ -383,4 +384,54 @@ exit	13.2.9	10.1.1
 13.2.9	38.870849	-77.198941
 end_lane
 end_segment
+zone	14	/*zones & segments have unique identifiers.*/
+num_spots	6
+zone_name	Central_Parking_Lot
+perimeter	14.0
+num_perimeterpoints	6
+exit	14.0.5	11.1.1	/*out of zone 14*/
+14.0.1	38.872271	-77.203339
+14.0.2	38.872258	-77.202804
+14.0.3	38.872264	-77.202315
+14.0.4	38.871959	-77.202309
+14.0.5	38.871948	-77.203136
+14.0.6	38.871947	-77.203331
+end_perimeter
+spot	14.1
+spot_width	16
+checkpoint	14.1.2	12
+14.1.1	38.872151	-77.202972
+14.1.2	38.872103	-77.202971
+end_spot
+spot	14.2
+spot_width	16
+checkpoint	14.2.2	13
+14.2.1	38.872152	-77.202907
+14.2.2	38.872104	-77.202906
+end_spot
+spot	14.3
+spot_width	16
+checkpoint	14.3.2	14
+14.3.1	38.872152	-77.202843
+14.3.2	38.872104	-77.202840
+end_spot
+spot	14.4
+spot_width	16
+checkpoint	14.4.2	15
+14.4.1	38.872152	-77.202772
+14.4.2	38.872105	-77.202770
+end_spot
+spot	14.5
+spot_width	16
+checkpoint	14.5.2	16
+14.5.1	38.872153	-77.202708
+14.5.2	38.872106	-77.202707
+end_spot
+spot	14.6
+spot_width	16
+checkpoint	14.6.2	17
+14.6.1	38.872153	-77.202645
+14.6.2	38.872106	-77.202643
+end_spot
+end_zone
 end_file

@@ -13,7 +13,7 @@ namespace drake {
 namespace maliput {
 namespace rndf {
 
-const double Builder::kWaypointDistancePhase = 0.0;
+const double Builder::kWaypointDistancePhase = 0.3;
 
 const double Builder::kLinearStep = 1e-2;
 
@@ -119,7 +119,8 @@ void Builder::CreateSegmentConnections(
     for (int i = 0; i < (num_of_waypoints - 1); i++) {
       // Create a segment name
       std::string segment_key_name = std::to_string(segment_id) +
-        std::string("-") + std::to_string(it.first) + std::string("-") + std::to_string(i);
+        std::string("-") + std::to_string(it.first) +
+        std::string("-") + std::to_string(i);
       // Add the lanes
       for (uint j = 0; j < ids.size(); j++) {
         // Create the lane
@@ -136,6 +137,42 @@ void Builder::CreateSegmentConnections(
           it.second[ids[j]].waypoints[i + 1].Id().String()] =
             it.second[ids[j]].waypoints[i + 1];
       }
+    }
+  }
+}
+
+
+void Builder::BuildConnectionsForZones(const double width,
+  std::vector<DirectedWaypoint> *perimeter_waypoints) {
+  DRAKE_THROW_UNLESS(perimeter_waypoints != nullptr);
+  DRAKE_THROW_UNLESS(perimeter_waypoints->size() > 0);
+  // We calculate the mean coordinates from all the waypoints of the perimeter
+  ignition::math::Vector3d center(0., 0., 0.);
+  for (const auto &waypoint : *perimeter_waypoints) {
+    center += waypoint.Position();
+  }
+  center /= static_cast<double>(perimeter_waypoints->size());
+  // Fill the tangents for the entries and exits
+  std::vector<DirectedWaypoint> entries, exits;
+  for (DirectedWaypoint &waypoint : *perimeter_waypoints) {
+    if (waypoint.is_entry()) {
+      waypoint.Tangent() = (center - waypoint.Position()).Normalize();
+      entries.push_back(waypoint);
+      directed_waypoints_[waypoint.Id().String()] = waypoint;
+    } else if (waypoint.is_exit()) {
+      waypoint.Tangent() = (waypoint.Position() - center).Normalize();
+      exits.push_back(waypoint);
+      directed_waypoints_[waypoint.Id().String()] = waypoint;
+    }
+  }
+
+  for (const auto entry : entries) {
+    for (const auto exit : exits) {
+      std::vector<DirectedWaypoint> control_points = {
+        entry, exit
+      };
+      std::string key_id = BuildName(exit.Id()) + std::string("-") + BuildName(entry.Id());
+      CreateLane(key_id, width, control_points);
     }
   }
 }

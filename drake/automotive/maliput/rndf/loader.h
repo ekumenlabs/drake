@@ -17,6 +17,8 @@
 #include "ignition/rndf/Waypoint.hh"
 #include "ignition/rndf/UniqueId.hh"
 #include "ignition/rndf/Exit.hh"
+#include "ignition/rndf/Zone.hh"
+#include "ignition/rndf/Perimeter.hh"
 
 #include "drake/automotive/maliput/api/road_geometry.h"
 #include "drake/automotive/maliput/rndf/builder.h"
@@ -89,7 +91,12 @@ class Loader {
   /// It builds the connections from one lane to another once all the
   /// @p segments have already been finished through BuildSegments.
   void BuildConnections(
-    const std::vector<ignition::rndf::Segment> &segments) const;
+    const std::vector<ignition::rndf::Segment> &segments,
+    const std::vector<ignition::rndf::Zone> &zones) const;
+
+  void BuildZoneLanes(
+    const ignition::math::Vector3d &origin,
+    const std::vector<ignition::rndf::Zone> &segments) const;
 
   void BuildBoundingBox(const ignition::math::Vector3d &origin,
     const std::vector<ignition::rndf::Segment> &segments) const;

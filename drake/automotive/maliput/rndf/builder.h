@@ -241,6 +241,9 @@ class Builder {
     bounding_box_ = bounding_box;
   }
 
+  void BuildConnectionsForZones(const double width,
+    std::vector<DirectedWaypoint> *perimeter_waypoints);
+
  private:
   std::string BuildName(const uint segment_id,
     const uint lane_id) const;
