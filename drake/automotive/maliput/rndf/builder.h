@@ -200,12 +200,6 @@ class Builder {
       const api::RoadGeometryId& id);
 
  private:
-  std::string BuildName(const uint segment_id,
-    const uint lane_id) const;
-
-  std::string BuildName(const uint segment_id,
-    const uint lane_id,
-    const uint waypoint_id) const;
 
   std::string BuildName(const ignition::rndf::UniqueId &id) const;
 
@@ -285,16 +279,15 @@ class Builder {
 
   double CalculateMomentum(const ignition::math::Vector3d &point,
     const DirectedWaypoint &wp);
-  double CalculateRNDFLaneMomentum(
+  double CalculateConnectionMomentum(
     const ignition::math::Vector3d &base_point,
     const std::vector<DirectedWaypoint> &wps);
-  void SetInvertedLanes(
-  std::vector<Connection> *lanes);
+
+  void SetInvertedLanes(std::vector<Connection> *lanes);
 
   ignition::math::Vector3d ConstructPointForLane(
     const DirectedWaypoint &base, const DirectedWaypoint &other_lane_base) const;
-  std::vector<int> GetStartingLaneIds(std::vector<Connection> *lanes,
-    const bool start_check) const;
+
   void GroupLanesByDirection(const std::vector<Connection> *lanes,
     std::map<int, std::vector<Connection>> *segments) const;
 

@@ -57,11 +57,11 @@ void Builder::SetInvertedLanes(
   std::vector<Connection> *lanes) {
   const auto base_point = std::get<0>(bounding_box_) -
     ignition::math::Vector3d(1., 1., 0);
-  // Get all the momentums and rotate the lanes if necessary
+  // Get all the momentums and mark the lanes if necessary
   int first_lane_sign_momentum, other_lane_sign_momentum;
   for (int i = 0; i < static_cast<int>(lanes->size()); i++) {
     double momentum =
-      CalculateRNDFLaneMomentum(base_point, lanes->at(i).waypoints());
+      CalculateConnectionMomentum(base_point, lanes->at(i).waypoints());
     if (i == 0) {
       first_lane_sign_momentum = std::copysign(1.0, momentum);
     } else {
@@ -78,41 +78,33 @@ void Builder::CreateSegmentConnections(
   std::vector<Connection> *lanes) {
   // Checks
   DRAKE_THROW_UNLESS(lanes != nullptr);
-  DRAKE_THROW_UNLESS(lanes->size() >= 1);
+  DRAKE_THROW_UNLESS(lanes->size() > 0);
   for (const auto &lane : *lanes) {
-    DRAKE_THROW_UNLESS(lane.waypoints().size() >= 2);
+    DRAKE_THROW_UNLESS(lane.waypoints().size() > 1);
   }
   // Build the vector of waypoints
   for (Connection &lane : *lanes) {
     BuildTangentsForWaypoints(&(lane.waypoints()));
   }
-
   // Check the momentum that each lane produces and then set the connected lane
   // accordingly
   SetInvertedLanes(lanes);
-
   // Split the lanes in groups so we get them by lane directions
   std::map<int, std::vector<Connection>> segments;
   GroupLanesByDirection(lanes, &segments);
-
+  // Iterate over the RNDF Lange groups
   for (auto it : segments) {
     CreateNewControlPointsForLanes(&(it.second));
-    // Fill in the map the waypoints
-    int num_of_waypoints = it.second[0].waypoints().size();
-    int num_of_lanes = it.second.size();
-    for (int i = 0; i < (num_of_waypoints - 1); i++) {
-      // Find the valid RNDF lane pieces.
+    // Iterate first over the waypoints
+    for (int i = 0; i < static_cast<int>((it.second[0].waypoints().size() - 1));
+      i++) {
+      // Find the valid RNDF lane pieces. Then, order them from right to left
       std::vector<int> valid_lane_ids;
-      for (int j = 0; j < num_of_lanes; j++) {
+      for (int j = 0; j < static_cast<int>(it.second.size()); j++) {
         if (it.second[j].waypoints()[i].Id().Valid() &&
           it.second[j].waypoints()[i + 1].Id().Valid()) {
           valid_lane_ids.push_back(j);
         }
-      }
-      // Order them from right to left
-      std::vector<int> ids;
-      for (int i = 0; i < static_cast<int>(it.second.size()); i++) {
-        ids.push_back(i);
       }
       OrderLaneIds(&(it.second), &valid_lane_ids, 0);
       // Create a segment name
@@ -120,22 +112,17 @@ void Builder::CreateSegmentConnections(
         std::string("-") + std::to_string(it.first) +
         std::string("-") + std::to_string(i);
 
-      // Add the lanes
-      for (uint j = 0; j < valid_lane_ids.size(); j++) {
+      // Iterate over the valid lane ids.
+      for (auto lane_it = valid_lane_ids.begin();
+        lane_it != valid_lane_ids.end(); ++lane_it) {
         // Create the lane
         std::vector<DirectedWaypoint> wps;
-        wps.push_back(it.second[valid_lane_ids[j]].waypoints()[i]);
-        wps.push_back(it.second[valid_lane_ids[j]].waypoints()[i + 1]);
-        CreateLane(segment_key_name,
-          it.second[valid_lane_ids[j]].width(),
-          wps);
+        wps.push_back(it.second[*lane_it].waypoints()[i]);
+        wps.push_back(it.second[*lane_it].waypoints()[i + 1]);
+        CreateLane(segment_key_name, it.second[*lane_it].width(), wps);
         // Add the pair of waypoints to the map
-        directed_waypoints_[
-          it.second[valid_lane_ids[j]].waypoints()[i].Id().String()] =
-            it.second[valid_lane_ids[j]].waypoints()[i];
-        directed_waypoints_[
-          it.second[valid_lane_ids[j]].waypoints()[i + 1].Id().String()] =
-            it.second[valid_lane_ids[j]].waypoints()[i + 1];
+        directed_waypoints_[wps.front().Id().String()] = wps.front();
+        directed_waypoints_[wps.back().Id().String()] = wps.back();
       }
     }
   }
@@ -260,8 +247,8 @@ void Builder::BuildTangentsForWaypoints(
   DRAKE_DEMAND(waypoints != nullptr);
   // We generate the spline
   std::unique_ptr<ignition::math::Spline> spline = CreateSpline(waypoints);
-  uint base_id = 0;
-  for (uint i = 0; i < waypoints->size(); i++) {
+  int base_id = 0;
+  for (int i = 0; i < static_cast<int>(waypoints->size()); i++) {
     if (!waypoints->at(i).Id().Valid()) {
       base_id = i;
       continue;
@@ -271,93 +258,11 @@ void Builder::BuildTangentsForWaypoints(
   }
 }
 
-
 double Builder::ComputeDistance(
   const DirectedWaypoint &base,
   const DirectedWaypoint &destiny) const {
   return (destiny.Position() - base.Position()).Dot(
     ignition::math::Vector3d(base.Tangent()).Normalize());
-}
-
-std::vector<int> Builder::GetStartingLaneIds(std::vector<Connection> *lanes,
-  const bool start_check) const {
-  DRAKE_DEMAND(lanes != nullptr);
-  if (lanes->size() == 1) {
-    return {0};
-  }
-  // We create
-  std::vector<std::vector<double>> distances_matrix;
-  for (int i = 0; i < static_cast<int>(lanes->size()); i++) {
-    distances_matrix.push_back(std::vector<double>());
-    for (int j = 0; j < static_cast<int>(lanes->size()); j++) {
-      if (i == j) {
-        // It is the distance against the same point, no computation is needed
-        distances_matrix[i].push_back(0.);
-      } else {
-        // We compute the distance between respective points
-        int first_index, second_index;
-        if ((start_check == true && !lanes->at(i).inverse_direction()) ||
-          (start_check == false && lanes->at(i).inverse_direction())) {
-          first_index = 0;
-        } else {
-          first_index = lanes->at(i).waypoints().size() - 1;
-        }
-
-        if ((start_check == true && !lanes->at(j).inverse_direction()) ||
-          (start_check == false && lanes->at(j).inverse_direction())) {
-          second_index = 0;
-        } else {
-          second_index = lanes->at(j).waypoints().size() - 1;
-        }
-
-        DirectedWaypoint first_wp(lanes->at(i).waypoints()[first_index]);
-        DirectedWaypoint second_wp(lanes->at(j).waypoints()[second_index]);
-        if (lanes->at(i).inverse_direction()) {
-          first_wp.Tangent() = - first_wp.Tangent();
-        }
-        if (lanes->at(j).inverse_direction()) {
-          second_wp.Tangent() = - second_wp.Tangent();
-        }
-        distances_matrix[i].push_back(
-          ComputeDistance(first_wp, second_wp));
-      }
-    }
-  }
-  // Compute the number of valid distances
-  std::vector<std::tuple<int, int>> index_valid_distances;
-  int i = 0;
-  for (const auto distances : distances_matrix) {
-    int number_of_valid_distances = 0;
-    for (const auto d : distances) {
-      if (start_check) {
-        if (d > 0.0) {
-          number_of_valid_distances++;
-        }
-      } else {
-        if (d < 0.0) {
-          number_of_valid_distances++;
-        }
-      }
-    }
-    index_valid_distances.push_back(std::make_tuple(i,
-      number_of_valid_distances));
-    i++;
-  }
-  // Sort the tuple vector by increasing number of valid distances.
-  // This gives us the first values of the vectors with the lane ids with
-  // waypoints that appear first
-  std::sort(std::begin(index_valid_distances), std::end(index_valid_distances),
-    [](auto const &t_a, auto const &t_b) {
-      return std::get<1>(t_a) > std::get<1>(t_b);
-    });
-
-  // Create a vector with all the lane ids that appear first and then return it
-  std::vector<int> ids;
-  for (const auto id_zeros : index_valid_distances) {
-    if (std::get<1>(id_zeros) == std::get<1>(index_valid_distances[0]))
-      ids.push_back(std::get<0>(id_zeros));
-  }
-  return ids;
 }
 
 std::vector<int> Builder::GetInitialLaneToProcess(
@@ -366,17 +271,16 @@ std::vector<int> Builder::GetInitialLaneToProcess(
   DRAKE_DEMAND(lanes != nullptr);
   // Compute the distance matrix
   std::vector<std::vector<double>> distances_matrix;
-  for (uint i = 0; i < lanes->size(); i++) {
+  for (int i = 0; i < static_cast<int>(lanes->size()); i++) {
     distances_matrix.push_back(std::vector<double>());
-    for (uint j = 0; j < lanes->size(); j++) {
-      if (i == j) {
-        // It is the distance against the same point
+    for (int j = 0; j < static_cast<int>(lanes->size()); j++) {
+      if (i == j) { // It is the distance against the same point
         distances_matrix[i].push_back(-1.);
       } else if (index >= static_cast<int>(lanes->at(i).waypoints().size()) ||
         index >= static_cast<int>(lanes->at(j).waypoints().size())) {
         // In this case it's none sense to compute the distance as one of the
         // lanes is shorter that the other at least in terms of waypoints.
-        distances_matrix[i].push_back(-2.);
+        distances_matrix[i].push_back(-1.);
       } else {
         // We compute the distance and in case it's less than zero we
         // truncate it to zero to set mean that this point is further
@@ -721,7 +625,7 @@ double Builder::CalculateMomentum(
   // its value on the z component, so we get it.
   return result.Z();
 }
-double Builder::CalculateRNDFLaneMomentum(
+double Builder::CalculateConnectionMomentum(
   const ignition::math::Vector3d &base_point,
   const std::vector<DirectedWaypoint> &wps) {
   double momentum = 0.;
@@ -729,20 +633,6 @@ double Builder::CalculateRNDFLaneMomentum(
     momentum += CalculateMomentum(base_point, wp);
   }
   return momentum;
-}
-
-std::string Builder::BuildName(const uint segment_id,
-  const uint lane_id) const {
-  return std::to_string(segment_id) + "_" +
-    std::to_string(lane_id) + "_";
-}
-
-std::string Builder::BuildName(const uint segment_id,
-  const uint lane_id,
-  const uint waypoint_id) const {
-  return std::to_string(segment_id) + "_" +
-    std::to_string(lane_id) + "_" +
-    std::to_string(waypoint_id);
 }
 
 std::string Builder::BuildName(const ignition::rndf::UniqueId &id) const {
