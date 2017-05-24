@@ -336,7 +336,6 @@ class Builder {
   void SetInvertedLanes(
   std::vector<ConnectedLane> *lanes);
 
-  void FillControlPoints(std::vector<ConnectedLane> *lanes);
   ignition::math::Vector3d ConstructPointForLane(
     const DirectedWaypoint &base, const DirectedWaypoint &other_lane_base) const;
   std::vector<int> GetStartingLaneIds(std::vector<ConnectedLane> *lanes,
