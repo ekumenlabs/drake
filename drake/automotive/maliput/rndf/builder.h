@@ -29,52 +29,9 @@ class RoadGeometry;
 
 class DirectedWaypoint {
  public:
-  DirectedWaypoint(const DirectedWaypoint &directed_waypoint) :
-    position_(directed_waypoint.position_),
-    tangent_(directed_waypoint.tangent_) {
-    id_.SetX(directed_waypoint.id_.X());
-    id_.SetY(directed_waypoint.id_.Y());
-    id_.SetZ(directed_waypoint.id_.Z());
-    is_entry_ = directed_waypoint.is_entry_;
-    is_exit_ = directed_waypoint.is_exit_;
-  }
-  DirectedWaypoint& operator=(const DirectedWaypoint &directed_waypoint) {
-    position_ = directed_waypoint.position_;
-    tangent_ = directed_waypoint.tangent_;
-    id_.SetX(directed_waypoint.id_.X());
-    id_.SetY(directed_waypoint.id_.Y());
-    id_.SetZ(directed_waypoint.id_.Z());
-    is_entry_ = directed_waypoint.is_entry_;
-    is_exit_ = directed_waypoint.is_exit_;
-    return *this;
-  }
-  DirectedWaypoint(DirectedWaypoint &&directed_waypoint) :
-    position_(directed_waypoint.position_),
-    tangent_(directed_waypoint.tangent_)  {
-    id_.SetX(directed_waypoint.id_.X());
-    id_.SetY(directed_waypoint.id_.Y());
-    id_.SetZ(directed_waypoint.id_.Z());
-    is_entry_ = directed_waypoint.is_entry_;
-    is_exit_ = directed_waypoint.is_exit_;
-    is_entry_ = directed_waypoint.is_entry_;
-    is_exit_ = directed_waypoint.is_exit_;
-  }
-  DirectedWaypoint& operator=(DirectedWaypoint &&directed_waypoint) {
-    if (this == &directed_waypoint) {
-      position_ = directed_waypoint.position_;
-      tangent_ = directed_waypoint.tangent_;
-      id_.SetX(directed_waypoint.id_.X());
-      id_.SetY(directed_waypoint.id_.Y());
-      id_.SetZ(directed_waypoint.id_.Z());
-      is_entry_ = directed_waypoint.is_entry_;
-      is_exit_ = directed_waypoint.is_exit_;
-    }
-    return *this;
-  }
-  static void DRAKE_COPYABLE_DEMAND_COPY_CAN_COMPILE() {
-    (void) static_cast<DirectedWaypoint& (DirectedWaypoint::*)
-      (const DirectedWaypoint&)>(&DirectedWaypoint::operator=);
-  }
+  DRAKE_DEFAULT_COPY_AND_MOVE_AND_ASSIGN(DirectedWaypoint)
+
+  DirectedWaypoint() = default;
 
   DirectedWaypoint(
     const ignition::rndf::UniqueId &id,
@@ -87,8 +44,6 @@ class DirectedWaypoint {
       tangent_(tangent),
       is_entry_(is_entry),
       is_exit_(is_exit) {}
-
-  DirectedWaypoint() {}
 
   const ignition::rndf::UniqueId& Id() const {
     return id_;
@@ -137,15 +92,11 @@ class Connection {
  public:
   DRAKE_NO_COPY_NO_MOVE_NO_ASSIGN(Connection)
 
-  /// Possible connection geometries: splines
-  enum Type { kSpline };
-
   /// Constructs a spline-segment connection joining @p points[0] to
   /// @p points[size-1].
   Connection(const std::string& id,
     const std::vector<DirectedWaypoint>& waypoints,
     const double width) :
-      type_(kSpline),
       id_(id),
       start_(waypoints.front()),
       end_(waypoints.back()),
@@ -153,9 +104,6 @@ class Connection {
       width_(width) {
     DRAKE_THROW_UNLESS(waypoints_.size() >= 2);
   }
-
-  /// Returns the geometric type of the path.
-  Type type() const { return type_; }
 
   /// Returns the ID string.
   const std::string& id() const { return id_; }
@@ -169,7 +117,6 @@ class Connection {
   DirectedWaypoint& end() { return end_; }
 
   const std::vector<DirectedWaypoint> &waypoints() const {
-    DRAKE_THROW_UNLESS(type_ == kSpline);
     return waypoints_;
   }
 
@@ -178,7 +125,6 @@ class Connection {
   }
 
  private:
-  Type type_{};
   std::string id_;
   DirectedWaypoint start_;
   DirectedWaypoint end_;
@@ -205,9 +151,16 @@ class Builder {
   /// to the single lanes of every segment; @p lane_bounds must be a subset
   /// of @p driveable_bounds.  @p linear_tolerance and @p angular_tolerance
   /// specify the respective tolerances for the resulting RoadGeometry.
-  Builder(/*const double width,*/
-          const double linear_tolerance,
-          const double angular_tolerance);
+  Builder(const double linear_tolerance,
+          const double angular_tolerance) :
+    linear_tolerance_(linear_tolerance),
+    angular_tolerance_(angular_tolerance) {}
+
+  void SetBoundingBox(
+    const std::tuple<ignition::math::Vector3d,
+      ignition::math::Vector3d> &bounding_box) {
+    bounding_box_ = bounding_box;
+  }
 
   /// If you have a segment with multiple lanes, you should call this function
   /// so as to build the lanes. It will create an extra control point on a
@@ -222,6 +175,9 @@ class Builder {
     const uint segment_id,
     std::vector<ConnectedLane> *lanes);
 
+  void CreateConnectionsForZones(const double width,
+    std::vector<DirectedWaypoint> *perimeter_waypoints);
+
   /// Loads a connections between two RNDF lanes based on a set of @p exit and
   /// @p entry ids that map to a specific waypoint location.
   /// @p lane_bounds and @p driveable_bounds are the necessary values for the
@@ -234,15 +190,6 @@ class Builder {
   /// Produces a RoadGeometry, with the ID @p id.
   std::unique_ptr<const api::RoadGeometry> Build(
       const api::RoadGeometryId& id);
-
-  void SetBoundingBox(
-    const std::tuple<ignition::math::Vector3d,
-      ignition::math::Vector3d> &bounding_box) {
-    bounding_box_ = bounding_box;
-  }
-
-  void BuildConnectionsForZones(const double width,
-    std::vector<DirectedWaypoint> *perimeter_waypoints);
 
  private:
   std::string BuildName(const uint segment_id,
@@ -343,8 +290,6 @@ class Builder {
   void GroupLanesByDirection(const std::vector<ConnectedLane> *lanes,
     std::map<int, std::vector<ConnectedLane>> *segments) const;
 
-
-  /*double width_;*/
   double linear_tolerance_{};
   double angular_tolerance_{};
   std::map<std::string, std::vector<std::unique_ptr<Connection>>> connections_;

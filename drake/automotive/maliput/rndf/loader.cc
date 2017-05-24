@@ -153,7 +153,7 @@ void Loader::BuildZoneLanes(
         waypoint.IsEntry(),
         waypoint.IsExit()));
     }
-    builder->BuildConnectionsForZones(this->rc_.default_width_,
+    builder->CreateConnectionsForZones(this->rc_.default_width_,
       &perimeter_waypoints);
   }
 }

@@ -36,14 +36,6 @@ std::tuple<ignition::math::Vector3d, ignition::math::Vector3d>
       0.0));
 }
 
-Builder::Builder(/*const double width,*/
-                 const double linear_tolerance,
-                 const double angular_tolerance)
-    : /*width_(width),*/
-      linear_tolerance_(linear_tolerance),
-      angular_tolerance_(angular_tolerance) {
-}
-
 void Builder::CreateConnection(
   const double width,
   const ignition::rndf::UniqueId &exit,
@@ -150,7 +142,7 @@ void Builder::CreateSegmentConnections(
 }
 
 
-void Builder::BuildConnectionsForZones(const double width,
+void Builder::CreateConnectionsForZones(const double width,
   std::vector<DirectedWaypoint> *perimeter_waypoints) {
   DRAKE_THROW_UNLESS(perimeter_waypoints != nullptr);
   DRAKE_THROW_UNLESS(perimeter_waypoints->size() > 0);
@@ -667,24 +659,17 @@ Lane* Builder::BuildConnection(
   Lane* lane{};
   api::LaneId lane_id{std::string("l:") + connection->id()};
 
-  switch (connection->type()) {
-    case Connection::kSpline: {
-      std::vector<std::tuple<
-        ignition::math::Vector3d,
-        ignition::math::Vector3d>> points_tangents;
-      for (const auto& directed_waypoint : connection->waypoints()) {
-        points_tangents.push_back(std::make_tuple(
-          directed_waypoint.Position(), directed_waypoint.Tangent()));
-      }
-      lane = segment->NewSplineLane(lane_id,
-        points_tangents,
-        connection->width());
-      break;
-    }
-    default: {
-      DRAKE_ABORT();
-    }
+  std::vector<std::tuple<
+    ignition::math::Vector3d,
+    ignition::math::Vector3d>> points_tangents;
+  for (const auto& directed_waypoint : connection->waypoints()) {
+    points_tangents.push_back(std::make_tuple(
+      directed_waypoint.Position(), directed_waypoint.Tangent()));
   }
+  lane = segment->NewSplineLane(lane_id,
+    points_tangents,
+    connection->width());
+
   return lane;
 }
 
