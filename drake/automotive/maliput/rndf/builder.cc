@@ -609,7 +609,9 @@ double Builder::CalculateMomentum(
   const ignition::math::Vector3d &point,
   const DirectedWaypoint &wp) {
   const auto v_wp_point = wp.Position() - point;
-  const auto result = wp.Tangent().Cross(v_wp_point);
+  auto tangent = wp.Tangent();
+  tangent.Normalize();
+  const auto result = tangent.Cross(v_wp_point);
   // As all the points should be on the x-y plane, the result should have all
   // its value on the z component, so we get it.
   return result.Z();
