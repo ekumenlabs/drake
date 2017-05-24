@@ -349,12 +349,14 @@ void Builder::AddWaypointIfNecessary(const std::vector<int> &ids,
     } else if (lane.waypoints()[index].Id().Z() == 1) {
       // As the waypoint is first one, we need to add one blank at the
       // beginning.
-      std::vector<DirectedWaypoint> new_lane;
+      std::vector<DirectedWaypoint> new_lane = {DirectedWaypoint()};
       new_lane.insert(new_lane.begin(),
-        lane.waypoints().begin(), lane.waypoints().begin() + index);
-      new_lane.push_back(DirectedWaypoint());
-      new_lane.insert(new_lane.end(),
-        lane.waypoints().begin() + index, lane.waypoints().end());
+        lane.waypoints().begin(), lane.waypoints().end());
+      // new_lane.insert(new_lane.begin(),
+      //   lane.waypoints().begin(), lane.waypoints().begin() + index);
+      // new_lane.push_back(DirectedWaypoint());
+      // new_lane.insert(new_lane.end(),
+      //   lane.waypoints().begin() + index, lane.waypoints().end());
       lane.waypoints() = new_lane;
     } else {
       // Here we need to add a waypoint to the respective position of the side
