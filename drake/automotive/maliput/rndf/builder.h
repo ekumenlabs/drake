@@ -146,9 +146,24 @@ class Connection {
 
 /// This structure holds all the lane information needed at construction time.
 struct ConnectedLane {
-  std::vector<DirectedWaypoint> waypoints;
-  bool inverse_direction{false};
-  double width;
+  std::vector<DirectedWaypoint> waypoints_;
+  bool inverse_direction_{false};
+  double width_;
+
+  double width() const { return width_; }
+  void set_width(const double width) { width_ = width;}
+
+  bool inverse_direction() const { return inverse_direction_; }
+  void set_inverse_direction(bool inverse_direction) {
+    inverse_direction_ = inverse_direction;
+  }
+
+  const std::vector<DirectedWaypoint> &waypoints() const {
+    return waypoints_;
+  }
+  std::vector<DirectedWaypoint> &waypoints() const {
+    return waypoints_;
+  }
 };
 
 // N.B. The Builder class overview documentation lives at the top of this file.
