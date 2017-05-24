@@ -236,10 +236,8 @@ drake_add_external(ignition_math PUBLIC CMAKE
 
 # ignition_rndf
 drake_add_external(ignition_rndf PUBLIC CMAKE
-  #URL https://bitbucket.org/ignitionrobotics/ign-rndf/get/ignition-rndf_0.1.2.tar.gz
   URL https://bitbucket.org/ignitionrobotics/ign-rndf/get/default.tar.gz
-  #URL_HASH SHA256=e0aa1489311679639717d3614c7c55edaa5f6de9a78c31ea48ea637bc1ba001a
-  URL_HASH SHA256=8ca19679ad52e9e174393cd3c1f329364676d0021b2bbf2f982c580049e7a909
+  URL_HASH SHA256=1f51d7d3b11b600098fc86c6b529c31f9eae26f49603869b2a50caca43f9179d
   CMAKE_ARGS
     -DENABLE_TESTS_COMPILATION=OFF
     -DUSE_HOST_CFLAGS=OFF

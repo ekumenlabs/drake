@@ -59,7 +59,7 @@ api::Rotation SplineLane::DoGetOrientation(
   const api::LanePosition& lane_pos) const {
   // Recover linear parameter p from arc-length position s.
   const Rot3 Rabg = Rabg_of_s(lane_pos.s());
-  return api::Rotation(0.0, 0.0, Rabg.yaw());
+  return api::Rotation::FromRpy(0.0, 0.0, Rabg.yaw());
 }
 
 api::LanePosition SplineLane::DoEvalMotionDerivatives(

@@ -173,7 +173,7 @@ class Connection {
     return waypoints_;
   }
 
-  const double width() const {
+  double width() const {
     return width_;
   }
 

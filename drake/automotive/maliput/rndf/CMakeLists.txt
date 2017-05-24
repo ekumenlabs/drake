@@ -38,6 +38,6 @@ if(ignition-rndf0_FOUND)
 endif()
 
 
-if(BUILD_TESTING)
-  add_subdirectory(test)
-endif()
+#if(BUILD_TESTING)
+#  add_subdirectory(test)
+#endif()
