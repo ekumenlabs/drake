@@ -128,6 +128,9 @@ class Connection {
   const std::vector<DirectedWaypoint> &waypoints() const {
     return waypoints_;
   }
+  std::vector<DirectedWaypoint> &waypoints() {
+    return waypoints_;
+  }
 
   double width() const { return width_; }
   void set_width(const double width) { width_ = width;}
@@ -142,28 +145,6 @@ class Connection {
   std::vector<DirectedWaypoint> waypoints_;
   double width_;
   bool inverse_direction_ {false};
-};
-
-/// This structure holds all the lane information needed at construction time.
-struct ConnectedLane {
-  std::vector<DirectedWaypoint> waypoints_;
-  bool inverse_direction_{false};
-  double width_;
-
-  double width() const { return width_; }
-  void set_width(const double width) { width_ = width;}
-
-  bool inverse_direction() const { return inverse_direction_; }
-  void set_inverse_direction(bool inverse_direction) {
-    inverse_direction_ = inverse_direction;
-  }
-
-  const std::vector<DirectedWaypoint> &waypoints() const {
-    return waypoints_;
-  }
-  std::vector<DirectedWaypoint> &waypoints() const {
-    return waypoints_;
-  }
 };
 
 // N.B. The Builder class overview documentation lives at the top of this file.
@@ -200,7 +181,7 @@ class Builder {
   /// not contain at least two waypoints an exception is thrown.
   void CreateSegmentConnections(
     const uint segment_id,
-    std::vector<ConnectedLane> *lanes);
+    std::vector<Connection> *lanes);
 
   void CreateConnectionsForZones(const double width,
     std::vector<DirectedWaypoint> *perimeter_waypoints);
@@ -261,7 +242,7 @@ class Builder {
   /// that are at the same s length from the first one. In case all the lanes
   /// are at the same position, none of them is returned.
   std::vector<int> GetInitialLaneToProcess(
-    std::vector<ConnectedLane> *lanes,
+    std::vector<Connection> *lanes,
     const int index);
 
   /// It loads the tangents into each of the @p waypoints using
@@ -280,7 +261,7 @@ class Builder {
   /// point before the others.
   void AddWaypointIfNecessary(
     const std::vector<int> &ids,
-    std::vector<ConnectedLane> *lanes,
+    std::vector<Connection> *lanes,
     const int index);
 
   /// It is the base function that wraps all the process of adding waypoints
@@ -288,7 +269,7 @@ class Builder {
   /// It will @throw std::runtime_error if @p lanes vector is nullptr or if any
   /// of the called functions constraints are not met.
   void CreateNewControlPointsForLanes(
-    std::vector<ConnectedLane> *lanes);
+    std::vector<Connection> *lanes);
 
   /// This function checks the list of lanes their waypoints (@p lane_waypoints)
   /// and copies all the waypoints in @p index position from @p lane_ids
@@ -298,7 +279,7 @@ class Builder {
   /// it will @throw std::runtime_error. If the size of @p lane_ids just one, it
   /// will return without doing anything.
   void OrderLaneIds(
-    std::vector<ConnectedLane> *lanes,
+    std::vector<Connection> *lanes,
     std::vector<int> *lane_ids,
     const int index);
 
@@ -308,14 +289,14 @@ class Builder {
     const ignition::math::Vector3d &base_point,
     const std::vector<DirectedWaypoint> &wps);
   void SetInvertedLanes(
-  std::vector<ConnectedLane> *lanes);
+  std::vector<Connection> *lanes);
 
   ignition::math::Vector3d ConstructPointForLane(
     const DirectedWaypoint &base, const DirectedWaypoint &other_lane_base) const;
-  std::vector<int> GetStartingLaneIds(std::vector<ConnectedLane> *lanes,
+  std::vector<int> GetStartingLaneIds(std::vector<Connection> *lanes,
     const bool start_check) const;
-  void GroupLanesByDirection(const std::vector<ConnectedLane> *lanes,
-    std::map<int, std::vector<ConnectedLane>> *segments) const;
+  void GroupLanesByDirection(const std::vector<Connection> *lanes,
+    std::map<int, std::vector<Connection>> *segments) const;
 
   double linear_tolerance_{};
   double angular_tolerance_{};

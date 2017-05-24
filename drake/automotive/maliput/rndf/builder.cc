@@ -54,7 +54,7 @@ void Builder::CreateConnection(
 }
 
 void Builder::SetInvertedLanes(
-  std::vector<ConnectedLane> *lanes) {
+  std::vector<Connection> *lanes) {
   const auto base_point = std::get<0>(bounding_box_) -
     ignition::math::Vector3d(1., 1., 0);
   // Get all the momentums and rotate the lanes if necessary
@@ -75,15 +75,15 @@ void Builder::SetInvertedLanes(
 
 void Builder::CreateSegmentConnections(
   const uint segment_id,
-  std::vector<ConnectedLane> *lanes) {
+  std::vector<Connection> *lanes) {
   // Checks
   DRAKE_THROW_UNLESS(lanes != nullptr);
   DRAKE_THROW_UNLESS(lanes->size() >= 1);
   for (const auto &lane : *lanes) {
-    DRAKE_THROW_UNLESS(lane.waypoints.size() >= 2);
+    DRAKE_THROW_UNLESS(lane.waypoints().size() >= 2);
   }
   // Build the vector of waypoints
-  for (ConnectedLane &lane : *lanes) {
+  for (Connection &lane : *lanes) {
     BuildTangentsForWaypoints(&(lane.waypoints()));
   }
 
@@ -92,7 +92,7 @@ void Builder::CreateSegmentConnections(
   SetInvertedLanes(lanes);
 
   // Split the lanes in groups so we get them by lane directions
-  std::map<int, std::vector<ConnectedLane>> segments;
+  std::map<int, std::vector<Connection>> segments;
   GroupLanesByDirection(lanes, &segments);
 
   for (auto it : segments) {
@@ -195,8 +195,8 @@ std::unique_ptr<ignition::math::Spline> Builder::CreateSpline(
   return spline;
 }
 
-void Builder::GroupLanesByDirection(const std::vector<ConnectedLane> *lanes,
-  std::map<int, std::vector<ConnectedLane>> *segments) const {
+void Builder::GroupLanesByDirection(const std::vector<Connection> *lanes,
+  std::map<int, std::vector<Connection>> *segments) const {
   // Checks
   DRAKE_DEMAND(lanes != nullptr);
   DRAKE_DEMAND(segments != nullptr);
@@ -208,14 +208,14 @@ void Builder::GroupLanesByDirection(const std::vector<ConnectedLane> *lanes,
     if (current_inversion == lanes->at(i).inverse_direction()) {
       // Create an entry for the map if it doesn't exist
       if (segments->find(segment_group) == segments->end()) {
-        (*segments)[current_inversion] = std::vector<ConnectedLane>();
+        (*segments)[current_inversion] = std::vector<Connection>();
       }
       // Add the lane
       (*segments)[current_inversion].push_back(lanes->at(i));
     } else {
       current_inversion = lanes->at(i).inverse_direction();
       segment_group ++;
-      (*segments)[current_inversion] = std::vector<ConnectedLane>();
+      (*segments)[current_inversion] = std::vector<Connection>();
       (*segments)[current_inversion].push_back(lanes->at(i));
     }
   }
@@ -223,7 +223,7 @@ void Builder::GroupLanesByDirection(const std::vector<ConnectedLane> *lanes,
 
 
 void Builder::OrderLaneIds(
-    std::vector<ConnectedLane> *lanes,
+    std::vector<Connection> *lanes,
     std::vector<int> *lane_ids,
     const int index) {
   DRAKE_DEMAND(lane_ids != nullptr);
@@ -279,7 +279,7 @@ double Builder::ComputeDistance(
     ignition::math::Vector3d(base.Tangent()).Normalize());
 }
 
-std::vector<int> Builder::GetStartingLaneIds(std::vector<ConnectedLane> *lanes,
+std::vector<int> Builder::GetStartingLaneIds(std::vector<Connection> *lanes,
   const bool start_check) const {
   DRAKE_DEMAND(lanes != nullptr);
   if (lanes->size() == 1) {
@@ -312,10 +312,10 @@ std::vector<int> Builder::GetStartingLaneIds(std::vector<ConnectedLane> *lanes,
 
         DirectedWaypoint first_wp(lanes->at(i).waypoints()[first_index]);
         DirectedWaypoint second_wp(lanes->at(j).waypoints()[second_index]);
-        if (lanes->at(i).inverse_direction) {
+        if (lanes->at(i).inverse_direction()) {
           first_wp.Tangent() = - first_wp.Tangent();
         }
-        if (lanes->at(j).inverse_direction) {
+        if (lanes->at(j).inverse_direction()) {
           second_wp.Tangent() = - second_wp.Tangent();
         }
         distances_matrix[i].push_back(
@@ -361,7 +361,7 @@ std::vector<int> Builder::GetStartingLaneIds(std::vector<ConnectedLane> *lanes,
 }
 
 std::vector<int> Builder::GetInitialLaneToProcess(
-  std::vector<ConnectedLane> *lanes,
+  std::vector<Connection> *lanes,
   const int index) {
   DRAKE_DEMAND(lanes != nullptr);
   // Compute the distance matrix
@@ -424,12 +424,12 @@ std::vector<int> Builder::GetInitialLaneToProcess(
 }
 
 void Builder::AddWaypointIfNecessary(const std::vector<int> &ids,
-  std::vector<ConnectedLane> *lanes,
+  std::vector<Connection> *lanes,
   const int index) {
   DRAKE_DEMAND(lanes != nullptr);
 
   for (int i = 0; i < static_cast<int>(lanes->size()); i++) {
-    ConnectedLane &lane = lanes->at(i);
+    Connection &lane = lanes->at(i);
     // Check id the id is in the ids (first-to-appear vector)
     if (std::find(ids.begin(), ids.end(), i) != ids.end()) {
       continue;
@@ -440,20 +440,22 @@ void Builder::AddWaypointIfNecessary(const std::vector<int> &ids,
     }
     if (static_cast<int>(lane.waypoints().size()) <= index) {
       // No more lane, so we add a new blank directed waypoint
-      lane.waypoints.push_back(DirectedWaypoint());
+      lane.waypoints().push_back(DirectedWaypoint());
     } else if (lane.waypoints()[index].Id().Z() == 1) {
       // As the waypoint is first one, we need to add one blank at the
       // beginning.
       std::vector<DirectedWaypoint> new_lane;
-      new_lane.insert(new_lane.begin(), lane.waypoints.begin(), lane.waypoints.begin() + index);
+      new_lane.insert(new_lane.begin(),
+        lane.waypoints().begin(), lane.waypoints().begin() + index);
       new_lane.push_back(DirectedWaypoint());
-      new_lane.insert(new_lane.end(), lane.waypoints.begin() + index, lane.waypoints.end());
-      lane.waypoints = new_lane;
+      new_lane.insert(new_lane.end(),
+        lane.waypoints().begin() + index, lane.waypoints().end());
+      lane.waypoints() = new_lane;
     } else {
       // Here we need to add a waypoint to the respective position of the side
       // lane.
       // Build the spline
-      auto spline = CreateSpline(&(lanes->at(i).waypoints));
+      auto spline = CreateSpline(&(lanes->at(i).waypoints()));
       std::unique_ptr<ArcLengthParameterizedSpline> arc_lenght_param_spline =
         std::make_unique<ArcLengthParameterizedSpline>(std::move(spline),
           linear_tolerance_);
@@ -463,27 +465,29 @@ void Builder::AddWaypointIfNecessary(const std::vector<int> &ids,
       DirectedWaypoint new_wp(
         ignition::rndf::UniqueId(lanes->at(i).waypoints()[index-1].Id().X(),
           lanes->at(i).waypoints()[index-1].Id().Y(),
-          lanes->at(i).waypoints.size() + 1),
+          lanes->at(i).waypoints().size() + 1),
         arc_lenght_param_spline->InterpolateMthDerivative(0, s),
         false,
         false,
         arc_lenght_param_spline->InterpolateMthDerivative(1, s));
       // Insert it into the vector.
       std::vector<DirectedWaypoint> new_lane;
-      new_lane.insert(new_lane.begin(), lane.waypoints.begin(), lane.waypoints.begin() + index);
+      new_lane.insert(new_lane.begin(),
+        lane.waypoints().begin(), lane.waypoints().begin() + index);
       new_lane.push_back(new_wp);
-      new_lane.insert(new_lane.end(), lane.waypoints.begin() + index, lane.waypoints.end());
-      lane.waypoints = new_lane;
+      new_lane.insert(new_lane.end(),
+        lane.waypoints().begin() + index, lane.waypoints().end());
+      lane.waypoints() = new_lane;
     }
   }
 }
 
 void Builder::CreateNewControlPointsForLanes(
-  std::vector<ConnectedLane> *lanes) {
+  std::vector<Connection> *lanes) {
   DRAKE_DEMAND(lanes != nullptr);
   // Load the tangents for each lane waypoints
-  for (ConnectedLane &lane : *lanes) {
-    BuildTangentsForWaypoints(&(lane.waypoints));
+  for (Connection &lane : *lanes) {
+    BuildTangentsForWaypoints(&(lane.waypoints()));
   }
   int i = 0;
 
@@ -498,7 +502,7 @@ void Builder::CreateNewControlPointsForLanes(
     i++;
     should_continue = false;
     for (const auto lane : *lanes) {
-      if (i < static_cast<int>(lane.waypoints.size())) {
+      if (i < static_cast<int>(lane.waypoints().size())) {
         should_continue = true;
         break;
       }

@@ -59,20 +59,20 @@ void Loader::BuildSegments(
   const std::vector<ignition::rndf::Segment> &segments) const {
   // We iterate over the segments, lanes and waypoints to build the lanes.
   for (const auto &segment : segments) {
-    std::vector<ConnectedLane> segment_lanes;
+    std::vector<Connection> segment_lanes;
     for (const auto &lane : segment.Lanes()) {
-      ConnectedLane connected_lane;
+      Connection connected_lane;
       for (auto &waypoint : lane.Waypoints()) {
-        connected_lane.waypoints.push_back(DirectedWaypoint(
+        connected_lane.waypoints().push_back(DirectedWaypoint(
           ignition::rndf::UniqueId(segment.Id(), lane.Id(), waypoint.Id()),
           ToGlobalCoordinates(origin, waypoint.Location()),
           waypoint.IsEntry(),
           waypoint.IsExit()));
       }
       if (lane.Width() == 0.0) {
-        connected_lane.width = rc_.default_width_;
+        connected_lane.set_width(rc_.default_width_);
       } else {
-        connected_lane.width = lane.Width();
+        connected_lane.set_width(lane.Width());
       }
       segment_lanes.push_back(connected_lane);
     }
