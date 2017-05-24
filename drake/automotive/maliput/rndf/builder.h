@@ -90,16 +90,19 @@ class DirectedWaypoint {
 /// of the endpoints.
 class Connection {
  public:
-  DRAKE_NO_COPY_NO_MOVE_NO_ASSIGN(Connection)
-
+  // DRAKE_NO_COPY_NO_MOVE_NO_ASSIGN(Connection)
+  DRAKE_DEFAULT_COPY_AND_MOVE_AND_ASSIGN(Connection)
+  Connection () = default;
   /// Constructs a spline-segment connection joining @p points[0] to
   /// @p points[size-1].
   Connection(const std::string& id,
     const std::vector<DirectedWaypoint>& waypoints,
-    const double width) :
+    const double width,
+    const bool inverse_direction = false) :
       id_(id),
       waypoints_(waypoints),
-      width_(width) {
+      width_(width),
+      inverse_direction_(inverse_direction) {
     DRAKE_THROW_UNLESS(waypoints_.size() >= 2);
   }
 
@@ -126,14 +129,19 @@ class Connection {
     return waypoints_;
   }
 
-  double width() const {
-    return width_;
+  double width() const { return width_; }
+  void set_width(const double width) { width_ = width;}
+
+  bool inverse_direction() const { return inverse_direction_; }
+  void set_inverse_direction(bool inverse_direction) {
+    inverse_direction_ = inverse_direction;
   }
 
  private:
   std::string id_;
   std::vector<DirectedWaypoint> waypoints_;
   double width_;
+  bool inverse_direction_ {false};
 };
 
 /// This structure holds all the lane information needed at construction time.
