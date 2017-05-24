@@ -291,7 +291,7 @@ std::vector<int> Builder::GetInitialLaneToProcess(
     }
   }
   // Compute the number of valid distances
-  std::vector<std::tuple<int, int>> index_valid_distances;
+  std::vector<std::pair<int, int>> index_valid_distances;
   int i = 0;
   for (const auto distances : distances_matrix) {
     int number_of_valid_distances = 0;
@@ -300,24 +300,25 @@ std::vector<int> Builder::GetInitialLaneToProcess(
         number_of_valid_distances++;
       }
     }
-    index_valid_distances.push_back(std::make_tuple(i,
+    index_valid_distances.push_back(std::make_pair(i,
       number_of_valid_distances));
     i++;
   }
+
 
   // Sort the tuple vector by increasing number of valid distances.
   // This gives us the first values of the vectors with the lane ids with
   // waypoints that appear first
   std::sort(std::begin(index_valid_distances), std::end(index_valid_distances),
     [](auto const &t_a, auto const &t_b) {
-      return std::get<1>(t_a) > std::get<1>(t_b);
+      return t_a.second > t_b.second;
     });
 
   // Create a vector with all the lane ids that appear first and then return it
   std::vector<int> ids;
   for (const auto id_zeros : index_valid_distances) {
-    if (std::get<1>(id_zeros) == std::get<1>(index_valid_distances[0]))
-      ids.push_back(std::get<0>(id_zeros));
+    if (id_zeros.second == index_valid_distances[0].second)
+      ids.push_back(id_zeros.first);
   }
   // In case we have all the lane ids, no one is first, all are on the same
   // line.
