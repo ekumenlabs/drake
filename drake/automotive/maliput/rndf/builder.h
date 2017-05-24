@@ -98,8 +98,6 @@ class Connection {
     const std::vector<DirectedWaypoint>& waypoints,
     const double width) :
       id_(id),
-      start_(waypoints.front()),
-      end_(waypoints.back()),
       waypoints_(waypoints),
       width_(width) {
     DRAKE_THROW_UNLESS(waypoints_.size() >= 2);
@@ -109,12 +107,20 @@ class Connection {
   const std::string& id() const { return id_; }
 
   /// Returns the parameters of the start point.
-  const DirectedWaypoint& start() const { return start_; }
-  DirectedWaypoint& start() { return start_; }
+  const DirectedWaypoint& start() const {
+    return waypoints_.front();
+  }
+  DirectedWaypoint& start() {
+    return waypoints_.front();
+  }
 
   /// Returns the parameters of the endpoint.
-  const DirectedWaypoint& end() const { return end_; }
-  DirectedWaypoint& end() { return end_; }
+  const DirectedWaypoint& end() const {
+    return waypoints_.back();
+  }
+  DirectedWaypoint& end() {
+    return waypoints_.back();
+  }
 
   const std::vector<DirectedWaypoint> &waypoints() const {
     return waypoints_;
@@ -126,8 +132,6 @@ class Connection {
 
  private:
   std::string id_;
-  DirectedWaypoint start_;
-  DirectedWaypoint end_;
   std::vector<DirectedWaypoint> waypoints_;
   double width_;
 };
