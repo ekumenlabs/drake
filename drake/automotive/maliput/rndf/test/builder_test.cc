@@ -313,6 +313,118 @@ GTEST_TEST(RNDFBuilder, MultilaneLane) {
     nullptr);
 }
 
+//               1.1.1      1.2.3
+//                     *   *
+//                     |   |
+//               1.1.2 |   |
+//    2.2.2    2.2.1   *   |
+//   *--------------*/ |   * 1.2.2
+//    2.1.1    2.1.2   |--/|           2.1.3
+//   *---------------*/---------------*
+//                    \|   |
+//               1.1.3 *   |
+//                     |   |
+//                     |   |
+//               1.1.4 *   * 1.2.1
+GTEST_TEST(RNDFBuilder, MultilaneLaneCross) {
+  const double width = 5.;
+
+  std::unique_ptr<Builder> builder = std::make_unique<Builder>(
+    0.01,
+    0.01 * M_PI);
+  auto bounding_box = std::make_tuple<ignition::math::Vector3d,
+    ignition::math::Vector3d> (ignition::math::Vector3d(0., 0., 0.),
+      ignition::math::Vector3d(40., 50., 0.));
+  builder->SetBoundingBox(bounding_box);
+
+  std::vector<Connection> connected_lanes;
+
+  {
+  std::vector<DirectedWaypoint> waypoints;
+  waypoints.push_back(DirectedWaypoint(
+    ignition::rndf::UniqueId(1, 1, 1),
+    ignition::math::Vector3d(20., 50.0, 0.0)));
+  waypoints.push_back(DirectedWaypoint(
+    ignition::rndf::UniqueId(1, 1, 2),
+    ignition::math::Vector3d(20.0, 40.0, 0.0),
+    false, true));
+  waypoints.push_back(DirectedWaypoint(
+    ignition::rndf::UniqueId(1, 1, 3),
+    ignition::math::Vector3d(20.0, 10.0, 0.0),
+    true, false));
+  waypoints.push_back(DirectedWaypoint(
+    ignition::rndf::UniqueId(1, 1, 4),
+    ignition::math::Vector3d(20.0, 0.0, 0.0)));
+  Connection l(std::to_string(1),
+    waypoints,
+    width);
+  connected_lanes.push_back(l);
+  }
+  {
+  std::vector<DirectedWaypoint> waypoints;
+  waypoints.push_back(DirectedWaypoint(
+    ignition::rndf::UniqueId(1, 2, 1),
+    ignition::math::Vector3d(30., 0.0, 0.0)));
+  waypoints.push_back(DirectedWaypoint(
+    ignition::rndf::UniqueId(1, 2, 2),
+    ignition::math::Vector3d(30.0, 30.0, 0.0),
+    true, false));
+  waypoints.push_back(DirectedWaypoint(
+    ignition::rndf::UniqueId(1, 2, 3),
+    ignition::math::Vector3d(30.0, 50.0, 0.0)));
+  Connection l(std::to_string(1),
+    waypoints,
+    width);
+  connected_lanes.push_back(l);
+  }
+  builder->CreateSegmentConnections(1, &connected_lanes);
+
+  connected_lanes.clear();
+  {
+  std::vector<DirectedWaypoint> waypoints;
+  waypoints.push_back(DirectedWaypoint(
+    ignition::rndf::UniqueId(2, 1, 1),
+    ignition::math::Vector3d(0., 20.0, 0.0)));
+  waypoints.push_back(DirectedWaypoint(
+    ignition::rndf::UniqueId(2, 1, 2),
+    ignition::math::Vector3d(10.0, 20.0, 0.0),
+    false, true));
+  waypoints.push_back(DirectedWaypoint(
+    ignition::rndf::UniqueId(2, 1, 3),
+    ignition::math::Vector3d(40.0, 20.0, 0.0)));
+  Connection l(std::to_string(2),
+    waypoints,
+    width);
+  connected_lanes.push_back(l);
+  }
+  {
+  std::vector<DirectedWaypoint> waypoints;
+  waypoints.push_back(DirectedWaypoint(
+    ignition::rndf::UniqueId(2, 2, 1),
+    ignition::math::Vector3d(10., 30.0, 0.0),
+    true, false));
+  waypoints.push_back(DirectedWaypoint(
+    ignition::rndf::UniqueId(2, 2, 2),
+    ignition::math::Vector3d(0.0, 30.0, 0.0)));
+  Connection l(std::to_string(2),
+    waypoints,
+    width);
+  connected_lanes.push_back(l);
+  }
+  builder->CreateSegmentConnections(2, &connected_lanes);
+
+  builder->CreateConnection(width, ignition::rndf::UniqueId(1, 1, 2),
+    ignition::rndf::UniqueId(2, 2, 1));
+  builder->CreateConnection(width, ignition::rndf::UniqueId(2, 1, 2),
+    ignition::rndf::UniqueId(1, 2, 2));
+  builder->CreateConnection(width, ignition::rndf::UniqueId(2, 1, 2),
+    ignition::rndf::UniqueId(1, 1, 3));
+
+  auto road_geometry = builder->Build({"MultilaneLaneCross"});
+  EXPECT_NE(road_geometry, nullptr);
+
+  EXPECT_EQ(road_geometry->num_junctions(), 12);
+}
 }  // namespace rndf
 }  // namespace maliput
 }  // namespace drake
