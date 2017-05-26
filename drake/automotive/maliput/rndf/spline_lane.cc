@@ -42,10 +42,11 @@ api::LanePosition SplineLane::DoToLanePosition(const api::GeoPosition&,
 
 api::GeoPosition
 SplineLane::DoToGeoPosition(const api::LanePosition& lane_pos) const {
+  const double s = math::saturate(lane_pos.s(), 0., this->do_length());
   // Calculate x,y of (s,0,0).
-  const V2 xy = xy_of_s(lane_pos.s());
+  const V2 xy = xy_of_s(s);
   // Calculate orientation of (s,r,h) basis at (s,0,0).
-  const Rot3 ypr = Rabg_of_s(lane_pos.s());
+  const Rot3 ypr = Rabg_of_s(s);
   // Rotate (0,r,h) and sum with mapped (s,0,h).
   const V3 xyz = ypr.apply({0., lane_pos.r(), lane_pos.h()}) +
                  V3(xy.x(), xy.y(), lane_pos.h());
@@ -54,8 +55,9 @@ SplineLane::DoToGeoPosition(const api::LanePosition& lane_pos) const {
 
 api::Rotation
 SplineLane::DoGetOrientation(const api::LanePosition& lane_pos) const {
+  const double s = math::saturate(lane_pos.s(), 0., this->do_length());
   // Recover linear parameter p from arc-length position s.
-  const Rot3 Rabg = Rabg_of_s(lane_pos.s());
+  const Rot3 Rabg = Rabg_of_s(s);
   return api::Rotation::FromRpy(0.0, 0.0, Rabg.yaw());
 }
 
@@ -180,12 +182,13 @@ api::RBounds SplineLane::do_driveable_bounds(double s) const {
     return api::RBounds(-width_ / 2., width_ / 2.);
   }
   // Get the position to the first lane
-  auto position_first_lane = GetPositionToLane(s, 0);
-  auto position_last_lane = GetPositionToLane(s, segment_->num_lanes() - 1);
+  const auto position_first_lane = GetPositionToLane(s, 0);
+  const auto position_last_lane =
+    GetPositionToLane(s, segment_->num_lanes() - 1);
   const double r_min =
-    -std::abs((position_first_lane - spline_->InterpolateMthDerivative(0, s))
-                  .Length() +
-              segment_->lane(0)->lane_bounds(0.).r_max);
+    -std::abs(
+      (position_first_lane - spline_->InterpolateMthDerivative(0, s)).Length() +
+      segment_->lane(0)->lane_bounds(0.).r_max);
   const double r_max = std::abs(
       (position_last_lane - spline_->InterpolateMthDerivative(0, s)).Length() +
       segment_->lane(segment_->num_lanes() - 1)->lane_bounds(0.).r_max);
@@ -194,36 +197,39 @@ api::RBounds SplineLane::do_driveable_bounds(double s) const {
 
 ignition::math::Vector3d
 SplineLane::GetPositionToLane(const double s, const int lane_id) const {
+  // This the geo position in the current lane for a LanePosition(s, 0., 0.)
   const ignition::math::Vector3d g_l_1 =
     spline_->InterpolateMthDerivative(0, s);
-
   // After continue working out the expression, if lane_id points to myself,
   // I just need to return my position.
   if (lane_id == index_) {
     return g_l_1;
   }
-
+  // This is the tangent of the current position
   ignition::math::Vector3d t_1 = spline_->InterpolateMthDerivative(1, s);
   t_1.Normalize();
+  // and the normal
   const ignition::math::Vector3d n_1(-t_1.Y(), t_1.X(), 0.);
-
+  // Here we get the beginning and ending of the other lane, and then compute
+  // the respective GeoPositions.
   const api::Lane *other_lane = segment_->lane(lane_id);
   const auto other_lane_beginning =
       other_lane->ToGeoPosition(api::LanePosition(0., 0., 0.));
   const auto other_lane_ending = other_lane->ToGeoPosition(
       api::LanePosition(other_lane->length(), 0., 0.));
-
+  // Beginning of other lane
   const ignition::math::Vector3d g_l_0_a(other_lane_beginning.x(),
                                          other_lane_beginning.y(), 0.);
+  // Ending of other lane
   const ignition::math::Vector3d g_l_0_b(other_lane_ending.x(),
                                          other_lane_ending.y(), 0.);
+  // As the lane is approximated as a line, we get the normalized tangent as:
   ignition::math::Vector3d t_0 = (g_l_0_b - g_l_0_a);
   t_0.Normalize();
-
-  const auto m =
-    g_l_1 +
+  // We get here the intersection point between n_1 and the other_lane's line
+  // approximation
+  return g_l_1 +
     n_1 * (t_0.Cross(g_l_1 - g_l_0_a).Length() / t_0.Cross(n_1).Length());
-  return m;
 }
 
 double SplineLane::ComputeLength(

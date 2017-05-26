@@ -39,6 +39,7 @@ drake_cc_library(
         "//drake/automotive/maliput/api",
         "//drake/common",
         "//drake/math:geometric_transform",
+        "//drake/math:saturate",
         "@ignition_math",
     ],
 )
