@@ -73,6 +73,7 @@ GTEST_TEST(RNDFBuilder, ZigZagLane) {
   auto road_geometry = builder->Build({"ZigZagLane"});
   EXPECT_NE(road_geometry, nullptr);
 
+  // Check the junctions, segments and lanes
   EXPECT_EQ(road_geometry->num_junctions(), 3);
   EXPECT_EQ(road_geometry->junction(0)->id().id, std::string("j:1-0-0"));
   EXPECT_EQ(road_geometry->junction(0)->num_segments(), 1);
@@ -97,6 +98,50 @@ GTEST_TEST(RNDFBuilder, ZigZagLane) {
   EXPECT_EQ(road_geometry->junction(2)->segment(0)->num_lanes(), 1);
   EXPECT_EQ(road_geometry->junction(2)->segment(0)->lane(0)->id().id,
     std::string("l:1_1_3-1_1_4"));
+
+  // Check the branchpoints
+  EXPECT_EQ(road_geometry->num_branch_points(), 4);
+  EXPECT_EQ(road_geometry->branch_point(0)->id().id,
+    std::string("bp:") + std::to_string(0));
+  EXPECT_EQ(road_geometry->branch_point(0)->GetASide()->size(), 1);
+  EXPECT_EQ(road_geometry->branch_point(0)->GetBSide()->size(), 0);
+
+  EXPECT_EQ(road_geometry->branch_point(1)->id().id,
+    std::string("bp:") + std::to_string(1));
+  EXPECT_EQ(road_geometry->branch_point(1)->GetASide()->size(), 1);
+  EXPECT_EQ(road_geometry->branch_point(1)->GetBSide()->size(), 1);
+
+  EXPECT_EQ(road_geometry->branch_point(2)->id().id,
+    std::string("bp:") + std::to_string(2));
+  EXPECT_EQ(road_geometry->branch_point(2)->GetASide()->size(), 1);
+  EXPECT_EQ(road_geometry->branch_point(2)->GetBSide()->size(), 1);
+
+  EXPECT_EQ(road_geometry->branch_point(3)->id().id,
+    std::string("bp:") + std::to_string(3));
+  EXPECT_EQ(road_geometry->branch_point(3)->GetASide()->size(), 1);
+  EXPECT_EQ(road_geometry->branch_point(3)->GetBSide()->size(), 0);
+
+  // Check the brach point assigment regarding the lanes
+  EXPECT_EQ(road_geometry->junction(0)->segment(0)->lane(0)->
+      GetBranchPoint(api::LaneEnd::kStart),
+    road_geometry->branch_point(0));
+  EXPECT_EQ(road_geometry->junction(0)->segment(0)->lane(0)->
+      GetBranchPoint(api::LaneEnd::kFinish),
+    road_geometry->branch_point(1));
+
+  EXPECT_EQ(road_geometry->junction(1)->segment(0)->lane(0)->
+      GetBranchPoint(api::LaneEnd::kStart),
+    road_geometry->branch_point(1));
+  EXPECT_EQ(road_geometry->junction(1)->segment(0)->lane(0)->
+      GetBranchPoint(api::LaneEnd::kFinish),
+    road_geometry->branch_point(2));
+
+  EXPECT_EQ(road_geometry->junction(2)->segment(0)->lane(0)->
+      GetBranchPoint(api::LaneEnd::kStart),
+    road_geometry->branch_point(2));
+  EXPECT_EQ(road_geometry->junction(2)->segment(0)->lane(0)->
+      GetBranchPoint(api::LaneEnd::kFinish),
+    road_geometry->branch_point(3));
 }
 
 }  // namespace rndf
