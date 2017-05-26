@@ -109,13 +109,13 @@ drake_cc_googletest(
     ],
 )
 
-# drake_cc_googletest(
-#     name = "builder_test",
-#     size = "small",
-#     deps = [
-#         ":builder",
-#     ],
-# )
+drake_cc_googletest(
+    name = "builder_test",
+    size = "small",
+    deps = [
+        ":builder",
+    ],
+)
 
 drake_cc_googletest(
     name = "segment_test",

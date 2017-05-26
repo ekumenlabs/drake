@@ -199,7 +199,8 @@ class Builder {
   /// Thos projections will end up as new DirectedWaypoints. We take the
   /// information of the generated splines to get the interpolated positions and
   /// tangents. Afterwards, we need to order the connections from right to left
-  /// and then add the final Connection objects to the intance map @p connections_
+  /// and then add the final Connection objects to the intance map @p
+  /// connections_
   ///
   /// @param segment_id is the RNDF id of the segment.
   /// @param lanes is a vector of connections used to construct the Maliput

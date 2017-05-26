@@ -124,14 +124,6 @@ GTEST_TEST(RNDFSplineLanesTest, FlatLineLane) {
       api::GeoPosition(18., 1.234567, 0.), kLinearTolerance);
   }
 
-  // Outside the lane constraints
-  {
-    EXPECT_THROW(l1->ToGeoPosition(api::LanePosition(-1., 0., 0.)),
-      std::runtime_error);
-    EXPECT_THROW(l1->ToGeoPosition(api::LanePosition(21., 0., 0.)),
-      std::runtime_error);
-  }
-
   // Orientation
   {
     EXPECT_ROT_NEAR(l1->GetOrientation(api::LanePosition(0., 0., 0.)),
