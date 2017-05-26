@@ -133,7 +133,7 @@ void Builder::CreateConnectionsForZones(
   center /= static_cast<double>(perimeter_waypoints->size());
   // Fill the tangents for the entries and exits
   std::vector<DirectedWaypoint> entries, exits;
-  for (DirectedWaypoint& waypoint :* perimeter_waypoints) {
+  for (DirectedWaypoint& waypoint : *perimeter_waypoints) {
     if (waypoint.is_entry()) {
       waypoint.tangent() = (center - waypoint.position()).Normalize();
       entries.push_back(waypoint);
@@ -378,7 +378,7 @@ void Builder::CreateNewControlPointsForLanes(std::vector<Connection>* lanes) {
     // Check if index is bounded to any of the lanes
     i++;
     should_continue = false;
-    for (const auto lane :* lanes) {
+    for (const auto lane : *lanes) {
       if (i < static_cast<int>(lane.waypoints().size())) {
         should_continue = true;
         break;
@@ -476,7 +476,7 @@ double HeadingIntoLane(const api::Lane* const lane,
   }
 }
 
-} // namespace
+}  // namespace
 
 void Builder::AttachLaneEndToBranchPoint(Lane* lane,
                                          const api::LaneEnd::Which end,
@@ -596,6 +596,6 @@ std::string Builder::BuildName(const ignition::rndf::UniqueId& id) const {
          std::to_string(id.Z());
 }
 
-} // namespace rndf
-} // namespace maliput
-} // namespace drake
+}  // namespace rndf
+}  // namespace maliput
+}  // namespace drake

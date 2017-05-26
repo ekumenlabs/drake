@@ -183,6 +183,6 @@ double ArcLengthParameterizedSpline::FindClosestPointTo(
   return closest_s;
 }
 
-} // namespace rndf
-} // namespace maliput
-} // namespace drake
+}  // namespace rndf
+}  // namespace maliput
+}  // namespace drake

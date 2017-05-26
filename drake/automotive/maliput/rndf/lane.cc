@@ -37,6 +37,6 @@ Lane::DoGetDefaultBranch(api::LaneEnd::Which which_end) const {
   return GetBranchPoint(which_end)->GetDefaultBranch({this, which_end});
 }
 
-} // namespace rndf
-} // namespace maliput
-} // namespace drake
+}  // namespace rndf
+}  // namespace maliput
+}  // namespace drake

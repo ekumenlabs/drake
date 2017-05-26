@@ -121,8 +121,8 @@ class Lane : public api::Lane {
   const api::Segment* segment_{};
   BranchPoint* start_bp_{};
   BranchPoint* end_bp_{};
-  const double width_;
-  const int index_;
+  const double width_{};
+  const int index_{};
 };
 
 

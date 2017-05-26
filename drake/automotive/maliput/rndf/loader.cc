@@ -21,7 +21,7 @@ Loader::LoadFile(const std::string& file_name) {
   DRAKE_DEMAND(segments[0].Lanes()[0].Waypoints().size() > 0);
   const auto &location = segments[0].Lanes()[0].Waypoints()[0].Location();
   const ignition::math::Vector3d origin(location.LatitudeReference().Degree(),
-    location.LongitudeReference().Degree(),0.0);
+    location.LongitudeReference().Degree(), 0.0);
 
   BuildBoundingBox(origin, segments);
   // We first build all segments so waypoints are populated in Builder class and
@@ -173,6 +173,6 @@ ignition::math::Vector3d Loader::ToGlobalCoordinates(
     ignition::math::SphericalCoordinates::GLOBAL);
 }
 
-} // namespace rndf
-} // namespace maliput
-} // namespace drake
+}  // namespace rndf
+}  // namespace maliput
+}  // namespace drake

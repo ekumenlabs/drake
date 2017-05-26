@@ -65,6 +65,6 @@ void BranchPoint::SetDefault(const api::LaneEnd& lane_end,
   defaults_[lane_end] = default_branch;
 }
 
-} // namespace rndf
-} // namespace maliput
-} // namespace drake
+}  // namespace rndf
+}  // namespace maliput
+}  // namespace drake

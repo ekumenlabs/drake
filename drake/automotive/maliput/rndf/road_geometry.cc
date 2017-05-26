@@ -30,6 +30,6 @@ api::RoadPosition RoadGeometry::DoToRoadPosition(const api::GeoPosition&,
   DRAKE_ABORT();
 }
 
-} // namespace rndf
-} // namespace maliput
-} // namespace drake
+}  // namespace rndf
+}  // namespace maliput
+}  // namespace drake

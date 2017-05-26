@@ -28,6 +28,6 @@ const api::Lane* Segment::do_lane(int index) const {
   return lanes_[index].get();
 }
 
-} // namespace rndf
-} // namespace maliput
-} // namespace drake
+}  // namespace rndf
+}  // namespace maliput
+}  // namespace drake

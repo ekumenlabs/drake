@@ -102,10 +102,10 @@ class Loader {
     const std::vector<ignition::rndf::Segment>& segments) const;
 
   /// Linear tolerance for RNDF @class RoadGeometry.
-  const double linear_tolerance_  = 0.01;
+  const double linear_tolerance_{0.01};
 
   /// Angular tolerance for RNDF @class RoadGeometry.
-  const double angular_tolerance_ = 0.01 * M_PI;
+  const double angular_tolerance_{0.01 * M_PI};
 
   const RoadCharacteristics rc_;
 

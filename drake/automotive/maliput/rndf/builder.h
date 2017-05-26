@@ -27,7 +27,7 @@ namespace rndf {
 class RoadGeometry;
 
 class DirectedWaypoint {
-public:
+ public:
   DRAKE_DEFAULT_COPY_AND_MOVE_AND_ASSIGN(DirectedWaypoint)
 
   DirectedWaypoint() = default;
@@ -50,12 +50,12 @@ public:
   static std::tuple<ignition::math::Vector3d, ignition::math::Vector3d>
   CalculateBoundingBox(const std::vector<DirectedWaypoint>& directed_waypoints);
 
-private:
+ private:
   ignition::rndf::UniqueId id_;
   ignition::math::Vector3d position_;
   ignition::math::Vector3d tangent_;
-  bool is_entry_;
-  bool is_exit_;
+  bool is_entry_ {false};
+  bool is_exit_ {false};
 };
 
 /// Representation of a reference path connecting two endpoints.
@@ -71,7 +71,7 @@ private:
 /// the path will be determined by the EndpointZ (elevation) parameters
 /// of the endpoints.
 class Connection {
-public:
+ public:
   // DRAKE_NO_COPY_NO_MOVE_NO_ASSIGN(Connection)
   DRAKE_DEFAULT_COPY_AND_MOVE_AND_ASSIGN(Connection)
 
@@ -116,16 +116,16 @@ public:
     inverse_direction_ = inverse_direction;
   }
 
-private:
+ private:
   std::string id_;
   std::vector<DirectedWaypoint> waypoints_;
-  double width_;
+  double width_ {};
   bool inverse_direction_{false};
 };
 
 // N.B. The Builder class overview documentation lives at the top of this file.
 class Builder {
-public:
+ public:
   DRAKE_NO_COPY_NO_MOVE_NO_ASSIGN(Builder)
 
   /// Constructs a Builder which can be used to specify and assemble a
@@ -171,7 +171,7 @@ public:
   /// Produces a RoadGeometry, with the ID @p id.
   std::unique_ptr<const api::RoadGeometry> Build(const api::RoadGeometryId& id);
 
-private:
+ private:
   std::string BuildName(const ignition::rndf::UniqueId& id) const;
 
   void CreateLane(const std::string& key_id, const double width,
@@ -250,8 +250,8 @@ private:
   GroupLanesByDirection(const std::vector<Connection>* lanes,
                         std::map<int, std::vector<Connection>>* segments) const;
 
-  const double linear_tolerance_{};
-  const double angular_tolerance_{};
+  const double linear_tolerance_ {};
+  const double angular_tolerance_ {};
   std::map<std::string, std::vector<std::unique_ptr<Connection>>> connections_;
   std::map<std::string, DirectedWaypoint> directed_waypoints_;
   std::tuple<ignition::math::Vector3d, ignition::math::Vector3d> bounding_box_;
@@ -259,6 +259,6 @@ private:
   static const double kLinearStep;
 };
 
-} // namespace rndf
-} // namespace maliput
-} // namespace drake
+}  // namespace rndf
+}  // namespace maliput
+}  // namespace drake

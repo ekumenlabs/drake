@@ -13,6 +13,6 @@ Segment* Junction::NewSegment(api::SegmentId id) {
   return segments_.back().get();
 }
 
-} // namespace rndf
-} // namespace maliput
-} // namespace drake
+}  // namespace rndf
+}  // namespace maliput
+}  // namespace drake
