@@ -36,7 +36,7 @@ public:
       const ignition::rndf::UniqueId& id,
       const ignition::math::Vector3d& position, const bool is_entry = false,
       const bool is_exit = false,
-      const ignition::math::Vector3d &tangent = ignition::math::Vector3d::Zero)
+      const ignition::math::Vector3d& tangent = ignition::math::Vector3d::Zero)
       : id_(id), position_(position), tangent_(tangent), is_entry_(is_entry),
         is_exit_(is_exit) {}
 
@@ -80,29 +80,31 @@ public:
 
   /// Constructs a spline-segment connection joining @p points[0] to
   /// @p points[size-1].
-  Connection(const std::string &id,
-             const std::vector<DirectedWaypoint> &waypoints, const double width,
-             const bool inverse_direction = false)
-      : id_(id), waypoints_(waypoints), width_(width),
-        inverse_direction_(inverse_direction) {
+  Connection(const std::string& id,
+    const std::vector<DirectedWaypoint>& waypoints,
+    const double width,
+    const bool inverse_direction = false) : id_(id),
+      waypoints_(waypoints),
+      width_(width),
+      inverse_direction_(inverse_direction) {
     DRAKE_THROW_UNLESS(waypoints_.size() >= 2);
   }
 
   /// Returns the ID string.
-  const std::string &id() const { return id_; }
+  const std::string& id() const { return id_; }
 
   /// Returns the parameters of the start point.
-  const DirectedWaypoint &start() const { return waypoints_.front(); }
+  const DirectedWaypoint& start() const { return waypoints_.front(); }
 
-  DirectedWaypoint &start() { return waypoints_.front(); }
+  DirectedWaypoint& start() { return waypoints_.front(); }
 
   /// Returns the parameters of the endpoint.
-  const DirectedWaypoint &end() const { return waypoints_.back(); }
+  const DirectedWaypoint& end() const { return waypoints_.back(); }
 
-  DirectedWaypoint &end() { return waypoints_.back(); }
+  DirectedWaypoint& end() { return waypoints_.back(); }
 
-  const std::vector<DirectedWaypoint> &waypoints() const { return waypoints_; }
-  std::vector<DirectedWaypoint> &waypoints() { return waypoints_; }
+  const std::vector<DirectedWaypoint>& waypoints() const { return waypoints_; }
+  std::vector<DirectedWaypoint>& waypoints() { return waypoints_; }
 
   double width() const { return width_; }
 
@@ -110,7 +112,7 @@ public:
 
   bool inverse_direction() const { return inverse_direction_; }
 
-  void set_inverse_direction(bool inverse_direction) {
+  void set_inverse_direction(const bool inverse_direction) {
     inverse_direction_ = inverse_direction;
   }
 
@@ -134,12 +136,11 @@ public:
   /// of @p driveable_bounds.  @p linear_tolerance and @p angular_tolerance
   /// specify the respective tolerances for the resulting RoadGeometry.
   Builder(const double linear_tolerance, const double angular_tolerance)
-      : linear_tolerance_(linear_tolerance),
-        angular_tolerance_(angular_tolerance) {}
+    : linear_tolerance_(linear_tolerance),
+    angular_tolerance_(angular_tolerance) {}
 
-  void
-  SetBoundingBox(const std::tuple<ignition::math::Vector3d,
-                                  ignition::math::Vector3d> &bounding_box) {
+  void SetBoundingBox(const std::tuple<ignition::math::Vector3d,
+      ignition::math::Vector3d>& bounding_box) {
     bounding_box_ = bounding_box;
   }
 
@@ -153,44 +154,44 @@ public:
   /// Also if the vector does not contain at least one lane or if the lanes do
   /// not contain at least two waypoints an exception is thrown.
   void CreateSegmentConnections(const uint segment_id,
-                                std::vector<Connection> *lanes);
+    std::vector<Connection>* lanes);
 
   void
   CreateConnectionsForZones(const double width,
-                            std::vector<DirectedWaypoint> *perimeter_waypoints);
+    std::vector<DirectedWaypoint>* perimeter_waypoints);
 
   /// Loads a connections between two RNDF lanes based on a set of @p exit and
   /// @p entry ids that map to a specific waypoint location.
   /// @p lane_bounds and @p driveable_bounds are the necessary values for the
   /// @class Lane .
   void CreateConnection(const double width,
-                        const ignition::rndf::UniqueId &exit,
-                        const ignition::rndf::UniqueId &entry);
+                        const ignition::rndf::UniqueId& exit,
+                        const ignition::rndf::UniqueId& entry);
 
   /// Produces a RoadGeometry, with the ID @p id.
-  std::unique_ptr<const api::RoadGeometry> Build(const api::RoadGeometryId &id);
+  std::unique_ptr<const api::RoadGeometry> Build(const api::RoadGeometryId& id);
 
 private:
-  std::string BuildName(const ignition::rndf::UniqueId &id) const;
+  std::string BuildName(const ignition::rndf::UniqueId& id) const;
 
-  void CreateLane(const std::string &key_id, const double width,
-                  const std::vector<DirectedWaypoint> &control_points);
+  void CreateLane(const std::string& key_id, const double width,
+                  const std::vector<DirectedWaypoint>& control_points);
 
-  void AttachLaneEndToBranchPoint(Lane *lane, const api::LaneEnd::Which end,
-                                  BranchPoint *branch_point);
+  void AttachLaneEndToBranchPoint(Lane* lane, const api::LaneEnd::Which end,
+                                  BranchPoint* branch_point);
 
   void BuildOrUpdateBranchpoints(
-      Connection *connection, Lane *lane,
-      std::map<std::string, BranchPoint *> *branch_point_map,
-      RoadGeometry *road_geometry);
+      Connection* connection, Lane* lane,
+      std::map<std::string, BranchPoint*>* branch_point_map,
+      RoadGeometry* road_geometry);
 
-  Lane *BuildConnection(Segment *segment, const Connection *connection);
+  Lane* BuildConnection(Segment* segment, const Connection* connection);
 
   /// Given a vector of @p waypoints, it will construct and
   /// @return ignition::math::Spline. If any of the id_ of the waypoints is not
   /// valid, it won't be taken into account.
   std::unique_ptr<ignition::math::Spline>
-  CreateSpline(const std::vector<DirectedWaypoint> *waypoints);
+  CreateSpline(const std::vector<DirectedWaypoint>* waypoints);
 
   /// Given the waypoints of the lanes (@p lanes) and @p index which is the item
   /// from zero to pick on each vector and test the distance against all the
@@ -198,30 +199,30 @@ private:
   /// s direction and return a @return vector containing all the lane indixes
   /// that are at the same s length from the first one. In case all the lanes
   /// are at the same position, none of them is returned.
-  std::vector<int> GetInitialLaneToProcess(std::vector<Connection> *lanes,
+  std::vector<int> GetInitialLaneToProcess(std::vector<Connection>* lanes,
                                            const int index);
 
   /// It loads the tangents into each of the @p waypoints using
   /// @function CreateSpline API.
-  void BuildTangentsForWaypoints(std::vector<DirectedWaypoint> *waypoints);
+  void BuildTangentsForWaypoints(std::vector<DirectedWaypoint>* waypoints);
 
   /// It computes a vector that joins @p base to @p destiny and then computes
   /// the projection of it against @p base tangent. It @return a double with
   /// that value
-  double ComputeDistance(const DirectedWaypoint &base,
-                         const DirectedWaypoint &destiny) const;
+  double ComputeDistance(const DirectedWaypoint& base,
+                         const DirectedWaypoint& destiny) const;
 
   /// It checks if we need to add a dummy or an interpolated waypoint on the
   /// @p lanes given the @p ids of the lanes that have for @p index a control
   /// point before the others.
-  void AddWaypointIfNecessary(const std::vector<int> &ids,
-                              std::vector<Connection> *lanes, const int index);
+  void AddWaypointIfNecessary(const std::vector<int>& ids,
+                              std::vector<Connection>* lanes, const int index);
 
   /// It is the base function that wraps all the process of adding waypoints
   /// when necessary for the @p lanes.
   /// It will @throw std::runtime_error if @p lanes vector is nullptr or if any
   /// of the called functions constraints are not met.
-  void CreateNewControlPointsForLanes(std::vector<Connection> *lanes);
+  void CreateNewControlPointsForLanes(std::vector<Connection>* lanes);
 
   /// This function checks the list of lanes their waypoints (@p lane_waypoints)
   /// and copies all the waypoints in @p index position from @p lane_ids
@@ -230,27 +231,27 @@ private:
   /// correct order of the ids. In case @p lane_ids is nullptr or its size is 0
   /// it will @throw std::runtime_error. If the size of @p lane_ids just one, it
   /// will return without doing anything.
-  void OrderLaneIds(std::vector<Connection> *lanes, std::vector<int> *lane_ids,
+  void OrderLaneIds(std::vector<Connection>* lanes, std::vector<int>* lane_ids,
                     const int index);
 
-  double CalculateMomentum(const ignition::math::Vector3d &point,
-                           const DirectedWaypoint &wp);
+  double CalculateMomentum(const ignition::math::Vector3d& point,
+                           const DirectedWaypoint& wp);
 
-  double CalculateConnectionMomentum(const ignition::math::Vector3d &base_point,
-                                     const std::vector<DirectedWaypoint> &wps);
+  double CalculateConnectionMomentum(const ignition::math::Vector3d& base_point,
+                                     const std::vector<DirectedWaypoint>& wps);
 
-  void SetInvertedLanes(std::vector<Connection> *lanes);
+  void SetInvertedLanes(std::vector<Connection>* lanes);
 
   ignition::math::Vector3d
-  ConstructPointForLane(const DirectedWaypoint &base,
-                        const DirectedWaypoint &other_lane_base) const;
+  ConstructPointForLane(const DirectedWaypoint& base,
+                        const DirectedWaypoint& other_lane_base) const;
 
   void
-  GroupLanesByDirection(const std::vector<Connection> *lanes,
-                        std::map<int, std::vector<Connection>> *segments) const;
+  GroupLanesByDirection(const std::vector<Connection>* lanes,
+                        std::map<int, std::vector<Connection>>* segments) const;
 
-  double linear_tolerance_{};
-  double angular_tolerance_{};
+  const double linear_tolerance_{};
+  const double angular_tolerance_{};
   std::map<std::string, std::vector<std::unique_ptr<Connection>>> connections_;
   std::map<std::string, DirectedWaypoint> directed_waypoints_;
   std::tuple<ignition::math::Vector3d, ignition::math::Vector3d> bounding_box_;
