@@ -9,6 +9,7 @@
 #include "drake/automotive/maliput/rndf/branch_point.h"
 #include "drake/automotive/maliput/rndf/junction.h"
 #include "drake/common/drake_copyable.h"
+#include "drake/common/drake_assert.h"
 
 namespace drake {
 namespace maliput {
@@ -23,8 +24,9 @@ class RoadGeometry : public api::RoadGeometry {
   DRAKE_NO_COPY_NO_MOVE_NO_ASSIGN(RoadGeometry)
 
   /// Constructs an empty RoadGeometry with the specified tolerances. It will
-  /// use @p to set a name to the object, and @linear_tolerance
-  /// and @p angular_tolerance for the CheckInvartiants constraints checks.
+  /// use @p id to set a name to the object, and @p linear_tolerance
+  /// and @p angular_tolerance for the api::RoadGeometry::CheckInvartiants
+  /// constraints checks.
   RoadGeometry(const api::RoadGeometryId& id,
     const double linear_tolerance,
     const double angular_tolerance) : id_(id),
@@ -44,12 +46,18 @@ class RoadGeometry : public api::RoadGeometry {
 
   int do_num_junctions() const override { return junctions_.size(); }
 
+  // This function will throw and exception if index is not bounded between 0
+  // and the current maximum available index of junctions_ vector.
   const api::Junction* do_junction(int index) const override;
 
   int do_num_branch_points() const override { return branch_points_.size(); }
 
+  // This function will throw an exception if index is not bounded between 0
+  // and the current maximum available index of branch_points_ vector.
   const api::BranchPoint* do_branch_point(int index) const override;
 
+  // This function will throw an exception as it's not implemented and should
+  // not be called.
   api::RoadPosition DoToRoadPosition(
     const api::GeoPosition& geo_pos,
     const api::RoadPosition* hint,
