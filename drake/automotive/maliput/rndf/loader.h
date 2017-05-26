@@ -70,7 +70,7 @@ class Loader {
   /// @note The origin of the map will be the position of the waypoint labeled
   ///       as 1.1.1.
   std::unique_ptr<const maliput::api::RoadGeometry> LoadFile(
-    const std::string &file_name);
+    const std::string& file_name);
 
  private:
   /// It's used to compute the global coordinates based on an @p origin vector
@@ -78,28 +78,28 @@ class Loader {
   /// @p spherical_position is the ignition::rndf::Waypoint::Location() result.
   /// @return A vector containing a vector
   ignition::math::Vector3d ToGlobalCoordinates(
-    const ignition::math::Vector3d &origin,
-    const ignition::math::SphericalCoordinates &spherical_position) const;
+    const ignition::math::Vector3d& origin,
+    const ignition::math::SphericalCoordinates& spherical_position) const;
 
   /// It builds all the segments of RNDF road geometry. @p origin is used as a
   /// base location to convert all the spherical coordiantes to a global frame.
   /// @p segments it's a vector containing all the segments to build.
   void BuildSegments(
-    const ignition::math::Vector3d &origin,
-    const std::vector<ignition::rndf::Segment> &segments) const;
+    const ignition::math::Vector3d& origin,
+    const std::vector<ignition::rndf::Segment>& segments) const;
 
   /// It builds the connections from one lane to another once all the
   /// @p segments have already been finished through BuildSegments.
   void BuildConnections(
-    const std::vector<ignition::rndf::Segment> &segments,
-    const std::vector<ignition::rndf::Zone> &zones) const;
+    const std::vector<ignition::rndf::Segment>& segments,
+    const std::vector<ignition::rndf::Zone>& zones) const;
 
   void BuildZoneLanes(
-    const ignition::math::Vector3d &origin,
-    const std::vector<ignition::rndf::Zone> &segments) const;
+    const ignition::math::Vector3d& origin,
+    const std::vector<ignition::rndf::Zone>& segments) const;
 
-  void BuildBoundingBox(const ignition::math::Vector3d &origin,
-    const std::vector<ignition::rndf::Segment> &segments) const;
+  void BuildBoundingBox(const ignition::math::Vector3d& origin,
+    const std::vector<ignition::rndf::Segment>& segments) const;
 
   /// Linear tolerance for RNDF @class RoadGeometry.
   const double linear_tolerance_  = 0.01;

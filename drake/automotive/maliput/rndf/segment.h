@@ -36,9 +36,9 @@ class Segment : public api::Segment {
   /// Gives the segment a newly constructed SplineLane.
   /// @throw An exception if the object already has created a lane.
   SplineLane* NewSplineLane(const api::LaneId& id,
-                      const std::vector<std::tuple<ignition::math::Vector3d,
-                        ignition::math::Vector3d>> &control_points,
-                      const double width);
+    const std::vector<std::tuple<ignition::math::Vector3d,
+      ignition::math::Vector3d>>& control_points,
+    const double width);
 
   ~Segment() override = default;
 

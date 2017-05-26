@@ -6,26 +6,22 @@ namespace maliput {
 namespace rndf {
 
 std::unique_ptr<const maliput::api::RoadGeometry>
-Loader::LoadFile(const std::string &file_name) {
-  builder = std::make_unique<maliput::rndf::Builder>(
-    linear_tolerance_,
+Loader::LoadFile(const std::string& file_name) {
+  builder = std::make_unique<maliput::rndf::Builder>(linear_tolerance_,
     angular_tolerance_);
   std::unique_ptr<ignition::rndf::RNDF> rndfInfo =
     std::make_unique<ignition::rndf::RNDF>(file_name);
   DRAKE_THROW_UNLESS(rndfInfo->Valid());
 
-  const auto &segments = rndfInfo->Segments();
+  const auto& segments = rndfInfo->Segments();
   // I get the first waypoint location and build the map
   // from it.
   DRAKE_DEMAND(segments.size() > 0);
   DRAKE_DEMAND(segments[0].Lanes().size() > 0);
   DRAKE_DEMAND(segments[0].Lanes()[0].Waypoints().size() > 0);
-  const auto &location = segments[0].Lanes()[0].Waypoints()[0].
-    Location();
-  const ignition::math::Vector3d origin(
-    location.LatitudeReference().Degree(),
-    location.LongitudeReference().Degree(),
-    0.0);
+  const auto &location = segments[0].Lanes()[0].Waypoints()[0].Location();
+  const ignition::math::Vector3d origin(location.LatitudeReference().Degree(),
+    location.LongitudeReference().Degree(),0.0);
 
   BuildBoundingBox(origin, segments);
   // We first build all segments so waypoints are populated in Builder class and
@@ -38,15 +34,16 @@ Loader::LoadFile(const std::string &file_name) {
   return builder->Build({rndfInfo->Name()});
 }
 
-void Loader::BuildBoundingBox(const ignition::math::Vector3d &origin,
-  const std::vector<ignition::rndf::Segment> &segments) const {
+void Loader::BuildBoundingBox(
+  const ignition::math::Vector3d& origin,
+  const std::vector<ignition::rndf::Segment>& segments) const {
   std::vector<DirectedWaypoint> wps;
-  for (const auto &segment : segments) {
-    for (const auto &lane : segment.Lanes()) {
-      for (auto &waypoint : lane.Waypoints()) {
-        wps.push_back(DirectedWaypoint(
-          ignition::rndf::UniqueId(),
-          ToGlobalCoordinates(origin, waypoint.Location())));
+  for (const auto& segment : segments) {
+    for (const auto& lane : segment.Lanes()) {
+      for (const auto& waypoint : lane.Waypoints()) {
+        wps.push_back(
+          DirectedWaypoint(ignition::rndf::UniqueId(),
+            ToGlobalCoordinates(origin, waypoint.Location())));
       }
     }
   }
@@ -55,19 +52,18 @@ void Loader::BuildBoundingBox(const ignition::math::Vector3d &origin,
 }
 
 void Loader::BuildSegments(
-  const ignition::math::Vector3d &origin,
-  const std::vector<ignition::rndf::Segment> &segments) const {
+  const ignition::math::Vector3d& origin,
+  const std::vector<ignition::rndf::Segment>& segments) const {
   // We iterate over the segments, lanes and waypoints to build the lanes.
-  for (const auto &segment : segments) {
+  for (const auto& segment : segments) {
     std::vector<Connection> segment_lanes;
-    for (const auto &lane : segment.Lanes()) {
+    for (const auto& lane : segment.Lanes()) {
       Connection connected_lane;
-      for (auto &waypoint : lane.Waypoints()) {
+      for (const auto& waypoint : lane.Waypoints()) {
         connected_lane.waypoints().push_back(DirectedWaypoint(
-          ignition::rndf::UniqueId(segment.Id(), lane.Id(), waypoint.Id()),
-          ToGlobalCoordinates(origin, waypoint.Location()),
-          waypoint.IsEntry(),
-          waypoint.IsExit()));
+            ignition::rndf::UniqueId(segment.Id(), lane.Id(), waypoint.Id()),
+            ToGlobalCoordinates(origin, waypoint.Location()),
+            waypoint.IsEntry(), waypoint.IsExit()));
       }
       if (lane.Width() == 0.0) {
         connected_lane.set_width(rc_.default_width_);
@@ -81,19 +77,18 @@ void Loader::BuildSegments(
 }
 
 void Loader::BuildConnections(
-  const std::vector<ignition::rndf::Segment> &segments,
-  const std::vector<ignition::rndf::Zone> &zones) const {
+  const std::vector<ignition::rndf::Segment>& segments,
+  const std::vector<ignition::rndf::Zone>& zones) const {
   auto build_connection_bounds = [segments, zones, this](
-    const double exit_width,
-    const ignition::rndf::UniqueId &entry_id) {
-    for (const auto &segment : segments) {
+      const double exit_width, const ignition::rndf::UniqueId& entry_id) {
+    for (const auto& segment : segments) {
       if (segment.Id() != entry_id.X())
         continue;
-      for (const auto &lane : segment.Lanes()) {
+      for (const auto& lane : segment.Lanes()) {
         if (lane.Id() != entry_id.Y())
           continue;
         const double entry_width = lane.Width();
-        double width = std::min(exit_width, entry_width);
+        const double width = std::min(exit_width, entry_width);
         if (width == 0.0) {
           return this->rc_.default_width_;
         } else {
@@ -111,11 +106,11 @@ void Loader::BuildConnections(
   // We iterate over the segments looking for each segment connection. We get
   // the exit and entry id from them and the builder uses it to build a
   // connection.
-  for (const auto &segment : segments) {
-    for (const auto &lane : segment.Lanes()) {
-      for (const auto &exit : lane.Exits()) {
-        const auto &exit_id = exit.ExitId();
-        const auto &entry_id = exit.EntryId();
+  for (const auto& segment : segments) {
+    for (const auto& lane : segment.Lanes()) {
+      for (const auto& exit : lane.Exits()) {
+        const auto& exit_id = exit.ExitId();
+        const auto& entry_id = exit.EntryId();
         // We define the bounds for the connection
         const double width = build_connection_bounds(lane.Width(), entry_id);
         // We set a default value for the width
@@ -124,15 +119,15 @@ void Loader::BuildConnections(
     }
   }
 
-  for (const auto &zone : zones) {
-    const auto &perimeter = zone.Perimeter();
+  for (const auto& zone : zones) {
+    const auto& perimeter = zone.Perimeter();
     std::vector<DirectedWaypoint> perimeter_waypoints;
-    for (const auto &exit : perimeter.Exits()) {
-      const auto &exit_id = exit.ExitId();
-      const auto &entry_id = exit.EntryId();
+    for (const auto& exit : perimeter.Exits()) {
+      const auto& exit_id = exit.ExitId();
+      const auto& entry_id = exit.EntryId();
       // We define the bounds for the connection
-      const double width = build_connection_bounds(this->rc_.default_width_,
-        entry_id);
+      const double width =
+        build_connection_bounds(this->rc_.default_width_, entry_id);
       // We set a default value for the width
       builder->CreateConnection(width, exit_id, entry_id);
     }
@@ -140,17 +135,15 @@ void Loader::BuildConnections(
 }
 
 void Loader::BuildZoneLanes(
-  const ignition::math::Vector3d &origin,
-  const std::vector<ignition::rndf::Zone> &zones) const {
-  for (const auto &zone : zones) {
-    const auto &perimeter = zone.Perimeter();
+  const ignition::math::Vector3d& origin,
+  const std::vector<ignition::rndf::Zone>& zones) const {
+  for (const auto& zone : zones) {
+    const auto& perimeter = zone.Perimeter();
     std::vector<DirectedWaypoint> perimeter_waypoints;
-    for (const auto &waypoint : perimeter.Points()) {
+    for (const auto& waypoint : perimeter.Points()) {
       perimeter_waypoints.push_back(DirectedWaypoint(
-        ignition::rndf::UniqueId(zone.Id(),
-          0, waypoint.Id()),
-        ToGlobalCoordinates(origin, waypoint.Location()),
-        waypoint.IsEntry(),
+        ignition::rndf::UniqueId(zone.Id(), 0, waypoint.Id()),
+        ToGlobalCoordinates(origin, waypoint.Location()), waypoint.IsEntry(),
         waypoint.IsExit()));
     }
     builder->CreateConnectionsForZones(this->rc_.default_width_,
@@ -159,31 +152,27 @@ void Loader::BuildZoneLanes(
 }
 
 ignition::math::Vector3d Loader::ToGlobalCoordinates(
-  const ignition::math::Vector3d &origin,
-  const ignition::math::SphericalCoordinates &spherical_position) const {
-  const auto build_spherical_coordinates = [] (
-    const double latitude, const double longitude) {
-      return ignition::math::SphericalCoordinates(
+  const ignition::math::Vector3d& origin,
+  const ignition::math::SphericalCoordinates& spherical_position) const {
+  const auto build_spherical_coordinates = [](const double latitude,
+    const double longitude) {
+    return ignition::math::SphericalCoordinates(
         ignition::math::SphericalCoordinates::EARTH_WGS84,
         ignition::math::Angle(latitude / 180.0 * M_PI),
-        ignition::math::Angle(longitude / 180.0 * M_PI),
-        0.0,
+        ignition::math::Angle(longitude / 180.0 * M_PI), 0.0,
         ignition::math::Angle(0.0));
   };
 
-  const auto &_origin = build_spherical_coordinates(
-    origin.X(), origin.Y());
-
-  const auto &_spherical_position = ignition::math::Vector3d(
-      spherical_position.LatitudeReference().Radian(),
-      spherical_position.LongitudeReference().Radian(),
-      spherical_position.ElevationReference());
+  const auto& _origin = build_spherical_coordinates(origin.X(), origin.Y());
+  const auto& _spherical_position =
+    ignition::math::Vector3d(spherical_position.LatitudeReference().Radian(),
+                             spherical_position.LongitudeReference().Radian(),
+                             spherical_position.ElevationReference());
   return _origin.PositionTransform(
-      _spherical_position,
-      ignition::math::SphericalCoordinates::SPHERICAL,
-      ignition::math::SphericalCoordinates::GLOBAL);
+    _spherical_position, ignition::math::SphericalCoordinates::SPHERICAL,
+    ignition::math::SphericalCoordinates::GLOBAL);
 }
 
-}  // namespace rndf
-}  // namespace maliput
-}  // namespace drake
+} // namespace rndf
+} // namespace maliput
+} // namespace drake

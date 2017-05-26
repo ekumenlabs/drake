@@ -38,7 +38,7 @@ class SplineLane : public Lane {
   /// that maps the s parameter of s,r,h frame to ignition's Spline t parameter.
   SplineLane(const api::LaneId& id, const api::Segment* segment,
           const std::vector<std::tuple<ignition::math::Vector3d,
-            ignition::math::Vector3d>> &control_points,
+            ignition::math::Vector3d>>& control_points,
           const double width,
           const int index);
 
@@ -49,7 +49,7 @@ class SplineLane : public Lane {
   /// value at that point.
   static double ComputeLength(
     const std::vector<std::tuple<ignition::math::Vector3d,
-    ignition::math::Vector3d>> &points);
+    ignition::math::Vector3d>>& points);
 
   /// It returns the tension of the curve, a bounded constant value between 0 to
   /// 1 which is a measure of the curvature of the interpolated spline. Given a

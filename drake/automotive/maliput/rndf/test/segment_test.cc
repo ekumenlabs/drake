@@ -42,6 +42,8 @@ GTEST_TEST(RNDFSegmentTest, MetadataLane) {
 
   EXPECT_NO_THROW(
     s1->NewSplineLane({"l2"}, control_points, 5.));
+
+  EXPECT_EQ(s1->num_lanes(), 2);
 }
 
 

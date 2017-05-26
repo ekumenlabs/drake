@@ -14,7 +14,6 @@
 #include "ignition/math/Spline.hh"
 #include "ignition/rndf/UniqueId.hh"
 
-
 #include "drake/automotive/maliput/api/lane_data.h"
 #include "drake/automotive/maliput/rndf/junction.h"
 #include "drake/common/drake_assert.h"
@@ -28,47 +27,30 @@ namespace rndf {
 class RoadGeometry;
 
 class DirectedWaypoint {
- public:
+public:
   DRAKE_DEFAULT_COPY_AND_MOVE_AND_ASSIGN(DirectedWaypoint)
 
   DirectedWaypoint() = default;
 
   DirectedWaypoint(
-    const ignition::rndf::UniqueId &id,
-    const ignition::math::Vector3d &position,
-    const bool is_entry = false,
-    const bool is_exit = false,
-    const ignition::math::Vector3d &tangent = ignition::math::Vector3d::Zero) :
-      id_(id),
-      position_(position),
-      tangent_(tangent),
-      is_entry_(is_entry),
-      is_exit_(is_exit) {}
+      const ignition::rndf::UniqueId& id,
+      const ignition::math::Vector3d& position, const bool is_entry = false,
+      const bool is_exit = false,
+      const ignition::math::Vector3d &tangent = ignition::math::Vector3d::Zero)
+      : id_(id), position_(position), tangent_(tangent), is_entry_(is_entry),
+        is_exit_(is_exit) {}
 
-  const ignition::rndf::UniqueId& Id() const {
-    return id_;
-  }
-  const ignition::math::Vector3d& Position() const {
-    return position_;
-  }
-  const ignition::math::Vector3d& Tangent() const {
-    return tangent_;
-  }
-  ignition::math::Vector3d& Tangent() {
-    return tangent_;
-  }
-  bool is_entry() const {
-    return is_entry_;
-  }
-  bool is_exit() const {
-    return is_exit_;
-  }
+  const ignition::rndf::UniqueId& id() const { return id_; }
+  const ignition::math::Vector3d& position() const { return position_; }
+  const ignition::math::Vector3d& tangent() const { return tangent_; }
+  ignition::math::Vector3d& tangent() { return tangent_; }
+  bool is_entry() const { return is_entry_; }
+  bool is_exit() const { return is_exit_; }
 
   static std::tuple<ignition::math::Vector3d, ignition::math::Vector3d>
-    CalculateBoundingBox(
-      const std::vector<DirectedWaypoint> &directed_waypoints);
+  CalculateBoundingBox(const std::vector<DirectedWaypoint>& directed_waypoints);
 
- private:
+private:
   ignition::rndf::UniqueId id_;
   ignition::math::Vector3d position_;
   ignition::math::Vector3d tangent_;
@@ -89,7 +71,7 @@ class DirectedWaypoint {
 /// the path will be determined by the EndpointZ (elevation) parameters
 /// of the endpoints.
 class Connection {
- public:
+public:
   // DRAKE_NO_COPY_NO_MOVE_NO_ASSIGN(Connection)
   DRAKE_DEFAULT_COPY_AND_MOVE_AND_ASSIGN(Connection)
 
@@ -98,48 +80,33 @@ class Connection {
 
   /// Constructs a spline-segment connection joining @p points[0] to
   /// @p points[size-1].
-  Connection(const std::string& id,
-    const std::vector<DirectedWaypoint>& waypoints,
-    const double width,
-    const bool inverse_direction = false) :
-      id_(id),
-      waypoints_(waypoints),
-      width_(width),
-      inverse_direction_(inverse_direction) {
+  Connection(const std::string &id,
+             const std::vector<DirectedWaypoint> &waypoints, const double width,
+             const bool inverse_direction = false)
+      : id_(id), waypoints_(waypoints), width_(width),
+        inverse_direction_(inverse_direction) {
     DRAKE_THROW_UNLESS(waypoints_.size() >= 2);
   }
 
   /// Returns the ID string.
-  const std::string& id() const { return id_; }
+  const std::string &id() const { return id_; }
 
   /// Returns the parameters of the start point.
-  const DirectedWaypoint& start() const {
-    return waypoints_.front();
-  }
+  const DirectedWaypoint &start() const { return waypoints_.front(); }
 
-  DirectedWaypoint& start() {
-    return waypoints_.front();
-  }
+  DirectedWaypoint &start() { return waypoints_.front(); }
 
   /// Returns the parameters of the endpoint.
-  const DirectedWaypoint& end() const {
-    return waypoints_.back();
-  }
+  const DirectedWaypoint &end() const { return waypoints_.back(); }
 
-  DirectedWaypoint& end() {
-    return waypoints_.back();
-  }
+  DirectedWaypoint &end() { return waypoints_.back(); }
 
-  const std::vector<DirectedWaypoint> &waypoints() const {
-    return waypoints_;
-  }
-  std::vector<DirectedWaypoint> &waypoints() {
-    return waypoints_;
-  }
+  const std::vector<DirectedWaypoint> &waypoints() const { return waypoints_; }
+  std::vector<DirectedWaypoint> &waypoints() { return waypoints_; }
 
   double width() const { return width_; }
 
-  void set_width(const double width) { width_ = width;}
+  void set_width(const double width) { width_ = width; }
 
   bool inverse_direction() const { return inverse_direction_; }
 
@@ -147,16 +114,16 @@ class Connection {
     inverse_direction_ = inverse_direction;
   }
 
- private:
+private:
   std::string id_;
   std::vector<DirectedWaypoint> waypoints_;
   double width_;
-  bool inverse_direction_ {false};
+  bool inverse_direction_{false};
 };
 
 // N.B. The Builder class overview documentation lives at the top of this file.
 class Builder {
- public:
+public:
   DRAKE_NO_COPY_NO_MOVE_NO_ASSIGN(Builder)
 
   /// Constructs a Builder which can be used to specify and assemble a
@@ -166,14 +133,13 @@ class Builder {
   /// to the single lanes of every segment; @p lane_bounds must be a subset
   /// of @p driveable_bounds.  @p linear_tolerance and @p angular_tolerance
   /// specify the respective tolerances for the resulting RoadGeometry.
-  Builder(const double linear_tolerance,
-          const double angular_tolerance) :
-    linear_tolerance_(linear_tolerance),
-    angular_tolerance_(angular_tolerance) {}
+  Builder(const double linear_tolerance, const double angular_tolerance)
+      : linear_tolerance_(linear_tolerance),
+        angular_tolerance_(angular_tolerance) {}
 
-  void SetBoundingBox(
-    const std::tuple<ignition::math::Vector3d,
-      ignition::math::Vector3d> &bounding_box) {
+  void
+  SetBoundingBox(const std::tuple<ignition::math::Vector3d,
+                                  ignition::math::Vector3d> &bounding_box) {
     bounding_box_ = bounding_box;
   }
 
@@ -186,54 +152,45 @@ class Builder {
   /// reference or any of the conditions of the internal API calls is not met.
   /// Also if the vector does not contain at least one lane or if the lanes do
   /// not contain at least two waypoints an exception is thrown.
-  void CreateSegmentConnections(
-    const uint segment_id,
-    std::vector<Connection> *lanes);
+  void CreateSegmentConnections(const uint segment_id,
+                                std::vector<Connection> *lanes);
 
-  void CreateConnectionsForZones(const double width,
-    std::vector<DirectedWaypoint> *perimeter_waypoints);
+  void
+  CreateConnectionsForZones(const double width,
+                            std::vector<DirectedWaypoint> *perimeter_waypoints);
 
   /// Loads a connections between two RNDF lanes based on a set of @p exit and
   /// @p entry ids that map to a specific waypoint location.
   /// @p lane_bounds and @p driveable_bounds are the necessary values for the
   /// @class Lane .
-  void CreateConnection(
-    const double width,
-    const ignition::rndf::UniqueId &exit,
-    const ignition::rndf::UniqueId &entry);
+  void CreateConnection(const double width,
+                        const ignition::rndf::UniqueId &exit,
+                        const ignition::rndf::UniqueId &entry);
 
   /// Produces a RoadGeometry, with the ID @p id.
-  std::unique_ptr<const api::RoadGeometry> Build(
-      const api::RoadGeometryId& id);
+  std::unique_ptr<const api::RoadGeometry> Build(const api::RoadGeometryId &id);
 
- private:
+private:
   std::string BuildName(const ignition::rndf::UniqueId &id) const;
 
-  void CreateLane(
-    const std::string &key_id,
-    const double width,
-    const std::vector<DirectedWaypoint> &control_points);
+  void CreateLane(const std::string &key_id, const double width,
+                  const std::vector<DirectedWaypoint> &control_points);
 
-  void AttachLaneEndToBranchPoint(
-    Lane* lane,
-    const api::LaneEnd::Which end,
-    BranchPoint *branch_point);
+  void AttachLaneEndToBranchPoint(Lane *lane, const api::LaneEnd::Which end,
+                                  BranchPoint *branch_point);
 
   void BuildOrUpdateBranchpoints(
-    Connection *connection,
-    Lane *lane,
-    std::map<std::string, BranchPoint*> *branch_point_map,
-    RoadGeometry *road_geometry);
+      Connection *connection, Lane *lane,
+      std::map<std::string, BranchPoint *> *branch_point_map,
+      RoadGeometry *road_geometry);
 
-  Lane* BuildConnection(
-    Segment *segment,
-    const Connection *connection);
+  Lane *BuildConnection(Segment *segment, const Connection *connection);
 
   /// Given a vector of @p waypoints, it will construct and
   /// @return ignition::math::Spline. If any of the id_ of the waypoints is not
   /// valid, it won't be taken into account.
-  std::unique_ptr<ignition::math::Spline> CreateSpline(
-    const std::vector<DirectedWaypoint> *waypoints);
+  std::unique_ptr<ignition::math::Spline>
+  CreateSpline(const std::vector<DirectedWaypoint> *waypoints);
 
   /// Given the waypoints of the lanes (@p lanes) and @p index which is the item
   /// from zero to pick on each vector and test the distance against all the
@@ -241,28 +198,24 @@ class Builder {
   /// s direction and return a @return vector containing all the lane indixes
   /// that are at the same s length from the first one. In case all the lanes
   /// are at the same position, none of them is returned.
-  std::vector<int> GetInitialLaneToProcess(
-    std::vector<Connection> *lanes,
-    const int index);
+  std::vector<int> GetInitialLaneToProcess(std::vector<Connection> *lanes,
+                                           const int index);
 
   /// It loads the tangents into each of the @p waypoints using
   /// @function CreateSpline API.
-  void BuildTangentsForWaypoints(
-    std::vector<DirectedWaypoint> *waypoints);
+  void BuildTangentsForWaypoints(std::vector<DirectedWaypoint> *waypoints);
 
   /// It computes a vector that joins @p base to @p destiny and then computes
   /// the projection of it against @p base tangent. It @return a double with
   /// that value
-  double ComputeDistance(
-    const DirectedWaypoint &base, const DirectedWaypoint &destiny) const;
+  double ComputeDistance(const DirectedWaypoint &base,
+                         const DirectedWaypoint &destiny) const;
 
   /// It checks if we need to add a dummy or an interpolated waypoint on the
   /// @p lanes given the @p ids of the lanes that have for @p index a control
   /// point before the others.
-  void AddWaypointIfNecessary(
-    const std::vector<int> &ids,
-    std::vector<Connection> *lanes,
-    const int index);
+  void AddWaypointIfNecessary(const std::vector<int> &ids,
+                              std::vector<Connection> *lanes, const int index);
 
   /// It is the base function that wraps all the process of adding waypoints
   /// when necessary for the @p lanes.
@@ -277,26 +230,24 @@ class Builder {
   /// correct order of the ids. In case @p lane_ids is nullptr or its size is 0
   /// it will @throw std::runtime_error. If the size of @p lane_ids just one, it
   /// will return without doing anything.
-  void OrderLaneIds(
-    std::vector<Connection> *lanes,
-    std::vector<int> *lane_ids,
-    const int index);
+  void OrderLaneIds(std::vector<Connection> *lanes, std::vector<int> *lane_ids,
+                    const int index);
 
   double CalculateMomentum(const ignition::math::Vector3d &point,
-    const DirectedWaypoint &wp);
+                           const DirectedWaypoint &wp);
 
-  double CalculateConnectionMomentum(
-    const ignition::math::Vector3d &base_point,
-    const std::vector<DirectedWaypoint> &wps);
+  double CalculateConnectionMomentum(const ignition::math::Vector3d &base_point,
+                                     const std::vector<DirectedWaypoint> &wps);
 
   void SetInvertedLanes(std::vector<Connection> *lanes);
 
-  ignition::math::Vector3d ConstructPointForLane(
-    const DirectedWaypoint &base,
-    const DirectedWaypoint &other_lane_base) const;
+  ignition::math::Vector3d
+  ConstructPointForLane(const DirectedWaypoint &base,
+                        const DirectedWaypoint &other_lane_base) const;
 
-  void GroupLanesByDirection(const std::vector<Connection> *lanes,
-    std::map<int, std::vector<Connection>> *segments) const;
+  void
+  GroupLanesByDirection(const std::vector<Connection> *lanes,
+                        std::map<int, std::vector<Connection>> *segments) const;
 
   double linear_tolerance_{};
   double angular_tolerance_{};
@@ -307,6 +258,6 @@ class Builder {
   static const double kLinearStep;
 };
 
-}  // namespace rndf
-}  // namespace maliput
-}  // namespace drake
+} // namespace rndf
+} // namespace maliput
+} // namespace drake

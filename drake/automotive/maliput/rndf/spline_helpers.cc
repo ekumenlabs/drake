@@ -13,11 +13,9 @@ static const int kFunctionPartitionTreeDegree = 10;
 static const int kFunctionPartitionTreeMaxDepth = 10;
 
 InverseFunctionInterpolator::InverseFunctionInterpolator(
-    const std::function<double(double)> _function,
-    const double _xmin, const double _xmax,
-    const double _error_boundary)
-    : function_(_function),
-      error_boundary_(_error_boundary) {
+    const std::function<double(double)> _function, const double _xmin,
+    const double _xmax, const double _error_boundary)
+    : function_(_function), error_boundary_(_error_boundary) {
   // Make sure the error boundary is attainable.
   DRAKE_THROW_UNLESS(_error_boundary > 0);
   // Instantiate the partition tree root
@@ -30,20 +28,22 @@ InverseFunctionInterpolator::InverseFunctionInterpolator(
   this->partition_tree_max_depth_ = kFunctionPartitionTreeMaxDepth;
 }
 
-double InverseFunctionInterpolator::InterpolateMthDerivative(
-    const int _mth, const double _y) const {
+double
+InverseFunctionInterpolator::InterpolateMthDerivative(const int _mth,
+                                                      const double _y) const {
   // Make sure that the derivative order is a positive integer or zero.
   DRAKE_THROW_UNLESS(_mth >= 0);
   // Make sure that y is not above x(y) image interval upper bound.
-  DRAKE_THROW_UNLESS(
-      (_y - this->partition_tree_->segment.ymax) < this->error_boundary_);
+  DRAKE_THROW_UNLESS((_y - this->partition_tree_->segment.ymax) <
+                     this->error_boundary_);
   // Make sure that y is not below x(y) image interval low bound.
-  DRAKE_THROW_UNLESS(
-      (this->partition_tree_->segment.ymin - _y) < this->error_boundary_);
+  DRAKE_THROW_UNLESS((this->partition_tree_->segment.ymin - _y) <
+                     this->error_boundary_);
 
   // Zero out any derivative of higher order than
   // 1, as this is a piecewise linear interpolant.
-  if (_mth > 1) return 0.0;
+  if (_mth > 1)
+    return 0.0;
 
   // Get partition tree root.
   FunctionGraphPartition *root = this->partition_tree_.get();
@@ -65,12 +65,12 @@ double InverseFunctionInterpolator::InterpolateMthDerivative(
 
       // Check if the interpolation suffices error bound requirements.
       if (std::abs(this->function_(ix) - iy) < this->error_boundary_) {
-          if (_mth == 1) {
-            // Return derivative dx/dy at y.
-            return dx / dy;
-          }
-          // Return interpolated x(y).
-          return ix;
+        if (_mth == 1) {
+          // Return derivative dx/dy at y.
+          return dx / dy;
+        }
+        // Return interpolated x(y).
+        return ix;
       }
 
       // Safety check before building next tree level.
@@ -78,7 +78,7 @@ double InverseFunctionInterpolator::InterpolateMthDerivative(
 
       // Build sub-partitions for this partition.
       double segmentdx = dx / this->partition_tree_degree_;
-      for (int i = 0; i < this->partition_tree_degree_ ; ++i) {
+      for (int i = 0; i < this->partition_tree_degree_; ++i) {
         double segmentxmin = root->segment.xmin + i * segmentdx;
         double segmentxmax = segmentxmin + segmentdx;
 
@@ -96,7 +96,7 @@ double InverseFunctionInterpolator::InterpolateMthDerivative(
     // Search subpartition that contains y.
     auto it = std::find_if(
         root->partitions.begin(), root->partitions.end(),
-        [&iy](const std::unique_ptr<FunctionGraphPartition>& subp) {
+        [&iy](const std::unique_ptr<FunctionGraphPartition> &subp) {
           return (subp->segment.ymin <= iy && iy <= subp->segment.ymax);
         });
 
@@ -104,27 +104,26 @@ double InverseFunctionInterpolator::InterpolateMthDerivative(
     DRAKE_DEMAND(it != root->partitions.end());
     DRAKE_DEMAND(it->get() != nullptr);
 
-    root = it->get(); depth++;
+    root = it->get();
+    depth++;
   }
 }
 
 ArcLengthParameterizedSpline::ArcLengthParameterizedSpline(
-  std::unique_ptr<ignition::math::Spline> _spline,
-  const double _error_boundary) :
-    q_t_(std::move(_spline)) {
+    std::unique_ptr<ignition::math::Spline> _spline,
+    const double _error_boundary)
+    : q_t_(std::move(_spline)) {
   DRAKE_ASSERT(this->q_t_ != nullptr);
   // Instantiate an inverse function interpolator
   // for the given spline arc length function.
-  t_s_ = std::make_unique<InverseFunctionInterpolator>(
-      [this] (double t) {
-        return this->q_t_->ArcLength(t);
-      }, 0.0, 1.0, _error_boundary);
+  t_s_ = std::make_unique<InverseFunctionInterpolator>([this](double t) {
+    return this->q_t_->ArcLength(t);
+  }, 0.0, 1.0, _error_boundary);
 }
 
 ignition::math::Vector3d
-ArcLengthParameterizedSpline::InterpolateMthDerivative(
-  const int _mth,
-  const double _s) const {
+ArcLengthParameterizedSpline::InterpolateMthDerivative(const int _mth,
+                                                       const double _s) const {
   if (_mth > 3) {
     // M > 3 => p = 0 (as this is a cubic interpolator)
     return ignition::math::Vector3d(0.0, 0.0, 0.0);
@@ -136,36 +135,33 @@ ArcLengthParameterizedSpline::InterpolateMthDerivative(
   }
   double t_prime_s = this->t_s_->InterpolateMthDerivative(1, _s);
   ignition::math::Vector3d q_prime_t =
-    this->q_t_->InterpolateMthDerivative(1, t_s);
+      this->q_t_->InterpolateMthDerivative(1, t_s);
 
   if (_mth < 2) {
     // M = 1 => P'(s) = Q'(t(s)) * t'(s)
     return q_prime_t * t_prime_s;
   }
   double t_prime_s_2 = t_prime_s * t_prime_s;
-  double t_prime2_s =
-    this->t_s_->InterpolateMthDerivative(2, _s);
+  double t_prime2_s = this->t_s_->InterpolateMthDerivative(2, _s);
   ignition::math::Vector3d q_prime2_t =
-    this->q_t_->InterpolateMthDerivative(2, t_s);
+      this->q_t_->InterpolateMthDerivative(2, t_s);
   if (_mth < 3) {
     // M = 2 => P''(s) = Q''(t(s)) * t'(s)^2 + Q'(t(s)) * t''(s)
     return q_prime2_t * t_prime_s_2 + q_prime_t * t_prime2_s;
   }
   double t_prime_s_3 = t_prime_s_2 * t_prime_s;
-  double t_prime3_s =
-    this->t_s_->InterpolateMthDerivative(3, _s);
+  double t_prime3_s = this->t_s_->InterpolateMthDerivative(3, _s);
   ignition::math::Vector3d q_prime3_t =
-    this->q_t_->InterpolateMthDerivative(3, t_s);
+      this->q_t_->InterpolateMthDerivative(3, t_s);
   // M = 3 => P'''(s) = Q'''(t(s)) * t'(s)^3
   ///                   + 3 * Q''(t(s)) * t'(s) * t''(s)
   ///                   + Q'(t(s)) * t'''(s)
-  return (q_prime3_t * t_prime_s_3
-          + 3 * q_prime2_t * t_prime_s * t_prime2_s
-          + q_prime_t * t_prime3_s);
+  return (q_prime3_t * t_prime_s_3 + 3 * q_prime2_t * t_prime_s * t_prime2_s +
+          q_prime_t * t_prime3_s);
 }
 
 double ArcLengthParameterizedSpline::FindClosestPointTo(
-  const ignition::math::Vector3d &point, const double step) const {
+    const ignition::math::Vector3d &point, const double step) const {
   double closest_s = 0.0;
   double min_distance = std::numeric_limits<double>::max();
   double distance, t_s;
@@ -178,8 +174,7 @@ double ArcLengthParameterizedSpline::FindClosestPointTo(
     }
   }
   t_s = this->t_s_->InterpolateMthDerivative(0, q_t_->ArcLength());
-  distance =
-    (q_t_->InterpolateMthDerivative(0, t_s) - point).Length();
+  distance = (q_t_->InterpolateMthDerivative(0, t_s) - point).Length();
   if (distance < min_distance) {
     min_distance = distance;
     closest_s = q_t_->ArcLength();
@@ -188,6 +183,6 @@ double ArcLengthParameterizedSpline::FindClosestPointTo(
   return closest_s;
 }
 
-}  // namespace rndf
-}  // namespace maliput
-}  // namespace drake
+} // namespace rndf
+} // namespace maliput
+} // namespace drake

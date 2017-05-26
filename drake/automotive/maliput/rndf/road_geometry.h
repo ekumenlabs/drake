@@ -26,11 +26,10 @@ class RoadGeometry : public api::RoadGeometry {
   /// use @p to set a name to the object, and @linear_tolerance
   /// and @p angular_tolerance for the CheckInvartiants constraints checks.
   RoadGeometry(const api::RoadGeometryId& id,
-               const double linear_tolerance,
-               const double angular_tolerance)
-      : id_(id),
-        linear_tolerance_(linear_tolerance),
-        angular_tolerance_(angular_tolerance) {}
+    const double linear_tolerance,
+    const double angular_tolerance) : id_(id),
+      linear_tolerance_(linear_tolerance),
+      angular_tolerance_(angular_tolerance) {}
 
   /// Creates and adds a new Junction with the specified @p id.
   Junction* NewJunction(api::JunctionId id);
@@ -52,10 +51,10 @@ class RoadGeometry : public api::RoadGeometry {
   const api::BranchPoint* do_branch_point(int index) const override;
 
   api::RoadPosition DoToRoadPosition(
-      const api::GeoPosition& geo_pos,
-      const api::RoadPosition* hint,
-      api::GeoPosition* nearest_position,
-      double* distance) const override;
+    const api::GeoPosition& geo_pos,
+    const api::RoadPosition* hint,
+    api::GeoPosition* nearest_position,
+    double* distance) const override;
 
   double do_linear_tolerance() const override { return linear_tolerance_; }
 
