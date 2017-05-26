@@ -144,6 +144,140 @@ GTEST_TEST(RNDFBuilder, ZigZagLane) {
     road_geometry->branch_point(3));
 }
 
+
+//          1.1.1      1.1.2       1.1.3
+//          *----------*-----------*
+//  1.2.1   1.2.2  1.2.3    1.2.4
+//  *-------*------*--------*
+//              1.3.2                      1.3.1
+//              *--------------------------*
+GTEST_TEST(RNDFBuilder, MultilaneLane) {
+  const double width = 5.;
+
+  std::unique_ptr<Builder> builder = std::make_unique<Builder>(
+    0.01,
+    0.01 * M_PI);
+
+  std::vector<Connection> connected_lanes;
+
+  {
+  std::vector<DirectedWaypoint> waypoints;
+  waypoints.push_back(DirectedWaypoint(
+    ignition::rndf::UniqueId(1, 2, 1),
+    ignition::math::Vector3d(0., 0.0, 0.0)));
+  waypoints.push_back(DirectedWaypoint(
+    ignition::rndf::UniqueId(1, 2, 2),
+    ignition::math::Vector3d(10.0, 0.0, 0.0)));
+  waypoints.push_back(DirectedWaypoint(
+    ignition::rndf::UniqueId(1, 2, 3),
+    ignition::math::Vector3d(15.0, 0.0, 0.0)));
+  waypoints.push_back(DirectedWaypoint(
+    ignition::rndf::UniqueId(1, 2, 4),
+    ignition::math::Vector3d(25.0, 0.0, 0.0)));
+  Connection l(std::to_string(1),
+    waypoints,
+    width);
+  connected_lanes.push_back(l);
+  }
+
+  {
+  std::vector<DirectedWaypoint> waypoints;
+  waypoints.push_back(DirectedWaypoint(
+    ignition::rndf::UniqueId(1, 1, 1),
+    ignition::math::Vector3d(10., 10.0, 0.0)));
+  waypoints.push_back(DirectedWaypoint(
+    ignition::rndf::UniqueId(1, 1, 2),
+    ignition::math::Vector3d(20.0, 10.0, 0.0)));
+  waypoints.push_back(DirectedWaypoint(
+    ignition::rndf::UniqueId(1, 1, 3),
+    ignition::math::Vector3d(30.0, 10.0, 0.0)));
+  Connection l(std::to_string(1),
+    waypoints,
+    width);
+  connected_lanes.push_back(l);
+  }
+
+  {
+  std::vector<DirectedWaypoint> waypoints;
+  waypoints.push_back(DirectedWaypoint(
+    ignition::rndf::UniqueId(1, 3, 1),
+    ignition::math::Vector3d(40., -10.0, 0.0)));
+  waypoints.push_back(DirectedWaypoint(
+    ignition::rndf::UniqueId(1, 3, 2),
+    ignition::math::Vector3d(5.0, -10.0, 0.0)));
+  Connection l(std::to_string(1),
+    waypoints,
+    width);
+  connected_lanes.push_back(l);
+  }
+
+  auto bounding_box = std::make_tuple<ignition::math::Vector3d,
+    ignition::math::Vector3d> (ignition::math::Vector3d(0., -10., 0.),
+      ignition::math::Vector3d(40., 10., 0.));
+  builder->SetBoundingBox(bounding_box);
+  builder->CreateSegmentConnections(1, &connected_lanes);
+
+  auto road_geometry = builder->Build({"MultilaneLane"});
+  EXPECT_NE(road_geometry, nullptr);
+
+
+  EXPECT_EQ(road_geometry->num_junctions(), 6);
+  EXPECT_EQ(road_geometry->junction(0)->id().id, std::string("j:1-0-0"));
+  EXPECT_EQ(road_geometry->junction(0)->num_segments(), 1);
+  EXPECT_EQ(road_geometry->junction(0)->segment(0)->id().id,
+    std::string("s:1-0-0"));
+  EXPECT_EQ(road_geometry->junction(0)->segment(0)->num_lanes(), 1);
+  EXPECT_EQ(road_geometry->junction(0)->segment(0)->lane(0)->id().id,
+    std::string("l:1_2_1-1_2_2"));
+
+
+  EXPECT_EQ(road_geometry->junction(1)->id().id, std::string("j:1-0-1"));
+  EXPECT_EQ(road_geometry->junction(1)->num_segments(), 1);
+  EXPECT_EQ(road_geometry->junction(1)->segment(0)->id().id,
+    std::string("s:1-0-1"));
+  EXPECT_EQ(road_geometry->junction(1)->segment(0)->num_lanes(), 2);
+  EXPECT_EQ(road_geometry->junction(1)->segment(0)->lane(0)->id().id,
+    std::string("l:1_2_2-1_2_3"));
+  EXPECT_EQ(road_geometry->junction(1)->segment(0)->lane(1)->id().id,
+    std::string("l:1_1_1-1_1_5"));
+
+  EXPECT_EQ(road_geometry->junction(2)->id().id, std::string("j:1-0-2"));
+  EXPECT_EQ(road_geometry->junction(2)->num_segments(), 1);
+  EXPECT_EQ(road_geometry->junction(2)->segment(0)->id().id,
+    std::string("s:1-0-2"));
+  EXPECT_EQ(road_geometry->junction(2)->segment(0)->num_lanes(), 2);
+  EXPECT_EQ(road_geometry->junction(2)->segment(0)->lane(0)->id().id,
+    std::string("l:1_2_3-1_2_5"));
+  EXPECT_EQ(road_geometry->junction(2)->segment(0)->lane(1)->id().id,
+    std::string("l:1_1_5-1_1_2"));
+
+  EXPECT_EQ(road_geometry->junction(3)->id().id, std::string("j:1-0-3"));
+  EXPECT_EQ(road_geometry->junction(3)->num_segments(), 1);
+  EXPECT_EQ(road_geometry->junction(3)->segment(0)->id().id,
+    std::string("s:1-0-3"));
+  EXPECT_EQ(road_geometry->junction(3)->segment(0)->num_lanes(), 2);
+  EXPECT_EQ(road_geometry->junction(3)->segment(0)->lane(0)->id().id,
+    std::string("l:1_2_5-1_2_4"));
+  EXPECT_EQ(road_geometry->junction(3)->segment(0)->lane(1)->id().id,
+    std::string("l:1_1_2-1_1_6"));
+
+  EXPECT_EQ(road_geometry->junction(4)->id().id, std::string("j:1-0-4"));
+  EXPECT_EQ(road_geometry->junction(4)->num_segments(), 1);
+  EXPECT_EQ(road_geometry->junction(4)->segment(0)->id().id,
+    std::string("s:1-0-4"));
+  EXPECT_EQ(road_geometry->junction(4)->segment(0)->num_lanes(), 1);
+  EXPECT_EQ(road_geometry->junction(4)->segment(0)->lane(0)->id().id,
+    std::string("l:1_1_6-1_1_3"));
+
+  EXPECT_EQ(road_geometry->junction(5)->id().id, std::string("j:1-1-0"));
+  EXPECT_EQ(road_geometry->junction(5)->num_segments(), 1);
+  EXPECT_EQ(road_geometry->junction(5)->segment(0)->id().id,
+    std::string("s:1-1-0"));
+  EXPECT_EQ(road_geometry->junction(5)->segment(0)->num_lanes(), 1);
+  EXPECT_EQ(road_geometry->junction(5)->segment(0)->lane(0)->id().id,
+    std::string("l:1_3_1-1_3_2"));
+}
+
 }  // namespace rndf
 }  // namespace maliput
 }  // namespace drake
