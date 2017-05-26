@@ -1,6 +1,5 @@
 #include "drake/automotive/maliput/rndf/lane.h"
 
-#include "drake/automotive/maliput/rndf/branch_point.h"
 #include "drake/common/drake_assert.h"
 
 namespace drake {

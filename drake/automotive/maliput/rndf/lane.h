@@ -8,6 +8,7 @@
 #include "drake/automotive/maliput/api/branch_point.h"
 #include "drake/automotive/maliput/api/lane.h"
 #include "drake/automotive/maliput/api/segment.h"
+#include "drake/automotive/maliput/rndf/branch_point.h"
 #include "drake/common/drake_copyable.h"
 #include "drake/common/eigen_types.h"
 #include "drake/math/roll_pitch_yaw.h"
@@ -44,29 +45,28 @@ class Rot3 {
 };
 
 
-/// Base class for the rndf implementation of api::Lane.
+/// Base class for the RNDF implementation of api::Lane.
 class Lane : public api::Lane {
  public:
   DRAKE_NO_COPY_NO_MOVE_NO_ASSIGN(Lane)
 
   /// Constructs a Lane.
-  ///
-  /// @param id the ID
-  /// @param segment the Segment to which this Lane will belong, which must
-  ///        remain valid for the lifetime of this class
-  /// @param lane_bounds nominal bounds of the lane, uniform along the entire
-  ///        reference path, which must be a subset of @p driveable_bounds
-  /// @param driveable_bounds driveable bounds of the lane, uniform along the
-  ///        entire reference path
+  /// The @p id is the ID of the api::Lane. @p segment is a pointer that referes
+  /// to its parent, which must remain valid for the lifetime of this class.
+  /// @p width is the value of the width of the lane based on the RNDF
+  /// lane_width parameter. It will be used to set a constant lane_bound
+  /// value along the road.
+  /// @p index is the index that can be used to reference this Lane from
+  /// api::Segment::lane() call.
   ///
   /// This is the base class for subclasses, each of which describe a
   /// primitive reference curve in the xy ground-plane of the world frame.
   /// The specific curve is expressed by a subclass's implementations of
   /// private virtual functions.
   ///
-  /// This base implamentation will handle all the non-geometric stuff from the
-  /// lane. All geomtric computation will be moved to each sub lane childs. See
-  /// @class SplineLane for an example.
+  /// This base implementation will handle all the non-geometric stuff from the
+  /// lane. All geometric computation will be moved to each sub lane childs. See
+  /// SplineLane for an example.
   Lane(const api::LaneId& id, const api::Segment* segment,
       const double width,
       const int index) :
