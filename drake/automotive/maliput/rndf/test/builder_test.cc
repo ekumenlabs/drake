@@ -229,7 +229,10 @@ GTEST_TEST(RNDFBuilder, MultilaneLane) {
   EXPECT_EQ(road_geometry->junction(0)->segment(0)->num_lanes(), 1);
   EXPECT_EQ(road_geometry->junction(0)->segment(0)->lane(0)->id().id,
     std::string("l:1_2_1-1_2_2"));
-
+  EXPECT_EQ(road_geometry->junction(0)->segment(0)->lane(0)->to_left(),
+    nullptr);
+  EXPECT_EQ(road_geometry->junction(0)->segment(0)->lane(0)->to_right(),
+    nullptr);
 
   EXPECT_EQ(road_geometry->junction(1)->id().id, std::string("j:1-0-1"));
   EXPECT_EQ(road_geometry->junction(1)->num_segments(), 1);
@@ -240,6 +243,14 @@ GTEST_TEST(RNDFBuilder, MultilaneLane) {
     std::string("l:1_2_2-1_2_3"));
   EXPECT_EQ(road_geometry->junction(1)->segment(0)->lane(1)->id().id,
     std::string("l:1_1_1-1_1_5"));
+  EXPECT_EQ(road_geometry->junction(1)->segment(0)->lane(0)->to_left(),
+    road_geometry->junction(1)->segment(0)->lane(1));
+  EXPECT_EQ(road_geometry->junction(1)->segment(0)->lane(0)->to_right(),
+    nullptr);
+  EXPECT_EQ(road_geometry->junction(1)->segment(0)->lane(1)->to_left(),
+    nullptr);
+  EXPECT_EQ(road_geometry->junction(1)->segment(0)->lane(1)->to_right(),
+    road_geometry->junction(1)->segment(0)->lane(0));
 
   EXPECT_EQ(road_geometry->junction(2)->id().id, std::string("j:1-0-2"));
   EXPECT_EQ(road_geometry->junction(2)->num_segments(), 1);
@@ -250,6 +261,14 @@ GTEST_TEST(RNDFBuilder, MultilaneLane) {
     std::string("l:1_2_3-1_2_5"));
   EXPECT_EQ(road_geometry->junction(2)->segment(0)->lane(1)->id().id,
     std::string("l:1_1_5-1_1_2"));
+  EXPECT_EQ(road_geometry->junction(2)->segment(0)->lane(0)->to_left(),
+    road_geometry->junction(2)->segment(0)->lane(1));
+  EXPECT_EQ(road_geometry->junction(2)->segment(0)->lane(0)->to_right(),
+    nullptr);
+  EXPECT_EQ(road_geometry->junction(2)->segment(0)->lane(1)->to_left(),
+    nullptr);
+  EXPECT_EQ(road_geometry->junction(2)->segment(0)->lane(1)->to_right(),
+    road_geometry->junction(2)->segment(0)->lane(0));
 
   EXPECT_EQ(road_geometry->junction(3)->id().id, std::string("j:1-0-3"));
   EXPECT_EQ(road_geometry->junction(3)->num_segments(), 1);
