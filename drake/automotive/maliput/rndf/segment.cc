@@ -1,15 +1,9 @@
 #include "drake/automotive/maliput/rndf/segment.h"
-
-#include <utility>
-
-#include "drake/automotive/maliput/rndf/spline_lane.h"
 #include "drake/common/drake_assert.h"
 
 namespace drake {
 namespace maliput {
 namespace rndf {
-
-const api::Junction *Segment::do_junction() const { return junction_; }
 
 SplineLane *Segment::NewSplineLane(
   const api::LaneId& id,

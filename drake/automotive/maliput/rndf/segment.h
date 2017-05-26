@@ -1,13 +1,14 @@
 #pragma once
 
 #include <memory>
-#include <vector>
 #include <tuple>
-
+#include <utility>
+#include <vector>
 #include "drake/automotive/maliput/api/junction.h"
 #include "drake/automotive/maliput/api/lane.h"
 #include "drake/automotive/maliput/api/segment.h"
 #include "drake/automotive/maliput/rndf/lane.h"
+#include "drake/automotive/maliput/rndf/spline_lane.h"
 #include "drake/common/drake_copyable.h"
 
 #include "ignition/math/Vector3.hh"
@@ -18,23 +19,25 @@ namespace rndf {
 
 class SplineLane;
 
-/// An api::Segment implementation.
+/// An api::Segment implementation for RNDF.
 class Segment : public api::Segment {
  public:
   DRAKE_NO_COPY_NO_MOVE_NO_ASSIGN(Segment)
 
   /// Constructs a new Segment.
-  ///
-  /// The Segment is not fully initialized until NewSplineLane() method is
-  /// called.
-  /// Right now, we don't have support for multilane, so just call
-  ///  NewSplineLane() once in the lifespan of the object.
-  /// @p junction must remain valid for the lifetime of this class.
+  /// Use @p id to name this segment, and @p junction must remain valid for the
+  /// lifetime of this class.
   Segment(const api::SegmentId& id, api::Junction* junction)
       : id_(id), junction_(junction) {}
 
   /// Gives the segment a newly constructed SplineLane.
-  /// @throw An exception if the object already has created a lane.
+  /// @p id is the id of the lane. @p control_points is a vector of tuples where
+  /// the first value has the position of the control point and the second is
+  /// its tangent. @p width is the width specified by the RNDF lane_width
+  /// parameter, or the default assigned value by this code. Later, this value
+  /// will be used to construct the api::Lane::lane_bounds() and the
+  /// api::Lane::driveable_bounds() result.
+  /// @returns a pointer to a valid SplineLane.
   SplineLane* NewSplineLane(const api::LaneId& id,
     const std::vector<std::tuple<ignition::math::Vector3d,
       ignition::math::Vector3d>>& control_points,
@@ -45,12 +48,12 @@ class Segment : public api::Segment {
  private:
   const api::SegmentId do_id() const override { return id_; }
 
-  const api::Junction* do_junction() const override;
+  const api::Junction* do_junction() const override { return junction_; }
 
-  int do_num_lanes() const override {
-    return lanes_.size();
-  }
+  int do_num_lanes() const override { return lanes_.size(); }
 
+  // It throws an exception if the index is not in between 0 and the size of
+  // lanes_ minus one.
   const api::Lane* do_lane(int index) const override;
 
   api::SegmentId id_;

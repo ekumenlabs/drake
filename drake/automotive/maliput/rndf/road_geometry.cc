@@ -1,4 +1,5 @@
 #include "drake/automotive/maliput/rndf/road_geometry.h"
+#include "drake/common/drake_assert.h"
 
 namespace drake {
 namespace maliput {
@@ -15,12 +16,13 @@ BranchPoint* RoadGeometry::NewBranchPoint(api::BranchPointId id) {
 }
 
 const api::Junction* RoadGeometry::do_junction(int index) const {
-  DRAKE_THROW_UNLESS(index >= 0 && index < junctions_.size());
+  DRAKE_THROW_UNLESS(index >= 0 && index < static_cast<int>(junctions_.size()));
   return junctions_[index].get();
 }
 
 const api::BranchPoint* RoadGeometry::do_branch_point(int index) const {
-  DRAKE_THROW_UNLESS(index >= 0 && index < branch_points_.size());
+  DRAKE_THROW_UNLESS(index >= 0 &&
+    index < static_cast<int>(branch_points_.size()));
   return branch_points_[index].get();
 }
 
