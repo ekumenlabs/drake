@@ -92,7 +92,10 @@ class Connection {
  public:
   // DRAKE_NO_COPY_NO_MOVE_NO_ASSIGN(Connection)
   DRAKE_DEFAULT_COPY_AND_MOVE_AND_ASSIGN(Connection)
+
+  /// Default constructor
   Connection () = default;
+
   /// Constructs a spline-segment connection joining @p points[0] to
   /// @p points[size-1].
   Connection(const std::string& id,
@@ -113,6 +116,7 @@ class Connection {
   const DirectedWaypoint& start() const {
     return waypoints_.front();
   }
+
   DirectedWaypoint& start() {
     return waypoints_.front();
   }
@@ -121,6 +125,7 @@ class Connection {
   const DirectedWaypoint& end() const {
     return waypoints_.back();
   }
+
   DirectedWaypoint& end() {
     return waypoints_.back();
   }
@@ -133,9 +138,11 @@ class Connection {
   }
 
   double width() const { return width_; }
+
   void set_width(const double width) { width_ = width;}
 
   bool inverse_direction() const { return inverse_direction_; }
+
   void set_inverse_direction(bool inverse_direction) {
     inverse_direction_ = inverse_direction;
   }
@@ -262,8 +269,7 @@ class Builder {
   /// when necessary for the @p lanes.
   /// It will @throw std::runtime_error if @p lanes vector is nullptr or if any
   /// of the called functions constraints are not met.
-  void CreateNewControlPointsForLanes(
-    std::vector<Connection> *lanes);
+  void CreateNewControlPointsForLanes(std::vector<Connection> *lanes);
 
   /// This function checks the list of lanes their waypoints (@p lane_waypoints)
   /// and copies all the waypoints in @p index position from @p lane_ids
@@ -279,6 +285,7 @@ class Builder {
 
   double CalculateMomentum(const ignition::math::Vector3d &point,
     const DirectedWaypoint &wp);
+
   double CalculateConnectionMomentum(
     const ignition::math::Vector3d &base_point,
     const std::vector<DirectedWaypoint> &wps);

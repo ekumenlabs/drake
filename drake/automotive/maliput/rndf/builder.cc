@@ -158,7 +158,8 @@ void Builder::CreateConnectionsForZones(const double width,
       std::vector<DirectedWaypoint> control_points = {
         entry, exit
       };
-      std::string key_id = BuildName(exit.Id()) + std::string("-") + BuildName(entry.Id());
+      std::string key_id =
+        BuildName(exit.Id()) + std::string("-") + BuildName(entry.Id());
       CreateLane(key_id, width, control_points);
     }
   }
@@ -286,7 +287,8 @@ std::vector<int> Builder::GetInitialLaneToProcess(
         // truncate it to zero to set mean that this point is further
         // than the other.
         distances_matrix[i].push_back(
-          ComputeDistance(lanes->at(i).waypoints()[index], lanes->at(j).waypoints()[index]));
+          ComputeDistance(lanes->at(i).waypoints()[index],
+            lanes->at(j).waypoints()[index]));
       }
     }
   }
@@ -501,6 +503,7 @@ double HeadingIntoLane(const api::Lane* const lane,
     default: { DRAKE_ABORT(); }
   }
 }
+
 }  // namespace
 
 
@@ -541,7 +544,7 @@ void Builder::AttachLaneEndToBranchPoint(
   const api::LaneEnd old_le = branch_point->GetASide()->get(0);
   const double old_h = HeadingIntoLane(old_le.lane, old_le.end);
   if (((std::cos(new_h) * std::cos(old_h)) +
-       (std::sin(new_h) * std::sin(old_h))) > 0.) {
+    (std::sin(new_h) * std::sin(old_h))) > 0.) {
     branch_point->AddABranch({lane, end});
   } else {
     branch_point->AddBBranch({lane, end});
@@ -563,9 +566,7 @@ Lane* Builder::BuildConnection(
     points_tangents.push_back(std::make_tuple(
       directed_waypoint.Position(), directed_waypoint.Tangent()));
   }
-  lane = segment->NewSplineLane(lane_id,
-    points_tangents,
-    connection->width());
+  lane = segment->NewSplineLane(lane_id, points_tangents, connection->width());
 
   return lane;
 }
@@ -616,6 +617,7 @@ double Builder::CalculateMomentum(
   // its value on the z component, so we get it.
   return result.Z();
 }
+
 double Builder::CalculateConnectionMomentum(
   const ignition::math::Vector3d &base_point,
   const std::vector<DirectedWaypoint> &wps) {
