@@ -289,31 +289,42 @@ class Builder {
   /// of the called functions constraints are not met.
   void CreateNewControlPointsForLanes(std::vector<Connection>* lanes);
 
-  /// This function checks the list of lanes their waypoints (lane_waypoints)
-  /// and copies all the waypoints in @p index position from @p lane_ids
+  /// This function checks the list of lanes their waypoints
+  /// and copies all the waypoints at index position from lane_ids
   /// respective lanes. Then, it orders them following the direction of each
-  /// control point from right to left. It will @return lane_ids with the
-  /// correct order of the ids. In case @p lane_ids is nullptr or its size is 0
-  /// it will @throw std::runtime_error. If the size of @p lane_ids just one, it
+  /// control point from right to left. It will return lane_ids with the
+  /// correct order of the ids. In case lane_ids is nullptr or its size is 0
+  /// it will throw std::runtime_error. If the size of lane_ids just one, it
   /// will return without doing anything.
   void OrderLaneIds(std::vector<Connection>* lanes, std::vector<int>* lane_ids,
                     const int index);
 
+  // It calculates the momentum of wp against point with normalized tangent
+  // value. As all the DirectedWaypoints are thought to be on the x-y play, the
+  // z value of the cross product is returned.
   double CalculateMomentum(const ignition::math::Vector3d& point,
                            const DirectedWaypoint& wp);
-
+  // It calculates the momenumt of all the DirectedWaypoints in wps against
+  // base_point.
+  // It returns the sum of all the CalculateMomentum results.
   double CalculateConnectionMomentum(const ignition::math::Vector3d& base_point,
                                      const std::vector<DirectedWaypoint>& wps);
 
+  // It calls CalculateConnectionMomentum for each lane in lanes. Then it checks
+  // the sign of the momentum of each lane to determine the "way" that each lane
+  // follows and make a reference against the first item on the vector.
   void SetInvertedLanes(std::vector<Connection>* lanes);
 
+  // It will return the intesection point of the normal line that intersects the
+  // position of base and the projection of the tangent of other_lane_base.
   ignition::math::Vector3d
   ConstructPointForLane(const DirectedWaypoint& base,
                         const DirectedWaypoint& other_lane_base) const;
 
-  void
-  GroupLanesByDirection(const std::vector<Connection>* lanes,
-                        std::map<int, std::vector<Connection>>* segments) const;
+  // It groups the lanes based on their direction and fills segments map with
+  // those groups.
+  void GroupLanesByDirection(const std::vector<Connection>* lanes,
+    std::map<int, std::vector<Connection>>* segments) const;
 
   const double linear_tolerance_ {};
   const double angular_tolerance_ {};

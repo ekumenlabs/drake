@@ -30,8 +30,8 @@ namespace maliput {
 namespace rndf {
 
 /// It has some basic and common characteristics of Maliput's API needed to
-/// construct the road_geometry.
-
+/// construct the RoadGeometry
+///
 // TODO(@agalbachicar) Should use the characteristics of the RNDF parsing.
 // See issue https://bitbucket.org/ekumen/terminus-simulation/issues/120
 struct RoadCharacteristics {
@@ -39,65 +39,76 @@ struct RoadCharacteristics {
   RoadCharacteristics() = default;
 
   /// Constructor for custom road geometries.
+  ///
+  /// @param default_width is the width used for those lanes whose width is not
+  /// provided in the map.
   explicit RoadCharacteristics(const double default_width)
       : default_width_(default_width) {}
 
   const double default_width_{4.};
 };
 
+/// This is a wrapper that lets you load a RNDF map file and use the
+/// ignition::rndf library to parse it and call Builder class to get the
+/// RoadGeometry.
 class Loader {
  public:
   DRAKE_NO_COPY_NO_MOVE_NO_ASSIGN(Loader)
 
-  /// Constructor for the example.  The user supplies @p rc, a
-  /// RoadCharacteristics structure that aggregates the road boundary data.
+  /// Constructor
+  ///
+  /// @param rc is the RoadCharacteristics object to work with.
   explicit Loader(const RoadCharacteristics& rc) : rc_(rc) {}
 
-  /// Constructor for the example, using default RoadCharacteristics settings.
+  /// Constructor. Using default RoadCharacteristics settings.
   Loader() : Loader(RoadCharacteristics{}) {}
 
   /// It loads a file and calls ignition::rndf::RNDF class to parse it. From it,
-  /// it will use the @class Builder class to build the @class RoadGeometry. The
+  /// it will use a Builder object to construct the RoadGeometry. The
   ///  @p file_name is used to locate a file.
   ///
-  /// @throws It will throw an exception when there is any problem loading the
-  ///         file_name provided.
+  /// @param file_name is the path to the RNDF map file.
+  /// @throws when there is any problem loading the file_name provided.
   ///
   /// There are some internal checks to find at least one segment, lane and
   /// waypoints.
   ///
-  /// @note We don't support RNDF Zones yet.
   /// @note The origin of the map will be the position of the waypoint labeled
   ///       as 1.1.1.
   std::unique_ptr<const maliput::api::RoadGeometry> LoadFile(
     const std::string& file_name);
 
  private:
-  /// It's used to compute the global coordinates based on an @p origin vector
-  /// (composed of latitude [degrees], longitude [degrees], elevation [meters]).
-  /// @p spherical_position is the ignition::rndf::Waypoint::Location() result.
-  /// @return A vector containing a vector
+  // It's used to compute the global coordinates based on an origin vector
+  // (composed of latitude [degrees], longitude [degrees], elevation [meters]).
+  // spherical_position is the ignition::rndf::Waypoint::Location() result.
+  // It returns a vector containing a vector
   ignition::math::Vector3d ToGlobalCoordinates(
     const ignition::math::Vector3d& origin,
     const ignition::math::SphericalCoordinates& spherical_position) const;
 
-  /// It builds all the segments of RNDF road geometry. @p origin is used as a
-  /// base location to convert all the spherical coordiantes to a global frame.
-  /// @p segments it's a vector containing all the segments to build.
+  // It builds all the segments of RNDF road geometry. origin is used as a
+  // base location to convert all the spherical coordiantes to a global frame.
+  // segments it's a vector containing all the segments to build.
   void BuildSegments(
     const ignition::math::Vector3d& origin,
     const std::vector<ignition::rndf::Segment>& segments) const;
 
+  // It builds a vector of DirectedWaypoints from all the RNDF perimeter
+  // waypoints that outline a zone. Then, it constructs with the Builder the
+  // roads inside that zone.
+  void BuildZoneLanes(
+    const ignition::math::Vector3d& origin,
+    const std::vector<ignition::rndf::Zone>& zones) const;
+
   /// It builds the connections from one lane to another once all the
-  /// @p segments have already been finished through BuildSegments.
+  /// segments and zone connections have already been finished.
   void BuildConnections(
     const std::vector<ignition::rndf::Segment>& segments,
     const std::vector<ignition::rndf::Zone>& zones) const;
 
-  void BuildZoneLanes(
-    const ignition::math::Vector3d& origin,
-    const std::vector<ignition::rndf::Zone>& segments) const;
-
+  // It builds the bounding box of the RNDF map getting the minimum coordinate
+  // and the maximum from all the segment waypoint locations.
   void BuildBoundingBox(const ignition::math::Vector3d& origin,
     const std::vector<ignition::rndf::Segment>& segments) const;
 

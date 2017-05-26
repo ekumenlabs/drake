@@ -13,20 +13,23 @@ namespace drake {
 namespace maliput {
 namespace rndf {
 
-/// An api::Junction implementation.
+/// An api::Junction implementation for RNDF.
 class Junction : public api::Junction {
  public:
   DRAKE_NO_COPY_NO_MOVE_NO_ASSIGN(Junction)
 
   /// Constructs an empty Junction.
   ///
-  /// @p road_geometry must remain valid for the lifetime of this class,
+  /// @param id is the ID of the Junction .
+  /// @param road_geometry must remain valid for the lifetime of this class,
   /// and must refer to the RoadGeometry which will contain the newly
   /// constructed Junction instance.
   Junction(const api::JunctionId& id, api::RoadGeometry* road_geometry)
       : id_(id), road_geometry_(road_geometry) {}
 
   /// Creates and adds a new Segment with the specified @p id.
+  ///
+  /// @param id is the ID of the segment.
   Segment* NewSegment(api::SegmentId id);
 
   ~Junction() override = default;
@@ -34,7 +37,9 @@ class Junction : public api::Junction {
  private:
   const api::JunctionId do_id() const override { return id_; }
 
-  const api::RoadGeometry* do_road_geometry() const override;
+  const api::RoadGeometry* do_road_geometry() const override {
+    return road_geometry_;
+  }
 
   int do_num_segments() const override { return segments_.size(); }
 
