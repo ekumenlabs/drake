@@ -94,7 +94,7 @@ class Connection {
   DRAKE_DEFAULT_COPY_AND_MOVE_AND_ASSIGN(Connection)
 
   /// Default constructor
-  Connection () = default;
+  Connection() = default;
 
   /// Constructs a spline-segment connection joining @p points[0] to
   /// @p points[size-1].
@@ -207,7 +207,6 @@ class Builder {
       const api::RoadGeometryId& id);
 
  private:
-
   std::string BuildName(const ignition::rndf::UniqueId &id) const;
 
   void CreateLane(
@@ -293,7 +292,8 @@ class Builder {
   void SetInvertedLanes(std::vector<Connection> *lanes);
 
   ignition::math::Vector3d ConstructPointForLane(
-    const DirectedWaypoint &base, const DirectedWaypoint &other_lane_base) const;
+    const DirectedWaypoint &base,
+    const DirectedWaypoint &other_lane_base) const;
 
   void GroupLanesByDirection(const std::vector<Connection> *lanes,
     std::map<int, std::vector<Connection>> *segments) const;

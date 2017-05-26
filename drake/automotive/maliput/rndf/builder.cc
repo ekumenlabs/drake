@@ -202,7 +202,7 @@ void Builder::GroupLanesByDirection(const std::vector<Connection> *lanes,
       (*segments)[current_inversion].push_back(lanes->at(i));
     } else {
       current_inversion = lanes->at(i).inverse_direction();
-      segment_group ++;
+      segment_group++;
       (*segments)[current_inversion] = std::vector<Connection>();
       (*segments)[current_inversion].push_back(lanes->at(i));
     }
@@ -275,7 +275,8 @@ std::vector<int> Builder::GetInitialLaneToProcess(
   for (int i = 0; i < static_cast<int>(lanes->size()); i++) {
     distances_matrix.push_back(std::vector<double>());
     for (int j = 0; j < static_cast<int>(lanes->size()); j++) {
-      if (i == j) { // It is the distance against the same point
+      if (i == j) {
+        // It is the distance against the same point
         distances_matrix[i].push_back(-1.);
       } else if (index >= static_cast<int>(lanes->at(i).waypoints().size()) ||
         index >= static_cast<int>(lanes->at(j).waypoints().size())) {

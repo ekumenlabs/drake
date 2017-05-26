@@ -196,7 +196,6 @@ api::RBounds SplineLane::do_driveable_bounds(double s) const {
 
 ignition::math::Vector3d SplineLane::GetPositionToLane(
   const double s, const int lane_id) const {
-
   const ignition::math::Vector3d g_l_1 =
     spline_->InterpolateMthDerivative(0, s);
 
