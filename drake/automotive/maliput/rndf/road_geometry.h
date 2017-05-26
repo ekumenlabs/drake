@@ -23,10 +23,13 @@ class RoadGeometry : public api::RoadGeometry {
  public:
   DRAKE_NO_COPY_NO_MOVE_NO_ASSIGN(RoadGeometry)
 
-  /// Constructs an empty RoadGeometry with the specified tolerances. It will
-  /// use @p id to set a name to the object, and @p linear_tolerance
-  /// and @p angular_tolerance for the api::RoadGeometry::CheckInvartiants
-  /// constraints checks.
+  /// Constructs an empty RoadGeometry with the specified tolerances.
+  ///
+  /// @param id to set a name to the object
+  /// @param linear_tolerance is the tolerance in the linear sense for the
+  /// api::RoadGeometry::CheckInvartiants constraints checks.
+  /// @param angular_tolerance is the tolerance in the angular sense for the
+  /// api::RoadGeometry::CheckInvartiants constraints checks.
   RoadGeometry(const api::RoadGeometryId& id,
     const double linear_tolerance,
     const double angular_tolerance) : id_(id),
@@ -34,9 +37,13 @@ class RoadGeometry : public api::RoadGeometry {
       angular_tolerance_(angular_tolerance) {}
 
   /// Creates and adds a new Junction with the specified @p id.
+  /// @param id is the ID of the junction.
+  /// @return A pointer to a Junction
   Junction* NewJunction(api::JunctionId id);
 
   /// Creates and adds a new BranchPoint with the specified @p id.
+  /// @param id is the ID of the branch point.
+  /// @return A pointer to a BranchPoint
   BranchPoint* NewBranchPoint(api::BranchPointId id);
 
   ~RoadGeometry() override = default;

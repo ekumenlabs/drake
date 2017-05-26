@@ -34,7 +34,8 @@ class DirectedWaypoint {
 
   DirectedWaypoint(
       const ignition::rndf::UniqueId& id,
-      const ignition::math::Vector3d& position, const bool is_entry = false,
+      const ignition::math::Vector3d& position,
+      const bool is_entry = false,
       const bool is_exit = false,
       const ignition::math::Vector3d& tangent = ignition::math::Vector3d::Zero)
       : id_(id), position_(position), tangent_(tangent), is_entry_(is_entry),

@@ -29,10 +29,11 @@ class SplineLane : public Lane {
   /// Constructs a SplineLane, a lane specified by a spline segment defined in
   /// the xy-plane (the ground plane) of the world frame.
   ///
-  /// @p control_points are a collection of points and the tangent value where
-  /// the interpolated curve will pass. They must be at least two.
   /// For @p id, @p segment, @p width and @p index please see the documentation
   /// of the Lane base class.
+  ///
+  /// @param control_points are a collection of points and the tangent value
+  /// where the interpolated curve will pass. They must be at least two.
   ///
   /// This implementation uses ignition::math::Spline and
   /// ArcLengthParameterizedSpline which is used as the inverse function
@@ -49,17 +50,20 @@ class SplineLane : public Lane {
   /// It computes the length of a SplineLane based on the @p points set as
   /// control points. The first value are the points and the second is the
   /// value at that point.
+  /// @param control_points are a collection of points and the tangent value
+  /// where the interpolated curve will pass. They must be at least two.
+  /// @return The length of the baseline computed as a spline.
   static double ComputeLength(
     const std::vector<std::tuple<ignition::math::Vector3d,
     ignition::math::Vector3d>>& points);
 
-  /// It returns the tension of the curve, a bounded constant value between 0 to
+  /// @return the tension of the curve, a bounded constant value between 0 to
   /// 1 which is a measure of the curvature of the interpolated spline. Given a
   /// bigger value of the tension, you'll get an interpolation more similar to a
   /// straight line.
   static double Tension() { return kTension; }
 
-  /// It returns the error bound that the arc length interpolator will
+  /// @return the error bound that the arc length interpolator will
   /// attempt to attain when aproximating the inverse function that maps
   /// the s coordinate of s,r,h frame into the t parameter that
   /// ignition::math::Spline uses to evaluate the function.

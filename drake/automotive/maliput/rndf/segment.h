@@ -25,19 +25,22 @@ class Segment : public api::Segment {
   DRAKE_NO_COPY_NO_MOVE_NO_ASSIGN(Segment)
 
   /// Constructs a new Segment.
-  /// Use @p id to name this segment, and @p junction must remain valid for the
-  /// lifetime of this class.
+  /// @param id to name this segment
+  /// @param junction must remain valid for the lifetime of this class.
   Segment(const api::SegmentId& id, api::Junction* junction)
       : id_(id), junction_(junction) {}
 
   /// Gives the segment a newly constructed SplineLane.
-  /// @p id is the id of the lane. @p control_points is a vector of tuples where
+  ///
+  /// @param id is the id of the lane.
+  /// @param control_points is a vector of tuples where
   /// the first value has the position of the control point and the second is
-  /// its tangent. @p width is the width specified by the RNDF lane_width
+  /// its tangent.
+  /// @param width is the width specified by the RNDF lane_width
   /// parameter, or the default assigned value by this code. Later, this value
   /// will be used to construct the api::Lane::lane_bounds() and the
   /// api::Lane::driveable_bounds() result.
-  /// @returns a pointer to a valid SplineLane.
+  /// @return a pointer to a valid SplineLane.
   SplineLane* NewSplineLane(const api::LaneId& id,
     const std::vector<std::tuple<ignition::math::Vector3d,
       ignition::math::Vector3d>>& control_points,

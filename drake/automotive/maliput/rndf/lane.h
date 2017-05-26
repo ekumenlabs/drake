@@ -51,12 +51,13 @@ class Lane : public api::Lane {
   DRAKE_NO_COPY_NO_MOVE_NO_ASSIGN(Lane)
 
   /// Constructs a Lane.
-  /// The @p id is the ID of the api::Lane. @p segment is a pointer that referes
-  /// to its parent, which must remain valid for the lifetime of this class.
-  /// @p width is the value of the width of the lane based on the RNDF
+  /// @param id is the ID of the api::Lane.
+  /// @param segment is a pointer that refers to its parent, which must remain
+  /// valid for the lifetime of this class.
+  /// @param width is the value of the width of the lane based on the RNDF
   /// lane_width parameter. It will be used to set a constant lane_bound
   /// value along the road.
-  /// @p index is the index that can be used to reference this Lane from
+  /// @param index is the index that can be used to reference this Lane from
   /// api::Segment::lane() call.
   ///
   /// This is the base class for subclasses, each of which describe a
