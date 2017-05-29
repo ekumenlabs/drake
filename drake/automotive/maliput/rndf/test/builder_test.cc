@@ -28,6 +28,16 @@ do {                                                       \
   EXPECT_NEAR(_actual.z(), _expected.z(), _tolerance);         \
 } while (0)
 
+int FindJunction(const api::RoadGeometry &road_geometry,
+  const std::string &junction_name) {
+  for (int i = 0; i < road_geometry.num_junctions(); i++) {
+    if (road_geometry.junction(i)->id().id == junction_name) {
+      return i;
+    }
+  }
+  return -1;
+}
+
 //   * 1.1.1
 //    \
 //     \
@@ -313,6 +323,7 @@ GTEST_TEST(RNDFBuilder, MultilaneLane) {
     nullptr);
 }
 
+
 //               1.1.1      1.2.3
 //                     *   *
 //                     |   |
@@ -423,8 +434,111 @@ GTEST_TEST(RNDFBuilder, MultilaneLaneCross) {
   auto road_geometry = builder->Build({"MultilaneLaneCross"});
   EXPECT_NE(road_geometry, nullptr);
 
-  EXPECT_EQ(road_geometry->num_junctions(), 12);
+  EXPECT_EQ(road_geometry->num_junctions(), 11);
+
+  int junction_id;
+
+  junction_id = FindJunction(*road_geometry, std::string("j:1-0-0"));
+  EXPECT_NE(junction_id, -1);
+  EXPECT_EQ(road_geometry->junction(junction_id)->num_segments(), 1);
+  EXPECT_EQ(road_geometry->junction(junction_id)->segment(0)->id().id,
+    std::string("s:1-0-0"));
+  EXPECT_EQ(road_geometry->junction(junction_id)->segment(0)->num_lanes(), 1);
+  EXPECT_EQ(road_geometry->junction(junction_id)->segment(0)->lane(0)->id().id,
+    std::string("l:1_1_1-1_1_2"));
+
+  junction_id = FindJunction(*road_geometry, std::string("j:1-0-1"));
+  EXPECT_NE(junction_id, -1);
+  EXPECT_EQ(road_geometry->junction(junction_id)->num_segments(), 1);
+  EXPECT_EQ(road_geometry->junction(junction_id)->segment(0)->id().id,
+    std::string("s:1-0-1"));
+  EXPECT_EQ(road_geometry->junction(junction_id)->segment(0)->num_lanes(), 1);
+  EXPECT_EQ(road_geometry->junction(junction_id)->segment(0)->lane(0)->id().id,
+    std::string("l:1_1_2-1_1_3"));
+
+
+  junction_id = FindJunction(*road_geometry, std::string("j:1-0-2"));
+  EXPECT_NE(junction_id, -1);
+  EXPECT_EQ(road_geometry->junction(junction_id)->num_segments(), 1);
+  EXPECT_EQ(road_geometry->junction(junction_id)->segment(0)->id().id,
+    std::string("s:1-0-2"));
+  EXPECT_EQ(road_geometry->junction(junction_id)->segment(0)->num_lanes(), 1);
+  EXPECT_EQ(road_geometry->junction(junction_id)->segment(0)->lane(0)->id().id,
+    std::string("l:1_1_3-1_1_4"));
+
+  junction_id = FindJunction(*road_geometry, std::string("j:1-1-0"));
+  EXPECT_NE(junction_id, -1);
+  EXPECT_EQ(road_geometry->junction(junction_id)->num_segments(), 1);
+  EXPECT_EQ(road_geometry->junction(junction_id)->segment(0)->id().id,
+    std::string("s:1-1-0"));
+  EXPECT_EQ(road_geometry->junction(junction_id)->segment(0)->num_lanes(), 1);
+  EXPECT_EQ(road_geometry->junction(junction_id)->segment(0)->lane(0)->id().id,
+    std::string("l:1_2_1-1_2_2"));
+
+  junction_id = FindJunction(*road_geometry, std::string("j:1-1-1"));
+  EXPECT_NE(junction_id, -1);
+  EXPECT_EQ(road_geometry->junction(junction_id)->num_segments(), 1);
+  EXPECT_EQ(road_geometry->junction(junction_id)->segment(0)->id().id,
+    std::string("s:1-1-1"));
+  EXPECT_EQ(road_geometry->junction(junction_id)->segment(0)->num_lanes(), 1);
+  EXPECT_EQ(road_geometry->junction(junction_id)->segment(0)->lane(0)->id().id,
+    std::string("l:1_2_2-1_2_3"));
+
+  junction_id = FindJunction(*road_geometry, std::string("j:2-0-0"));
+  EXPECT_NE(junction_id, -1);
+  EXPECT_EQ(road_geometry->junction(junction_id)->num_segments(), 1);
+  EXPECT_EQ(road_geometry->junction(junction_id)->segment(0)->id().id,
+    std::string("s:2-0-0"));
+  EXPECT_EQ(road_geometry->junction(junction_id)->segment(0)->num_lanes(), 1);
+  EXPECT_EQ(road_geometry->junction(junction_id)->segment(0)->lane(0)->id().id,
+    std::string("l:2_1_1-2_1_2"));
+
+  junction_id = FindJunction(*road_geometry, std::string("j:2-0-1"));
+  EXPECT_NE(junction_id, -1);
+  EXPECT_EQ(road_geometry->junction(junction_id)->num_segments(), 1);
+  EXPECT_EQ(road_geometry->junction(junction_id)->segment(0)->id().id,
+    std::string("s:2-0-1"));
+  EXPECT_EQ(road_geometry->junction(junction_id)->segment(0)->num_lanes(), 1);
+  EXPECT_EQ(road_geometry->junction(junction_id)->segment(0)->lane(0)->id().id,
+    std::string("l:2_1_2-2_1_3"));
+
+  junction_id = FindJunction(*road_geometry, std::string("j:2-1-0"));
+  EXPECT_NE(junction_id, -1);
+  EXPECT_EQ(road_geometry->junction(junction_id)->num_segments(), 1);
+  EXPECT_EQ(road_geometry->junction(junction_id)->segment(0)->id().id,
+    std::string("s:2-1-0"));
+  EXPECT_EQ(road_geometry->junction(junction_id)->segment(0)->num_lanes(), 1);
+  EXPECT_EQ(road_geometry->junction(junction_id)->segment(0)->lane(0)->id().id,
+    std::string("l:2_2_1-2_2_2"));
+
+  junction_id = FindJunction(*road_geometry, std::string("j:1_1_2-2_2_1"));
+  EXPECT_NE(junction_id, -1);
+  EXPECT_EQ(road_geometry->junction(junction_id)->num_segments(), 1);
+  EXPECT_EQ(road_geometry->junction(junction_id)->segment(0)->id().id,
+    std::string("s:1_1_2-2_2_1"));
+  EXPECT_EQ(road_geometry->junction(junction_id)->segment(0)->num_lanes(), 1);
+  EXPECT_EQ(road_geometry->junction(junction_id)->segment(0)->lane(0)->id().id,
+    std::string("l:1_1_2-2_2_1"));
+
+  junction_id = FindJunction(*road_geometry, std::string("j:2_1_2-1_2_2"));
+  EXPECT_NE(junction_id, -1);
+  EXPECT_EQ(road_geometry->junction(junction_id)->num_segments(), 1);
+  EXPECT_EQ(road_geometry->junction(junction_id)->segment(0)->id().id,
+    std::string("s:2_1_2-1_2_2"));
+  EXPECT_EQ(road_geometry->junction(junction_id)->segment(0)->num_lanes(), 1);
+  EXPECT_EQ(road_geometry->junction(junction_id)->segment(0)->lane(0)->id().id,
+    std::string("l:2_1_2-1_2_2"));
+
+  junction_id = FindJunction(*road_geometry, std::string("j:2_1_2-1_1_3"));
+  EXPECT_NE(junction_id, -1);
+  EXPECT_EQ(road_geometry->junction(junction_id)->num_segments(), 1);
+  EXPECT_EQ(road_geometry->junction(junction_id)->segment(0)->id().id,
+    std::string("s:2_1_2-1_1_3"));
+  EXPECT_EQ(road_geometry->junction(junction_id)->segment(0)->num_lanes(), 1);
+  EXPECT_EQ(road_geometry->junction(junction_id)->segment(0)->lane(0)->id().id,
+    std::string("l:2_1_2-1_1_3"));
 }
+
 }  // namespace rndf
 }  // namespace maliput
 }  // namespace drake
