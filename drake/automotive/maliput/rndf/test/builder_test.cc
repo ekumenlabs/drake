@@ -28,6 +28,15 @@ do {                                                       \
   EXPECT_NEAR(_actual.z(), _expected.z(), _tolerance);         \
 } while (0)
 
+#define EXPECT_BOUNDS_NEAR(actual, expected, tolerance)      \
+do {                                                         \
+  const api::RBounds _actual(actual);                        \
+  const api::RBounds _expected(expected);                    \
+  const double _tolerance = (tolerance);                     \
+  EXPECT_NEAR(_actual.r_min, _expected.r_min, _tolerance);   \
+  EXPECT_NEAR(_actual.r_max, _expected.r_max, _tolerance);   \
+} while (0)
+
 int FindJunction(const api::RoadGeometry &road_geometry,
   const std::string &junction_name) {
   for (int i = 0; i < road_geometry.num_junctions(); i++) {
@@ -163,6 +172,9 @@ GTEST_TEST(RNDFBuilder, ZigZagLane) {
 //              *--------------------------*
 GTEST_TEST(RNDFBuilder, MultilaneLane) {
   const double width = 5.;
+  const api::RBounds single_lane_bounds(-width / 2.0, width / 2.0);
+  const api::RBounds two_lane_bounds_left(-width / 2.0, width / 2.0 + 10.0);
+  const api::RBounds two_lane_bounds_right(-width / 2.0 - 10.0, width / 2.0);
 
   std::unique_ptr<Builder> builder = std::make_unique<Builder>(
     0.01,
@@ -230,7 +242,7 @@ GTEST_TEST(RNDFBuilder, MultilaneLane) {
   auto road_geometry = builder->Build({"MultilaneLane"});
   EXPECT_NE(road_geometry, nullptr);
 
-
+  // Check road creation, naming, which lane is at both sides and bounds.
   EXPECT_EQ(road_geometry->num_junctions(), 6);
   EXPECT_EQ(road_geometry->junction(0)->id().id, std::string("j:1-0-0"));
   EXPECT_EQ(road_geometry->junction(0)->num_segments(), 1);
@@ -243,6 +255,14 @@ GTEST_TEST(RNDFBuilder, MultilaneLane) {
     nullptr);
   EXPECT_EQ(road_geometry->junction(0)->segment(0)->lane(0)->to_right(),
     nullptr);
+  EXPECT_BOUNDS_NEAR(
+    road_geometry->junction(0)->segment(0)->lane(0)->lane_bounds(0),
+    single_lane_bounds,
+    kLinearTolerance);
+  EXPECT_BOUNDS_NEAR(
+    road_geometry->junction(0)->segment(0)->lane(0)->driveable_bounds(0),
+    single_lane_bounds,
+    kLinearTolerance);
 
   EXPECT_EQ(road_geometry->junction(1)->id().id, std::string("j:1-0-1"));
   EXPECT_EQ(road_geometry->junction(1)->num_segments(), 1);
@@ -261,6 +281,22 @@ GTEST_TEST(RNDFBuilder, MultilaneLane) {
     nullptr);
   EXPECT_EQ(road_geometry->junction(1)->segment(0)->lane(1)->to_right(),
     road_geometry->junction(1)->segment(0)->lane(0));
+  EXPECT_BOUNDS_NEAR(
+    road_geometry->junction(1)->segment(0)->lane(0)->lane_bounds(0),
+    single_lane_bounds,
+    kLinearTolerance);
+  EXPECT_BOUNDS_NEAR(
+    road_geometry->junction(1)->segment(0)->lane(1)->lane_bounds(0),
+    single_lane_bounds,
+    kLinearTolerance);
+  EXPECT_BOUNDS_NEAR(
+    road_geometry->junction(1)->segment(0)->lane(0)->driveable_bounds(0),
+    two_lane_bounds_left,
+    kLinearTolerance);
+  EXPECT_BOUNDS_NEAR(
+    road_geometry->junction(1)->segment(0)->lane(1)->driveable_bounds(0),
+    two_lane_bounds_right,
+    kLinearTolerance);
 
   EXPECT_EQ(road_geometry->junction(2)->id().id, std::string("j:1-0-2"));
   EXPECT_EQ(road_geometry->junction(2)->num_segments(), 1);
@@ -279,6 +315,22 @@ GTEST_TEST(RNDFBuilder, MultilaneLane) {
     nullptr);
   EXPECT_EQ(road_geometry->junction(2)->segment(0)->lane(1)->to_right(),
     road_geometry->junction(2)->segment(0)->lane(0));
+  EXPECT_BOUNDS_NEAR(
+    road_geometry->junction(2)->segment(0)->lane(0)->lane_bounds(0),
+    single_lane_bounds,
+    kLinearTolerance);
+  EXPECT_BOUNDS_NEAR(
+    road_geometry->junction(2)->segment(0)->lane(1)->lane_bounds(0),
+    single_lane_bounds,
+    kLinearTolerance);
+  EXPECT_BOUNDS_NEAR(
+    road_geometry->junction(2)->segment(0)->lane(0)->driveable_bounds(0),
+    two_lane_bounds_left,
+    kLinearTolerance);
+  EXPECT_BOUNDS_NEAR(
+    road_geometry->junction(2)->segment(0)->lane(1)->driveable_bounds(0),
+    two_lane_bounds_right,
+    kLinearTolerance);
 
   EXPECT_EQ(road_geometry->junction(3)->id().id, std::string("j:1-0-3"));
   EXPECT_EQ(road_geometry->junction(3)->num_segments(), 1);
@@ -297,6 +349,22 @@ GTEST_TEST(RNDFBuilder, MultilaneLane) {
     nullptr);
   EXPECT_EQ(road_geometry->junction(3)->segment(0)->lane(1)->to_right(),
     road_geometry->junction(3)->segment(0)->lane(0));
+  EXPECT_BOUNDS_NEAR(
+    road_geometry->junction(3)->segment(0)->lane(0)->lane_bounds(0),
+    single_lane_bounds,
+    kLinearTolerance);
+  EXPECT_BOUNDS_NEAR(
+    road_geometry->junction(3)->segment(0)->lane(1)->lane_bounds(0),
+    single_lane_bounds,
+    kLinearTolerance);
+  EXPECT_BOUNDS_NEAR(
+    road_geometry->junction(3)->segment(0)->lane(0)->driveable_bounds(0),
+    two_lane_bounds_left,
+    kLinearTolerance);
+  EXPECT_BOUNDS_NEAR(
+    road_geometry->junction(3)->segment(0)->lane(1)->driveable_bounds(0),
+    two_lane_bounds_right,
+    kLinearTolerance);
 
   EXPECT_EQ(road_geometry->junction(4)->id().id, std::string("j:1-0-4"));
   EXPECT_EQ(road_geometry->junction(4)->num_segments(), 1);
@@ -309,6 +377,14 @@ GTEST_TEST(RNDFBuilder, MultilaneLane) {
     nullptr);
   EXPECT_EQ(road_geometry->junction(4)->segment(0)->lane(0)->to_right(),
     nullptr);
+  EXPECT_BOUNDS_NEAR(
+    road_geometry->junction(4)->segment(0)->lane(0)->lane_bounds(0),
+    single_lane_bounds,
+    kLinearTolerance);
+  EXPECT_BOUNDS_NEAR(
+    road_geometry->junction(4)->segment(0)->lane(0)->driveable_bounds(0),
+    single_lane_bounds,
+    kLinearTolerance);
 
   EXPECT_EQ(road_geometry->junction(5)->id().id, std::string("j:1-1-0"));
   EXPECT_EQ(road_geometry->junction(5)->num_segments(), 1);
@@ -321,6 +397,14 @@ GTEST_TEST(RNDFBuilder, MultilaneLane) {
     nullptr);
   EXPECT_EQ(road_geometry->junction(5)->segment(0)->lane(0)->to_right(),
     nullptr);
+  EXPECT_BOUNDS_NEAR(
+    road_geometry->junction(5)->segment(0)->lane(0)->lane_bounds(0),
+    single_lane_bounds,
+    kLinearTolerance);
+  EXPECT_BOUNDS_NEAR(
+    road_geometry->junction(5)->segment(0)->lane(0)->driveable_bounds(0),
+    single_lane_bounds,
+    kLinearTolerance);
 }
 
 
