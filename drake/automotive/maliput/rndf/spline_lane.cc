@@ -133,13 +133,15 @@ V2 SplineLane::xy_of_s(const double s) const {
   // xy_of_s it's called L which is a function
   // R --> R^2. We discard z component right now. We can say
   // L = f(s) = (x(s) ; y(s))
-  const auto& point = spline_->InterpolateMthDerivative(0, s);
+  const ignition::math::Vector3d point =
+    spline_->InterpolateMthDerivative(0, s);
   return {point.X(), point.Y()};
 }
 V2 SplineLane::xy_dot_of_s(const double s) const {
   // We get here the tangent, which is the first derivative of
   // L --> dL(s) / ds
-  const auto& point = spline_->InterpolateMthDerivative(1, s);
+  const ignition::math::Vector3d point =
+    spline_->InterpolateMthDerivative(1, s);
   return {point.X(), point.Y()};
 }
 double SplineLane::heading_of_s(const double s) const {
@@ -148,7 +150,7 @@ double SplineLane::heading_of_s(const double s) const {
   // is a function like: h(s) = R --> R or h(f(x, y)) where f it's
   // a function defined like y / x. y and x are the components
   // of the first derivative of L. Then, we got: f: R^2 --> R
-  const auto tangent = xy_dot_of_s(s);
+  const V2 tangent = xy_dot_of_s(s);
   return std::atan2(tangent.y(), tangent.x());
 }
 
@@ -161,8 +163,10 @@ double SplineLane::heading_dot_of_s(const double s) const {
   // Where y and x are the components of the L' and, x' and y' are
   // the components of L'' as they are independant.
   const double heading = heading_of_s(s);
-  const auto& first_derivative = spline_->InterpolateMthDerivative(1, s);
-  const auto& second_derivative = spline_->InterpolateMthDerivative(2, s);
+  const ignition::math::Vector3d first_derivative =
+    spline_->InterpolateMthDerivative(1, s);
+  const ignition::math::Vector3d second_derivative =
+    spline_->InterpolateMthDerivative(2, s);
   const double m = (second_derivative.Y() * first_derivative.X() -
                     first_derivative.Y() * second_derivative.X()) /
                    (first_derivative.X() * first_derivative.X());
@@ -182,8 +186,8 @@ api::RBounds SplineLane::do_driveable_bounds(double s) const {
     return api::RBounds(-width_ / 2., width_ / 2.);
   }
   // Get the position to the first lane
-  const auto position_first_lane = GetPositionToLane(s, 0);
-  const auto position_last_lane =
+  const ignition::math::Vector3d position_first_lane = GetPositionToLane(s, 0);
+  const ignition::math::Vector3d position_last_lane =
     GetPositionToLane(s, segment_->num_lanes() - 1);
   const double r_min =
     -std::abs(
@@ -213,9 +217,9 @@ SplineLane::GetPositionToLane(const double s, const int lane_id) const {
   // Here we get the beginning and ending of the other lane, and then compute
   // the respective GeoPositions.
   const api::Lane *other_lane = segment_->lane(lane_id);
-  const auto other_lane_beginning =
+  const api::GeoPosition other_lane_beginning =
       other_lane->ToGeoPosition(api::LanePosition(0., 0., 0.));
-  const auto other_lane_ending = other_lane->ToGeoPosition(
+  const api::GeoPosition other_lane_ending = other_lane->ToGeoPosition(
       api::LanePosition(other_lane->length(), 0., 0.));
   // Beginning of other lane
   const ignition::math::Vector3d g_l_0_a(other_lane_beginning.x(),

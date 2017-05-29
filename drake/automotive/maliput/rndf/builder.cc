@@ -281,9 +281,9 @@ Builder::GetInitialLaneToProcess(std::vector<Connection>* lanes,
   // Compute the number of valid distances
   std::vector<std::pair<int, int>> index_valid_distances;
   int i = 0;
-  for (const auto distances : distances_matrix) {
+  for (const std::vector<double> &distances : distances_matrix) {
     int number_of_valid_distances = 0;
-    for (const auto d : distances) {
+    for (const double& d : distances) {
       if (d > kWaypointDistancePhase) {
         number_of_valid_distances++;
       }
@@ -303,7 +303,7 @@ Builder::GetInitialLaneToProcess(std::vector<Connection>* lanes,
 
   // Create a vector with all the lane ids that appear first and then return it
   std::vector<int> ids;
-  for (const auto &id_zeros : index_valid_distances) {
+  for (const auto& id_zeros : index_valid_distances) {
     if (id_zeros.second == index_valid_distances[0].second)
       ids.push_back(id_zeros.first);
   }
@@ -341,11 +341,12 @@ void Builder::AddWaypointIfNecessary(const std::vector<int>& ids,
       // Here we need to add a waypoint to the respective position of the side
       // lane.
       // Build the spline
-      auto spline = CreateSpline(&(lanes->at(i).waypoints()));
+      std::unique_ptr<ignition::math::Spline> spline =
+        CreateSpline(&(lanes->at(i).waypoints()));
       std::unique_ptr<ArcLengthParameterizedSpline> arc_lenght_param_spline =
           std::make_unique<ArcLengthParameterizedSpline>(std::move(spline),
                                                          linear_tolerance_);
-      double s = arc_lenght_param_spline->FindClosestPointTo(
+      const double s = arc_lenght_param_spline->FindClosestPointTo(
           lanes->at(ids[0]).waypoints()[index].position(), kLinearStep);
       // Build the waypoint
       DirectedWaypoint new_wp(
@@ -371,7 +372,7 @@ void Builder::CreateNewControlPointsForLanes(std::vector<Connection>* lanes) {
   bool should_continue = true;
   while (should_continue) {
     // Get the lanes ids which appear first
-    auto ids = GetInitialLaneToProcess(lanes, i);
+    std::vector<int> ids = GetInitialLaneToProcess(lanes, i);
     // We need to check if we need to create a waypoint for the other lane and
     // add them if necessary.
     AddWaypointIfNecessary(ids, lanes, i);
@@ -401,8 +402,8 @@ Builder::ConstructPointForLane(const DirectedWaypoint& base,
   ignition::math::Vector3d t_0 = other_lane_base.tangent();
   t_0.Normalize();
 
-  auto delta = (g_l_0_a - g_l_1).Cross(n_1).Dot(t_0.Cross(n_1)) /
-               t_0.Cross(n_1).SquaredLength()*  (-1);
+  const double delta = (g_l_0_a - g_l_1).Cross(n_1).Dot(t_0.Cross(n_1)) /
+               t_0.Cross(n_1).SquaredLength() * (-1.0);
   return g_l_0_a + t_0 * delta;
 }
 
@@ -449,8 +450,8 @@ Builder::Build(const api::RoadGeometryId& id) {
 void Builder::CreateLane(const std::string& key_id, const double width,
                          const std::vector<DirectedWaypoint>& control_points) {
   DRAKE_DEMAND(control_points.size() > 1);
-  const auto& start_id = control_points.front().id();
-  const auto& end_id = control_points.back().id();
+  const ignition::rndf::UniqueId& start_id = control_points.front().id();
+  const ignition::rndf::UniqueId& end_id = control_points.back().id();
   const std::string name =
       BuildName(start_id) + std::string("-") + BuildName(end_id);
   if (connections_.find(key_id) == connections_.end()) {
@@ -573,7 +574,7 @@ void Builder::BuildOrUpdateBranchpoints(
 double Builder::CalculateMomentum(const ignition::math::Vector3d& point,
                                   const DirectedWaypoint& wp) {
   const auto v_wp_point = wp.position() - point;
-  auto tangent = wp.tangent();
+  ignition::math::Vector3d tangent = wp.tangent();
   tangent.Normalize();
   const auto result = tangent.Cross(v_wp_point);
   // As all the points should be on the x-y plane, the result should have all
