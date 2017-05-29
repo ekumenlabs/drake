@@ -56,12 +56,12 @@ CreateSpline(
 
 #define EXPECT_ROT_NEAR(actual, expected, tolerance)                 \
   do {                                                               \
-    const api::Rotation _actual(actual);                             \
-    const api::Rotation _expected expected;                          \
+    const api::Rotation _actual = actual;                            \
+    const api::Rotation _expected = expected;                        \
     const double _tolerance = (tolerance);                           \
-    EXPECT_NEAR(_actual.yaw, _expected.yaw, _tolerance);             \
-    EXPECT_NEAR(_actual.pitch, _expected.pitch, _tolerance);         \
-    EXPECT_NEAR(_actual.roll, _expected.roll, _tolerance);           \
+    EXPECT_NEAR(_actual.yaw(), _expected.yaw(), _tolerance);         \
+    EXPECT_NEAR(_actual.pitch(), _expected.pitch(), _tolerance);     \
+    EXPECT_NEAR(_actual.roll(), _expected.roll(), _tolerance);       \
   } while (0)
 
 // It makes geometric tests over a straight line lane
@@ -124,24 +124,16 @@ GTEST_TEST(RNDFSplineLanesTest, FlatLineLane) {
       api::GeoPosition(18., 1.234567, 0.), kLinearTolerance);
   }
 
-  // Outside the lane constraints
-  {
-    EXPECT_THROW(l1->ToGeoPosition(api::LanePosition(-1., 0., 0.)),
-      std::runtime_error);
-    EXPECT_THROW(l1->ToGeoPosition(api::LanePosition(21., 0., 0.)),
-      std::runtime_error);
-  }
-
   // Orientation
   {
     EXPECT_ROT_NEAR(l1->GetOrientation(api::LanePosition(0., 0., 0.)),
-      (0., 0., 0.), kAngularTolerance);
+      api::Rotation::FromRpy(0., 0., 0.), kAngularTolerance);
     EXPECT_ROT_NEAR(l1->GetOrientation(api::LanePosition(20., 0., 0.)),
-      (0., 0., 0.), kAngularTolerance);
+      api::Rotation::FromRpy(0., 0., 0.), kAngularTolerance);
     EXPECT_ROT_NEAR(l1->GetOrientation(api::LanePosition(10., 2., 0.)),
-      (0., 0., 0.), kAngularTolerance);
+      api::Rotation::FromRpy(0., 0., 0.), kAngularTolerance);
     EXPECT_ROT_NEAR(l1->GetOrientation(api::LanePosition(10., -2., 0.)),
-     (0., 0., 0.), kAngularTolerance);
+      api::Rotation::FromRpy(0., 0., 0.), kAngularTolerance);
   }
 
   // EvalMotionDerivatives
@@ -243,12 +235,12 @@ GTEST_TEST(RNDFSplineLanesTest, CurvedLineLane) {
   // Orientation
   {
     EXPECT_ROT_NEAR(l1->GetOrientation(api::LanePosition(0., 0., 0.)),
-      (0., 0., 0.), kAngularTolerance);
+      api::Rotation::FromRpy(0., 0., 0.), kAngularTolerance);
     EXPECT_ROT_NEAR(
       l1->GetOrientation(
         api::LanePosition(
           arc_length_interpolator->BaseSpline()->ArcLength(), 0., 0.)),
-      (0., 0., M_PI/2.), kAngularTolerance);
+      api::Rotation::FromRpy(0., 0., M_PI/2.), kAngularTolerance);
     const auto point =
       arc_length_interpolator->InterpolateMthDerivative(1,
         arc_length_interpolator->BaseSpline()->ArcLength() / 2.);
@@ -257,17 +249,17 @@ GTEST_TEST(RNDFSplineLanesTest, CurvedLineLane) {
       l1->GetOrientation(
         api::LanePosition(
           arc_length_interpolator->BaseSpline()->ArcLength() / 2., 0., 0.)),
-       (0., 0., yaw), kAngularTolerance);
+      api::Rotation::FromRpy(0., 0., yaw), kAngularTolerance);
     EXPECT_ROT_NEAR(
       l1->GetOrientation(
         api::LanePosition(
           arc_length_interpolator->BaseSpline()->ArcLength() / 2., 2., 0.)),
-      (0., 0., yaw), kAngularTolerance);
+      api::Rotation::FromRpy(0., 0., yaw), kAngularTolerance);
     EXPECT_ROT_NEAR(
       l1->GetOrientation(
         api::LanePosition(
           arc_length_interpolator->BaseSpline()->ArcLength() / 2., -2., 0.)),
-      (0., 0., yaw), kAngularTolerance);
+      api::Rotation::FromRpy(0., 0., yaw), kAngularTolerance);
   }
   // EvalMotionDerivatives
   {

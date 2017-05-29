@@ -16,7 +16,7 @@ namespace rndf {
 class BranchPoint;
 class Lane;
 
-/// An implementation of LaneEndSet.
+/// An implementation of LaneEndSet for RNDF.
 class LaneEndSet : public api::LaneEndSet {
  public:
   DRAKE_NO_COPY_NO_MOVE_NO_ASSIGN(LaneEndSet)
@@ -36,14 +36,16 @@ class LaneEndSet : public api::LaneEndSet {
 };
 
 
-/// An implementation of api::BranchPoint.
+/// An implementation of api::BranchPoint for RNDF.
 class BranchPoint : public api::BranchPoint {
  public:
   DRAKE_NO_COPY_NO_MOVE_NO_ASSIGN(BranchPoint)
 
   /// Constructs an empty BranchPoint.
   ///
-  /// @p road_geometry must remain valid for the lifetime of this class.
+  /// @param id is the ID of the BranchPoint.
+  /// @param road_geometry is a pointer to the parent api::RoadGeometry, which
+  /// must remain valid for the lifetime of this class.
   BranchPoint(const api::BranchPointId& id, api::RoadGeometry* road_geometry);
 
   /// Adds a LaneEnd to the "A side" of the BranchPoint.
