@@ -16,7 +16,7 @@ namespace drake {
 namespace maliput {
 namespace rndf {
 
-// const double kLinearTolerance = 1e-2;
+const double kLinearTolerance = 1e-2;
 
 #define EXPECT_GEO_NEAR(actual, expected, tolerance)         \
 do {                                                       \
@@ -436,111 +436,196 @@ GTEST_TEST(RNDFBuilder, MultilaneLaneCross) {
 
   EXPECT_EQ(road_geometry->num_junctions(), 11);
 
+  // Here I check for the lane creation, naming, and bound coordinates
   int junction_id;
-
+  {
   junction_id = FindJunction(*road_geometry, std::string("j:1-0-0"));
   EXPECT_NE(junction_id, -1);
   EXPECT_EQ(road_geometry->junction(junction_id)->num_segments(), 1);
   EXPECT_EQ(road_geometry->junction(junction_id)->segment(0)->id().id,
     std::string("s:1-0-0"));
   EXPECT_EQ(road_geometry->junction(junction_id)->segment(0)->num_lanes(), 1);
-  EXPECT_EQ(road_geometry->junction(junction_id)->segment(0)->lane(0)->id().id,
-    std::string("l:1_1_1-1_1_2"));
 
+  auto lane = road_geometry->junction(junction_id)->segment(0)->lane(0);
+  EXPECT_EQ(lane->id().id, std::string("l:1_1_1-1_1_2"));
+  EXPECT_GEO_NEAR(lane->ToGeoPosition(api::LanePosition(0.0, 0.0, 0.0)),
+    api::GeoPosition(20., 50.0, 0.0), kLinearTolerance);
+  EXPECT_GEO_NEAR(lane->ToGeoPosition(
+      api::LanePosition(lane->length(), 0.0, 0.0)),
+    api::GeoPosition(20.0, 40.0, 0.0), kLinearTolerance);
+  }
+
+  {
   junction_id = FindJunction(*road_geometry, std::string("j:1-0-1"));
   EXPECT_NE(junction_id, -1);
   EXPECT_EQ(road_geometry->junction(junction_id)->num_segments(), 1);
   EXPECT_EQ(road_geometry->junction(junction_id)->segment(0)->id().id,
     std::string("s:1-0-1"));
   EXPECT_EQ(road_geometry->junction(junction_id)->segment(0)->num_lanes(), 1);
-  EXPECT_EQ(road_geometry->junction(junction_id)->segment(0)->lane(0)->id().id,
-    std::string("l:1_1_2-1_1_3"));
 
+  auto lane = road_geometry->junction(junction_id)->segment(0)->lane(0);
+  EXPECT_EQ(lane->id().id, std::string("l:1_1_2-1_1_3"));
+  EXPECT_GEO_NEAR(lane->ToGeoPosition(api::LanePosition(0.0, 0.0, 0.0)),
+    api::GeoPosition(20.0, 40.0, 0.0), kLinearTolerance);
+  EXPECT_GEO_NEAR(lane->ToGeoPosition(
+      api::LanePosition(lane->length(), 0.0, 0.0)),
+    api::GeoPosition(20.0, 10.0, 0.0), kLinearTolerance);
+  }
 
+  {
   junction_id = FindJunction(*road_geometry, std::string("j:1-0-2"));
   EXPECT_NE(junction_id, -1);
   EXPECT_EQ(road_geometry->junction(junction_id)->num_segments(), 1);
   EXPECT_EQ(road_geometry->junction(junction_id)->segment(0)->id().id,
     std::string("s:1-0-2"));
   EXPECT_EQ(road_geometry->junction(junction_id)->segment(0)->num_lanes(), 1);
-  EXPECT_EQ(road_geometry->junction(junction_id)->segment(0)->lane(0)->id().id,
-    std::string("l:1_1_3-1_1_4"));
 
+  auto lane = road_geometry->junction(junction_id)->segment(0)->lane(0);
+  EXPECT_EQ(lane->id().id, std::string("l:1_1_3-1_1_4"));
+  EXPECT_GEO_NEAR(lane->ToGeoPosition(api::LanePosition(0.0, 0.0, 0.0)),
+    api::GeoPosition(20.0, 10.0, 0.0), kLinearTolerance);
+  EXPECT_GEO_NEAR(lane->ToGeoPosition(
+      api::LanePosition(lane->length(), 0.0, 0.0)),
+    api::GeoPosition(20.0, 0.0, 0.0), kLinearTolerance);
+  }
+
+  {
   junction_id = FindJunction(*road_geometry, std::string("j:1-1-0"));
   EXPECT_NE(junction_id, -1);
   EXPECT_EQ(road_geometry->junction(junction_id)->num_segments(), 1);
   EXPECT_EQ(road_geometry->junction(junction_id)->segment(0)->id().id,
     std::string("s:1-1-0"));
   EXPECT_EQ(road_geometry->junction(junction_id)->segment(0)->num_lanes(), 1);
-  EXPECT_EQ(road_geometry->junction(junction_id)->segment(0)->lane(0)->id().id,
-    std::string("l:1_2_1-1_2_2"));
 
+  auto lane = road_geometry->junction(junction_id)->segment(0)->lane(0);
+  EXPECT_EQ(lane->id().id, std::string("l:1_2_1-1_2_2"));
+  EXPECT_GEO_NEAR(lane->ToGeoPosition(api::LanePosition(0.0, 0.0, 0.0)),
+    api::GeoPosition(30.0, 0.0, 0.0), kLinearTolerance);
+  EXPECT_GEO_NEAR(lane->ToGeoPosition(
+      api::LanePosition(lane->length(), 0.0, 0.0)),
+    api::GeoPosition(30.0, 30.0, 0.0), kLinearTolerance);
+  }
+
+  {
   junction_id = FindJunction(*road_geometry, std::string("j:1-1-1"));
   EXPECT_NE(junction_id, -1);
   EXPECT_EQ(road_geometry->junction(junction_id)->num_segments(), 1);
   EXPECT_EQ(road_geometry->junction(junction_id)->segment(0)->id().id,
     std::string("s:1-1-1"));
   EXPECT_EQ(road_geometry->junction(junction_id)->segment(0)->num_lanes(), 1);
-  EXPECT_EQ(road_geometry->junction(junction_id)->segment(0)->lane(0)->id().id,
-    std::string("l:1_2_2-1_2_3"));
 
+  auto lane = road_geometry->junction(junction_id)->segment(0)->lane(0);
+  EXPECT_EQ(lane->id().id, std::string("l:1_2_2-1_2_3"));
+  EXPECT_GEO_NEAR(lane->ToGeoPosition(api::LanePosition(0.0, 0.0, 0.0)),
+    api::GeoPosition(30.0, 30.0, 0.0), kLinearTolerance);
+  EXPECT_GEO_NEAR(lane->ToGeoPosition(
+      api::LanePosition(lane->length(), 0.0, 0.0)),
+    api::GeoPosition(30.0, 50.0, 0.0), kLinearTolerance);
+  }
+
+  {
   junction_id = FindJunction(*road_geometry, std::string("j:2-0-0"));
   EXPECT_NE(junction_id, -1);
   EXPECT_EQ(road_geometry->junction(junction_id)->num_segments(), 1);
   EXPECT_EQ(road_geometry->junction(junction_id)->segment(0)->id().id,
     std::string("s:2-0-0"));
   EXPECT_EQ(road_geometry->junction(junction_id)->segment(0)->num_lanes(), 1);
-  EXPECT_EQ(road_geometry->junction(junction_id)->segment(0)->lane(0)->id().id,
-    std::string("l:2_1_1-2_1_2"));
 
+  auto lane = road_geometry->junction(junction_id)->segment(0)->lane(0);
+  EXPECT_EQ(lane->id().id, std::string("l:2_1_1-2_1_2"));
+  EXPECT_GEO_NEAR(lane->ToGeoPosition(api::LanePosition(0.0, 0.0, 0.0)),
+    api::GeoPosition(0.0, 20.0, 0.0), kLinearTolerance);
+  EXPECT_GEO_NEAR(lane->ToGeoPosition(
+      api::LanePosition(lane->length(), 0.0, 0.0)),
+    api::GeoPosition(10.0, 20.0, 0.0), kLinearTolerance);
+  }
+
+  {
   junction_id = FindJunction(*road_geometry, std::string("j:2-0-1"));
   EXPECT_NE(junction_id, -1);
   EXPECT_EQ(road_geometry->junction(junction_id)->num_segments(), 1);
   EXPECT_EQ(road_geometry->junction(junction_id)->segment(0)->id().id,
     std::string("s:2-0-1"));
   EXPECT_EQ(road_geometry->junction(junction_id)->segment(0)->num_lanes(), 1);
-  EXPECT_EQ(road_geometry->junction(junction_id)->segment(0)->lane(0)->id().id,
-    std::string("l:2_1_2-2_1_3"));
 
+  auto lane = road_geometry->junction(junction_id)->segment(0)->lane(0);
+  EXPECT_EQ(lane->id().id, std::string("l:2_1_2-2_1_3"));
+  EXPECT_GEO_NEAR(lane->ToGeoPosition(api::LanePosition(0.0, 0.0, 0.0)),
+    api::GeoPosition(10.0, 20.0, 0.0), kLinearTolerance);
+  EXPECT_GEO_NEAR(lane->ToGeoPosition(
+      api::LanePosition(lane->length(), 0.0, 0.0)),
+    api::GeoPosition(40.0, 20.0, 0.0), kLinearTolerance);
+  }
+
+  {
   junction_id = FindJunction(*road_geometry, std::string("j:2-1-0"));
   EXPECT_NE(junction_id, -1);
   EXPECT_EQ(road_geometry->junction(junction_id)->num_segments(), 1);
   EXPECT_EQ(road_geometry->junction(junction_id)->segment(0)->id().id,
     std::string("s:2-1-0"));
   EXPECT_EQ(road_geometry->junction(junction_id)->segment(0)->num_lanes(), 1);
-  EXPECT_EQ(road_geometry->junction(junction_id)->segment(0)->lane(0)->id().id,
-    std::string("l:2_2_1-2_2_2"));
 
+  auto lane = road_geometry->junction(junction_id)->segment(0)->lane(0);
+  EXPECT_EQ(lane->id().id, std::string("l:2_2_1-2_2_2"));
+  EXPECT_GEO_NEAR(lane->ToGeoPosition(api::LanePosition(0.0, 0.0, 0.0)),
+    api::GeoPosition(10.0, 30.0, 0.0), kLinearTolerance);
+  EXPECT_GEO_NEAR(lane->ToGeoPosition(
+      api::LanePosition(lane->length(), 0.0, 0.0)),
+    api::GeoPosition(0.0, 30.0, 0.0), kLinearTolerance);
+  }
+
+  {
   junction_id = FindJunction(*road_geometry, std::string("j:1_1_2-2_2_1"));
   EXPECT_NE(junction_id, -1);
   EXPECT_EQ(road_geometry->junction(junction_id)->num_segments(), 1);
   EXPECT_EQ(road_geometry->junction(junction_id)->segment(0)->id().id,
     std::string("s:1_1_2-2_2_1"));
   EXPECT_EQ(road_geometry->junction(junction_id)->segment(0)->num_lanes(), 1);
-  EXPECT_EQ(road_geometry->junction(junction_id)->segment(0)->lane(0)->id().id,
-    std::string("l:1_1_2-2_2_1"));
 
+  auto lane = road_geometry->junction(junction_id)->segment(0)->lane(0);
+  EXPECT_EQ(lane->id().id, std::string("l:1_1_2-2_2_1"));
+  EXPECT_GEO_NEAR(lane->ToGeoPosition(api::LanePosition(0.0, 0.0, 0.0)),
+    api::GeoPosition(20.0, 40.0, 0.0), kLinearTolerance);
+  EXPECT_GEO_NEAR(lane->ToGeoPosition(
+      api::LanePosition(lane->length(), 0.0, 0.0)),
+    api::GeoPosition(10.0, 30.0, 0.0), kLinearTolerance);
+  }
+  {
   junction_id = FindJunction(*road_geometry, std::string("j:2_1_2-1_2_2"));
   EXPECT_NE(junction_id, -1);
   EXPECT_EQ(road_geometry->junction(junction_id)->num_segments(), 1);
   EXPECT_EQ(road_geometry->junction(junction_id)->segment(0)->id().id,
     std::string("s:2_1_2-1_2_2"));
   EXPECT_EQ(road_geometry->junction(junction_id)->segment(0)->num_lanes(), 1);
-  EXPECT_EQ(road_geometry->junction(junction_id)->segment(0)->lane(0)->id().id,
-    std::string("l:2_1_2-1_2_2"));
 
+  auto lane = road_geometry->junction(junction_id)->segment(0)->lane(0);
+  EXPECT_EQ(lane->id().id, std::string("l:2_1_2-1_2_2"));
+  EXPECT_GEO_NEAR(lane->ToGeoPosition(api::LanePosition(0.0, 0.0, 0.0)),
+    api::GeoPosition(10.0, 20.0, 0.0), kLinearTolerance);
+  EXPECT_GEO_NEAR(lane->ToGeoPosition(
+      api::LanePosition(lane->length(), 0.0, 0.0)),
+    api::GeoPosition(30.0, 30.0, 0.0), kLinearTolerance);
+  }
+
+  {
   junction_id = FindJunction(*road_geometry, std::string("j:2_1_2-1_1_3"));
   EXPECT_NE(junction_id, -1);
   EXPECT_EQ(road_geometry->junction(junction_id)->num_segments(), 1);
   EXPECT_EQ(road_geometry->junction(junction_id)->segment(0)->id().id,
     std::string("s:2_1_2-1_1_3"));
   EXPECT_EQ(road_geometry->junction(junction_id)->segment(0)->num_lanes(), 1);
-  EXPECT_EQ(road_geometry->junction(junction_id)->segment(0)->lane(0)->id().id,
-    std::string("l:2_1_2-1_1_3"));
 
-  // int branch_point_id;
+  auto lane = road_geometry->junction(junction_id)->segment(0)->lane(0);
+  EXPECT_EQ(lane->id().id, std::string("l:2_1_2-1_1_3"));
+  EXPECT_GEO_NEAR(lane->ToGeoPosition(api::LanePosition(0.0, 0.0, 0.0)),
+    api::GeoPosition(10.0, 20.0, 0.0), kLinearTolerance);
+  EXPECT_GEO_NEAR(lane->ToGeoPosition(
+      api::LanePosition(lane->length(), 0.0, 0.0)),
+    api::GeoPosition(20.0, 10.0, 0.0), kLinearTolerance);
+  }
+
   EXPECT_EQ(road_geometry->num_branch_points(), 12);
-
+  // Checks for the branch points
   {
   junction_id = FindJunction(*road_geometry, std::string("j:1-0-0"));
   auto branch_point = road_geometry->junction(junction_id)->segment(0)->
