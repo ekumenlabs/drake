@@ -328,9 +328,9 @@ GTEST_TEST(RNDFBuilder, MultilaneLane) {
 //                     *   *
 //                     |   |
 //               1.1.2 |   |
-//    2.2.2    2.2.1   *   |
-//   *--------------*/ |   * 1.2.2
-//    2.1.1    2.1.2   |--/|           2.1.3
+//    2.2.2    2.2.1   *   *
+//   *--------------*/ |  /| 1.2.2
+//    2.1.1    2.1.2   | / |           2.1.3
 //   *---------------*/---------------*
 //                    \|   |
 //               1.1.3 *   |
@@ -537,6 +537,36 @@ GTEST_TEST(RNDFBuilder, MultilaneLaneCross) {
   EXPECT_EQ(road_geometry->junction(junction_id)->segment(0)->num_lanes(), 1);
   EXPECT_EQ(road_geometry->junction(junction_id)->segment(0)->lane(0)->id().id,
     std::string("l:2_1_2-1_1_3"));
+
+  // int branch_point_id;
+  EXPECT_EQ(road_geometry->num_branch_points(), 12);
+
+  {
+  junction_id = FindJunction(*road_geometry, std::string("j:1-0-0"));
+  auto branch_point = road_geometry->junction(junction_id)->segment(0)->
+    lane(0)->GetBranchPoint(api::LaneEnd::kFinish);
+  EXPECT_NE(branch_point, nullptr);
+  EXPECT_EQ(branch_point->GetASide()->size(), 1);
+  EXPECT_EQ(branch_point->GetBSide()->size(), 2);
+  }
+
+  {
+  junction_id = FindJunction(*road_geometry, std::string("j:1-0-1"));
+  auto branch_point = road_geometry->junction(junction_id)->segment(0)->
+    lane(0)->GetBranchPoint(api::LaneEnd::kFinish);
+  EXPECT_NE(branch_point, nullptr);
+  EXPECT_EQ(branch_point->GetASide()->size(), 2);
+  EXPECT_EQ(branch_point->GetBSide()->size(), 1);
+  }
+
+  {
+  junction_id = FindJunction(*road_geometry, std::string("j:1-1-1"));
+  auto branch_point = road_geometry->junction(junction_id)->segment(0)->
+    lane(0)->GetBranchPoint(api::LaneEnd::kStart);
+  EXPECT_NE(branch_point, nullptr);
+  EXPECT_EQ(branch_point->GetASide()->size(), 2);
+  EXPECT_EQ(branch_point->GetBSide()->size(), 1);
+  }
 }
 
 }  // namespace rndf
