@@ -1,0 +1,27 @@
+RNDF_name	loop
+num_segments	2
+num_zones	0
+format_version	1.0
+segment	1
+num_lanes	1
+segment_name	s1
+lane	1.1
+num_waypoints	3
+lane_width	13
+exit	1.1.3	2.1.1
+1.1.1	-34.583786 -58.446440
+1.1.2	-34.583758 -58.446504
+1.1.3	-34.583291 -58.447591
+end_lane
+end_segment
+segment	2
+num_lanes	1
+segment_name	s2
+lane	2.1
+num_waypoints	2
+lane_width	13
+2.1.1	-34.583308 -58.447668
+2.1.2	-34.583340 -58.447682
+end_lane
+end_segment
+end_file

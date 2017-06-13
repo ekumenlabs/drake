@@ -12,7 +12,7 @@ namespace maliput {
 namespace rndf {
 
 const double SplineLane::kSplineErrorBound = 1e-6;
-const double SplineLane::kTension = 0.99;
+const double SplineLane::kTension = 0.8;
 
 SplineLane::SplineLane(
   const api::LaneId& id, const api::Segment* segment,

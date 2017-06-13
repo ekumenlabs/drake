@@ -39,6 +39,17 @@ drake_cc_binary(
     ],
 )
 
+drake_cc_binary(
+    name = "rndf_to_obj",
+    srcs = ["rndf_to_obj.cpp"],
+    deps = [
+        ":utility",
+        "//drake/automotive/maliput/monolane",
+        "//drake/automotive/maliput/rndf",
+        "//drake/common:text_logging_gflags",
+    ],
+)
+
 # === test/ ===
 
 filegroup(
