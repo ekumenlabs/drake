@@ -226,10 +226,11 @@ std::vector<std::string> RoadGeometry::CheckInvariants() const {
                                       const Rotation& reference) {
       for (int bi = 0; bi < ends.size(); ++bi) {
         const LaneEnd le = ends.get(bi);
+        const std::string id = le.lane->id().id;
         const double d = Distance(reference, OrientationOutFromLane(le));
         if (d > angular_tolerance()) {
           std::stringstream ss;
-          ss << "Lane " << le.lane->id().id
+          ss << "Lane " << id
              << ((le.end == LaneEnd::kStart) ? "[start]" : "[end]")
              << " orientation is off by " << d << ".";
           failures.push_back(ss.str());

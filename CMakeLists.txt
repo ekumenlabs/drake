@@ -227,8 +227,8 @@ drake_add_external(iris PUBLIC CMAKE MATLAB PYTHON
 
 # ignition_math
 drake_add_external(ignition_math PUBLIC CMAKE
-  URL https://bitbucket.org/ignitionrobotics/ign-math/get/ignition-math3_3.2.0.tar.gz
-  URL_HASH SHA256=1948c1610fa4403bce7ba2a262a29662990ee66aab00882411a0868afe0e5309
+  URL https://bitbucket.org/ekumen/ign-math/get/ign-math3-spline-tangent-refactor.tar.gz
+  URL_HASH SHA256=bcea5524f0df1413c0648bddfd6d65974689f2cf3fce91f7e58a5b61bfdff01d
   CMAKE_ARGS
     -DENABLE_TESTS_COMPILATION=OFF
     -DUSE_HOST_CFLAGS=OFF
@@ -237,7 +237,7 @@ drake_add_external(ignition_math PUBLIC CMAKE
 # ignition_rndf
 drake_add_external(ignition_rndf PUBLIC CMAKE
   URL https://bitbucket.org/ignitionrobotics/ign-rndf/get/default.tar.gz
-  URL_HASH SHA256=1f51d7d3b11b600098fc86c6b529c31f9eae26f49603869b2a50caca43f9179d
+  URL_HASH SHA256=e949b345b3e010b46a3592497d06e1d3136e11fedffbc90ee43204ed2cad110c
   CMAKE_ARGS
     -DENABLE_TESTS_COMPILATION=OFF
     -DUSE_HOST_CFLAGS=OFF

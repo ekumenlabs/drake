@@ -12,7 +12,7 @@ namespace maliput {
 namespace rndf {
 
 const double SplineLane::kSplineErrorBound = 1e-6;
-const double SplineLane::kTension = 0.8;
+const double SplineLane::kTension = 0.5;
 
 SplineLane::SplineLane(
   const api::LaneId& id, const api::Segment* segment,
@@ -27,6 +27,7 @@ SplineLane::SplineLane(
   for (const auto& point : control_points) {
     spline->AddPoint(std::get<0>(point), std::get<1>(point));
   }
+  spline->EnsureNoLoop();
   // Then we move the spline to the ArcLengthParameterizedSpline to wrap the
   // inverse function from the t parameter of the ignition::math::Spline to the
   // Maliput s coordinate.

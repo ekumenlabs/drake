@@ -42,9 +42,12 @@ void Loader::BuildBoundingBox(
   for (const auto& segment : segments) {
     for (const auto& lane : segment.Lanes()) {
       for (const auto& waypoint : lane.Waypoints()) {
+        ignition::math::Vector3d globalLocation =
+            ToGlobalCoordinates(origin, waypoint.Location());
+        globalLocation.Z() = 0.0;
         wps.push_back(
           DirectedWaypoint(ignition::rndf::UniqueId(),
-            ToGlobalCoordinates(origin, waypoint.Location())));
+            globalLocation));
       }
     }
   }
@@ -62,9 +65,13 @@ void Loader::BuildSegments(
     for (const auto& lane : segment.Lanes()) {
       Connection connected_lane;
       for (const auto& waypoint : lane.Waypoints()) {
+        ignition::math::Vector3d globalLocation =
+            ToGlobalCoordinates(origin, waypoint.Location());
+        globalLocation.Z() = 0.0;
+
         connected_lane.waypoints().push_back(DirectedWaypoint(
             ignition::rndf::UniqueId(segment.Id(), lane.Id(), waypoint.Id()),
-            ToGlobalCoordinates(origin, waypoint.Location()),
+            globalLocation,
             waypoint.IsEntry(), waypoint.IsExit()));
       }
       if (lane.Width() == 0.0) {
@@ -143,9 +150,13 @@ void Loader::BuildZoneLanes(
     const ignition::rndf::Perimeter& perimeter = zone.Perimeter();
     std::vector<DirectedWaypoint> perimeter_waypoints;
     for (const auto& waypoint : perimeter.Points()) {
+      ignition::math::Vector3d globalLocation =
+            ToGlobalCoordinates(origin, waypoint.Location());
+        globalLocation.Z() = 0.0;
+
       perimeter_waypoints.push_back(DirectedWaypoint(
         ignition::rndf::UniqueId(zone.Id(), 0, waypoint.Id()),
-        ToGlobalCoordinates(origin, waypoint.Location()), waypoint.IsEntry(),
+        globalLocation, waypoint.IsEntry(),
         waypoint.IsExit()));
     }
     builder->CreateConnectionsForZones(this->rc_.default_width_,

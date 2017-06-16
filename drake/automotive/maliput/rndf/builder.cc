@@ -52,13 +52,14 @@ void Builder::SetInvertedLanes(std::vector<Connection>* lanes) {
   const auto base_point =
     std::get<0>(bounding_box_) - ignition::math::Vector3d(1., 1., 0);
   // Get all the momentums and mark the lanes if necessary
-  int first_lane_sign_momentum, other_lane_sign_momentum;
-  for (int i = 0; i < static_cast<int>(lanes->size()); i++) {
-    const double momentum =
-      CalculateConnectionMomentum(base_point, lanes->at(i).waypoints());
-    if (i == 0) {
-      first_lane_sign_momentum = std::copysign(1.0, momentum);
-    } else {
+  if (lanes->size() > 0) {
+    int first_lane_sign_momentum, other_lane_sign_momentum;
+    double momentum = CalculateConnectionMomentum(
+        base_point, lanes->at(0).waypoints());
+    first_lane_sign_momentum = std::copysign(1.0, momentum);
+    for (int i = 1 ; i < static_cast<int>(lanes->size()) ; i++) {
+      momentum = CalculateConnectionMomentum(
+          base_point, lanes->at(i).waypoints());
       other_lane_sign_momentum = std::copysign(1.0, momentum);
       if (other_lane_sign_momentum != first_lane_sign_momentum) {
         lanes->at(i).set_inverse_direction(true);
@@ -170,6 +171,7 @@ Builder::CreateSpline(const std::vector<DirectedWaypoint>* waypoints) {
     spline->AddPoint(ignition::math::Vector3d(point.position().X(),
       point.position().Y(), 0.));
   }
+  spline->EnsureNoLoop();
   return spline;
 }
 

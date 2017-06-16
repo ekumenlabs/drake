@@ -18,10 +18,11 @@ segment	2
 num_lanes	1
 segment_name	s2
 lane	2.1
-num_waypoints	2
+num_waypoints	3
 lane_width	13
 2.1.1	-34.583308 -58.447668
-2.1.2	-34.583340 -58.447682
+2.1.2	-34.583408 -58.447768
+2.1.3	-34.584339 -58.448112
 end_lane
 end_segment
 end_file
