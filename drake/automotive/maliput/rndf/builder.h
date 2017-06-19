@@ -196,7 +196,7 @@ class Builder {
   /// create a local map of Connections that is used later to create the Maliput
   /// Segment and Lane. For each group, we project the DirectedWaypoints on the
   /// other Connection to have matching pieces of lanes in the same Segment.
-  /// Thos projections will end up as new DirectedWaypoints. We take the
+  /// Those projections will end up as new DirectedWaypoints. We take the
   /// information of the generated splines to get the interpolated positions and
   /// tangents. Afterwards, we need to order the connections from right to left
   /// and then add the final Connection objects to the intance map @p
@@ -258,6 +258,9 @@ class Builder {
   // the waypoints is not valid, it won't be taken into account.
   std::unique_ptr<ignition::math::Spline>
   CreateSpline(const std::vector<DirectedWaypoint>* waypoints);
+
+  std::unique_ptr<ignition::math::Spline> CreatePChip(
+    const std::vector<DirectedWaypoint>* waypoints);
 
   // Given the waypoints of the lanes and index which is the item
   // from zero to pick on each vector and test the distance against all the

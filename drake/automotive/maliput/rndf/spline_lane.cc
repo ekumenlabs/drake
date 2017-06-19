@@ -22,7 +22,7 @@ SplineLane::SplineLane(
   // It first creates a spline based on the positions and its tangents.
   std::unique_ptr<ignition::math::Spline> spline =
       std::make_unique<ignition::math::Spline>();
-  spline->Tension(kTension);
+  // spline->Tension(kTension);
   spline->AutoCalculate(true);
   for (const auto& point : control_points) {
     spline->AddPoint(std::get<0>(point), std::get<1>(point));

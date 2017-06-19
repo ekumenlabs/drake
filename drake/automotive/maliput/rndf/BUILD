@@ -56,6 +56,8 @@ drake_cc_library(
         ":lanes",
         "@ignition_math",
         "@ignition_rndf",
+        "//drake/common",
+        "//drake/common/trajectories:piecewise_polynomial",
     ],
 )
 

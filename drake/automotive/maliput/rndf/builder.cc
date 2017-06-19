@@ -3,6 +3,8 @@
 #include <cmath>
 #include <utility>
 
+#include "drake/common/eigen_types.h"
+#include "drake/common/trajectories/piecewise_polynomial.h"
 #include "drake/automotive/maliput/rndf/branch_point.h"
 #include "drake/automotive/maliput/rndf/spline_lane.h"
 #include "drake/automotive/maliput/rndf/road_geometry.h"
@@ -157,8 +159,70 @@ void Builder::CreateConnectionsForZones(
 }
 
 std::unique_ptr<ignition::math::Spline>
+ Builder::CreatePChip(
+  const std::vector<DirectedWaypoint>* waypoints) {
+  int size = 0;
+  for (int i = 0; i < static_cast<int>(waypoints->size()); i++) {
+    if (!waypoints->at(i).id().Valid()) {
+      continue;
+    }
+    size ++;
+  }
+  std::vector<double> breaks;
+  //std::vector<MatrixX<double>> knots(size, MatrixX<double>::Zero(3, 1));
+  std::vector<MatrixX<double>> knots;
+  double t = 0.0;
+  for (int i = 0, j = 0; i < static_cast<int>(waypoints->size()); i++, j++) {
+    if (!(waypoints->at(i).id().Valid())) {
+      continue;
+    }
+    MatrixX<double> point = MatrixX<double>::Zero(3, 1);
+    point << waypoints->at(i).position().X(), waypoints->at(i).position().Y(), 0.0;
+    knots.push_back(point);
+    // knots[j] << waypoints->at(i).position().X(), waypoints->at(i).position().Y(), 0.0;
+    breaks.push_back(t);
+    t += 1.0;
+  }
+
+  PiecewisePolynomial<double> polynomial =
+      PiecewisePolynomial<double>::Pchip(breaks, knots, true);
+  PiecewisePolynomial<double> derivated_polynomial = polynomial.derivative(
+      1);
+
+  // We generate the spline
+  std::unique_ptr<ignition::math::Spline> spline =
+      std::make_unique<ignition::math::Spline>();
+  spline->AutoCalculate(true);
+  for (double tt = 0.0; tt < t; tt += 1) {
+    const Vector3<double> point = polynomial.value(tt);
+    const Vector3<double> tangent = derivated_polynomial.value(tt);
+    std::cout << "tt: " << tt << " | " << point << " | " << tangent << std::endl;
+    spline->AddPoint(ignition::math::Vector3d(point.x(), point.y(), point.z()),
+      ignition::math::Vector3d(tangent.x(), tangent.y(), tangent.z()));
+  }
+
+  return spline;
+  /*
+  const double new_step = (t - 1.0) * step;
+  double tt {0.0};
+  while(tt < (t - 1.0)) {
+    auto result = derivated_polynomial.value(tt);
+    interpolated_points.push_back(derivated_polynomial.value(tt));
+    tt += new_step;
+  }
+  if (tt > (t - 1.0)) {
+    auto result = derivated_polynomial.value(t - 1.0);
+    interpolated_points.push_back(derivated_polynomial.value(t - 1.0));
+  }
+  return interpolated_points;
+  */
+}
+
+std::unique_ptr<ignition::math::Spline>
 Builder::CreateSpline(const std::vector<DirectedWaypoint>* waypoints) {
   DRAKE_DEMAND(waypoints != nullptr);
+  return CreatePChip(waypoints);
+  /*
   // We generate the spline
   std::unique_ptr<ignition::math::Spline> spline =
       std::make_unique<ignition::math::Spline>();
@@ -173,6 +237,7 @@ Builder::CreateSpline(const std::vector<DirectedWaypoint>* waypoints) {
   }
   spline->EnsureNoLoop();
   return spline;
+  */
 }
 
 void Builder::GroupLanesByDirection(
