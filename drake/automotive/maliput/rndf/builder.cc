@@ -191,7 +191,6 @@ std::unique_ptr<ignition::math::Spline>
     const Vector3<double> tangent = derivated_polynomial.value(breaks[i]);
     spline->AddPoint(positions[i],
         ignition::math::Vector3d(tangent.x(), tangent.y(), tangent.z()));
-    std::cout << "Point: " << positions[i] << "| Tangent: " << tangent << std::endl;
   }
 
   return spline;
@@ -199,9 +198,9 @@ std::unique_ptr<ignition::math::Spline>
 
 std::unique_ptr<ignition::math::Spline>
 Builder::CreateSpline(const std::vector<DirectedWaypoint>* waypoints) {
-  DRAKE_DEMAND(waypoints != nullptr);
-  return CreatePChip(waypoints);
-  /*
+  // DRAKE_DEMAND(waypoints != nullptr);
+  // return CreatePChip(waypoints);
+
   // We generate the spline
   std::unique_ptr<ignition::math::Spline> spline =
       std::make_unique<ignition::math::Spline>();
@@ -214,9 +213,8 @@ Builder::CreateSpline(const std::vector<DirectedWaypoint>* waypoints) {
     spline->AddPoint(ignition::math::Vector3d(point.position().X(),
       point.position().Y(), 0.));
   }
-  spline->EnsureNoLoop();
+  // spline->EnsureNoLoop();
   return spline;
-  */
 }
 
 void Builder::GroupLanesByDirection(
