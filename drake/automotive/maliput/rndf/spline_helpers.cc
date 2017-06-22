@@ -1,5 +1,8 @@
 #include <algorithm>
 
+#include <ignition/math/Vector4.hh>
+#include <ignition/math/Matrix4.hh>
+
 #include "drake/automotive/maliput/rndf/spline_helpers.h"
 #include "drake/common/drake_assert.h"
 #include "drake/common/drake_throw.h"
@@ -181,6 +184,133 @@ double ArcLengthParameterizedSpline::FindClosestPointTo(
   }
 
   return closest_s;
+}
+
+std::vector<ignition::math::Vector3d> SplineToBezier(
+    const ignition::math::Vector3d& p0,
+    const ignition::math::Vector3d& t0,
+    const ignition::math::Vector3d& p1,
+    const ignition::math::Vector3d& t1) {
+  // This is the Bezier coefficient matrix.
+  const ignition::math::Matrix4d bezier_matrix(1.0, 0.0, 0.0, 0.0,
+                                         -3.0, 3.0, 0.0, 0.0,
+                                         3.0, -6.0, 3.0, 0.0,
+                                         -1.0, 3.0, -3.0, 1.0);
+  // This is the Hermite coefficient matrix.
+  const ignition::math::Matrix4d hermite_matrix(1.0, 0.0, 0.0, 0.0,
+                                          0.0, 1.0, 0.0, 0.0,
+                                          -3.0, -2.0, 3.0, -1.0,
+                                          2.0, 1.0, -2.0, 1.0);
+  // These are the control points arranged by coordinate.
+  const ignition::math::Matrix4d hermite_points(p0.X(), p0.Y(), p0.Z(), 0.0,
+                                                t0.X(), t0.Y(), t0.Z(), 0.0,
+                                                p1.X(), p1.Y(), p1.Z(), 0.0,
+                                                t1.X(), t1.Y(), t1.Z(), 0.0);
+  // Given a function F_B(t): ℝ --> ℝ^3 that represents a cubic Bezier curve,
+  // and F_H(t) : ℝ --> ℝ^3 that represents a cubic Hermite Spline curve, we can
+  // define them like:
+  // F_B(t) = [1 t t^2 t^3] * [bezier_matrix] * [bezier_points]
+  // F_H(t) = [1 t t^2 t^3] * [hermite_matrix] * [hermite_points]
+  // If both functions have the same image: F_B(t) = F_H(t), we can say:
+  // [bezier_points] = [bezier_matrix]^(-1) * [hermite_matrix] * [hermite_points]
+  // [hermite_points] = [hermite_matrix]^(-1) * [bezier_matrix] * [bezier_points]
+  const ignition::math::Matrix4d bezier_points =
+      bezier_matrix.Inverse() * hermite_matrix * hermite_points;
+  std::vector<ignition::math::Vector3d> result;
+  result.push_back(ignition::math::Vector3d(
+      bezier_points(0,0), bezier_points(0,1), bezier_points(0,2)));
+  result.push_back(ignition::math::Vector3d(
+      bezier_points(1,0), bezier_points(1,1), bezier_points(1,2)));
+  result.push_back(ignition::math::Vector3d(
+      bezier_points(2,0), bezier_points(2,1), bezier_points(2,2)));
+  result.push_back(ignition::math::Vector3d(
+      bezier_points(3,0), bezier_points(3,1), bezier_points(3,2)));
+  return result;
+}
+
+
+std::vector<ignition::math::Vector3d> BezierToSpline(
+    const ignition::math::Vector3d& p0,
+    const ignition::math::Vector3d& p1,
+    const ignition::math::Vector3d& p2,
+    const ignition::math::Vector3d& p3) {
+  // This is the Bezier coefficient matrix.
+  const ignition::math::Matrix4d bezier_matrix(1.0, 0.0, 0.0, 0.0,
+                                         -3.0, 3.0, 0.0, 0.0,
+                                         3.0, -6.0, 3.0, 0.0,
+                                         -1.0, 3.0, -3.0, 1.0);
+  // This is the Hermite coefficient matrix.
+  const ignition::math::Matrix4d hermite_matrix(1.0, 0.0, 0.0, 0.0,
+                                          0.0, 1.0, 0.0, 0.0,
+                                          -3.0, -2.0, 3.0, -1.0,
+                                          2.0, 1.0, -2.0, 1.0);
+  const ignition::math::Matrix4d bezier_points(p0.X(), p0.Y(), p0.Z(), 0.0,
+                                               p1.X(), p1.Y(), p1.Z(), 0.0,
+                                               p2.X(), p2.Y(), p2.Z(), 0.0,
+                                               p3.X(), p3.Y(), p3.Z(), 0.0);
+  ignition::math::Matrix4d hermite_points =
+      hermite_matrix.Inverse() * bezier_matrix * bezier_points;
+  std::vector<ignition::math::Vector3d> result;
+  result.push_back(ignition::math::Vector3d(
+      hermite_points(0,0), hermite_points(0,1), hermite_points(0,2)));
+  result.push_back(ignition::math::Vector3d(
+      hermite_points(1,0), hermite_points(1,1), hermite_points(1,2)));
+  result.push_back(ignition::math::Vector3d(
+      hermite_points(2,0), hermite_points(2,1), hermite_points(2,2)));
+  result.push_back(ignition::math::Vector3d(
+      hermite_points(3,0), hermite_points(3,1), hermite_points(3,2)));
+  return result;
+}
+
+
+std::vector<ignition::math::Vector3d> RemoveLoopsInBezier(
+    const std::vector<ignition::math::Vector3d>& cp) {
+  const ignition::math::Vector3d& p0 = cp[0];
+  const ignition::math::Vector3d& p1 = cp[1];
+  const ignition::math::Vector3d& p2 = cp[2];
+  const ignition::math::Vector3d& p3 = cp[3];
+
+  const ignition::math::Vector3d norm_t0 = (p1 - p0).Normalize();
+  const ignition::math::Vector3d norm_t3 = (p3 - p2).Normalize();
+  const ignition::math::Vector3d r = p3 - p0;
+
+  const double original_k1 = (p1 - p0).Length();
+  const double original_k3 = (p3 - p2).Length();
+
+  const ignition::math::Vector3d norm_t3_x_r = norm_t3.Cross(r);
+  const ignition::math::Vector3d norm_t3_x_norm_t0 = norm_t3.Cross(norm_t0);
+
+  // Check if we have intersection between t0 and t3
+  if (norm_t3_x_r.Length() == 0 || norm_t3_x_norm_t0.Length() == 0) {
+    // Here we won't have intersection
+    return cp;
+  }
+
+  const ignition::math::Vector3d l =
+    (norm_t3_x_r.Length() / norm_t3_x_norm_t0.Length()) * norm_t0;
+
+  double projection = norm_t3_x_r.Dot(norm_t3_x_norm_t0);
+  ignition::math::Vector3d critical_point;
+  if (projection >= 0.) {
+    critical_point = p0 + l;
+  } else {
+    critical_point = p0 - l;
+  }
+
+  const double critical_k1 = (critical_point - p0).Length();
+  const double critical_k2 = (critical_point - p3).Length();
+
+  std::vector<ignition::math::Vector3d> result;
+  if (std::abs(critical_k1) < std::abs(original_k1) ||
+    std::abs(critical_k2) < std::abs(original_k3)) {
+    result.push_back(p0);
+    result.push_back(critical_point);
+    result.push_back(critical_point);
+    result.push_back(p3);
+  } else {
+    result.insert(result.end(), cp.begin(), cp.end());
+  }
+  return result;
 }
 
 }  // namespace rndf

@@ -15,7 +15,7 @@ namespace drake {
 namespace maliput {
 namespace rndf {
 
-const double Builder::kWaypointDistancePhase = 0.3;
+const double Builder::kWaypointDistancePhase = 0.5;
 
 const double Builder::kLinearStep = 1e-2;
 
@@ -43,11 +43,37 @@ void Builder::CreateConnection(const double width,
   const auto& entry_it = directed_waypoints_.find(entry.String());
   DRAKE_THROW_UNLESS(exit_it != directed_waypoints_.end());
   DRAKE_THROW_UNLESS(entry_it != directed_waypoints_.end());
-
+/*
   std::vector<DirectedWaypoint> control_points = {
     exit_it->second, entry_it->second};
   std::string key_id = BuildName(exit) + std::string("-") + BuildName(entry);
   CreateLane(key_id, width, control_points);
+*/
+  std::vector<DirectedWaypoint> control_points =
+     CreateDirectedWaypointsForConnections(exit_it->second, entry_it->second);
+  std::string key_id = BuildName(exit) + std::string("-") + BuildName(entry);
+  CreateLane(key_id, width, control_points);
+}
+
+std::vector<DirectedWaypoint> Builder::CreateDirectedWaypointsForConnections(
+    const DirectedWaypoint& exit, const DirectedWaypoint& entry) const {
+  // First, we convert the the point and tangents to Bezier base.
+  const std::vector<ignition::math::Vector3d>& bezier_points = SplineToBezier(
+    exit.position(), exit.tangent(), entry.position(), entry.tangent());
+  // We validate that these points will not generate a loop / cusp.
+  const std::vector<ignition::math::Vector3d>& adapted_bezier_points =
+      RemoveLoopsInBezier(bezier_points);
+  // We convert back those Bezier control points to Hermite spline base.
+  const std::vector<ignition::math::Vector3d>& hermite_points = BezierToSpline(
+      adapted_bezier_points[0], adapted_bezier_points[1],
+      adapted_bezier_points[2], adapted_bezier_points[3]);
+  // We create a pair of DirectedWaypoints and send them back.
+  std::vector<DirectedWaypoint> waypoints;
+  waypoints.push_back(DirectedWaypoint(exit.id(), hermite_points[0], true,
+      false, hermite_points[1]));
+  waypoints.push_back(DirectedWaypoint(entry.id(), hermite_points[2], false,
+      true, hermite_points[3]));
+  return waypoints;
 }
 
 void Builder::SetInvertedLanes(std::vector<Connection>* lanes) {
@@ -170,17 +196,30 @@ std::unique_ptr<ignition::math::Spline>
     positions.push_back(waypoint.position());
   }
 
+  if (positions.size() == 2) {
+    // We generate the spline
+    std::unique_ptr<ignition::math::Spline> spline =
+        std::make_unique<ignition::math::Spline>();
+    spline->AutoCalculate(true);
+    spline->AddPoint(positions[0]);
+    spline->AddPoint(positions[1]);
+    return spline;
+  }
+
   std::vector<double> breaks(positions.size(), 0.0);
   std::vector<MatrixX<double>> knots(positions.size(), MatrixX<double>::Zero(3, 1));
-  double t = 0.0;
   for (int i = 0; i < static_cast<int>(positions.size()); i++) {
     knots[i] << positions[i].X(), positions[i].Y(), 0.0;
-    breaks[i] = t;
-    t += 1.0;
+    if (i == 0) {
+      breaks[i] = 0.0;
+    }
+    else {
+      breaks[i] = 0.2 * (positions[i] - positions[i - 1]).Length() + breaks[i - 1];
+    }
   }
 
   PiecewisePolynomial<double> polynomial =
-      PiecewisePolynomial<double>::Pchip(breaks, knots, true);
+      PiecewisePolynomial<double>::Pchip(breaks, knots, false);
   PiecewisePolynomial<double> derivated_polynomial = polynomial.derivative(1);
 
   // We generate the spline
@@ -190,7 +229,7 @@ std::unique_ptr<ignition::math::Spline>
   for (int i = 0; i < static_cast<int>(positions.size()); i++) {
     const Vector3<double> tangent = derivated_polynomial.value(breaks[i]);
     spline->AddPoint(positions[i],
-        ignition::math::Vector3d(tangent.x(), tangent.y(), tangent.z()));
+        ignition::math::Vector3d(tangent.x(), tangent.y(), 0.0));
   }
 
   return spline;
@@ -199,13 +238,13 @@ std::unique_ptr<ignition::math::Spline>
 std::unique_ptr<ignition::math::Spline>
 Builder::CreateSpline(const std::vector<DirectedWaypoint>* waypoints) {
   // DRAKE_DEMAND(waypoints != nullptr);
-  // return CreatePChip(waypoints);
-
+  return CreatePChip(waypoints);
+/*
   // We generate the spline
   std::unique_ptr<ignition::math::Spline> spline =
       std::make_unique<ignition::math::Spline>();
   spline->AutoCalculate(true);
-  spline->Tension(SplineLane::Tension());
+  // spline->Tension(SplineLane::Tension());
   // Add only valid waypoints
   for (const auto& point : *waypoints) {
     if (!point.id().Valid())
@@ -215,6 +254,7 @@ Builder::CreateSpline(const std::vector<DirectedWaypoint>* waypoints) {
   }
   // spline->EnsureNoLoop();
   return spline;
+*/
 }
 
 void Builder::GroupLanesByDirection(

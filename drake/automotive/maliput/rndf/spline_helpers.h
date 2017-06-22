@@ -119,6 +119,19 @@ class ArcLengthParameterizedSpline {
     InverseFunctionInterpolator> t_s_;  ///< Inverse arc length function t(s).
 };
 
+
+std::vector<ignition::math::Vector3d> SplineToBezier(
+    const ignition::math::Vector3d& p0,
+    const ignition::math::Vector3d& t0,
+    const ignition::math::Vector3d& p1,
+    const ignition::math::Vector3d& t1);
+std::vector<ignition::math::Vector3d> BezierToSpline(
+    const ignition::math::Vector3d& p0,
+    const ignition::math::Vector3d& p1,
+    const ignition::math::Vector3d& p2,
+    const ignition::math::Vector3d& p3);
+std::vector<ignition::math::Vector3d> RemoveLoopsInBezier(
+    const std::vector<ignition::math::Vector3d>& cp);
 }  // namespace rndf
 }  // namespace maliput
 }  // namespace drake

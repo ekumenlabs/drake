@@ -231,7 +231,22 @@ PiecewisePolynomial<double> ConstructPChip(const std::vector<V3>& control_points
     t += 1.0;
   }
 
-  return PiecewisePolynomial<double>::Pchip(breaks, knots, true);
+  return PiecewisePolynomial<double>::Pchip(breaks, knots, false);
+}
+
+ignition::math::Spline ConstructSpline(
+    const std::vector<V3>& points, const std::vector<V3>& tangents) {
+  // Create the Spline and then add the points + tangents
+  ignition::math::Spline spline;
+  spline.AutoCalculate(true);
+  for (size_t i = 0; i < points.size(); i++) {
+    //spline.AddPoint(FromV3(points[i]), FromV3(tangents[i]));
+    spline.AddPoint(FromV3(points[i]));
+  }
+  std::cout << spline.Tangent(0) << std::endl;
+  std::cout << spline.Tangent(1) << std::endl;
+  std::cout << spline.Tangent(2) << std::endl;
+  return spline;
 }
 
 void PrintPoint(const V3& p) {
@@ -323,50 +338,70 @@ int main(int, char **) {
   std::vector<V3> control_points;
   /*
   control_points.push_back(V3(0.0, 0.0, 0.0));
-  control_points.push_back(V3(10.0, 10.0, 0.0));
-  control_points.push_back(V3(20.0, 0.0, 0.0));
-  */
-  control_points.push_back(V3(0.0, 0.0, 0.0));
+  control_points.push_back(V3(96.0441, 0.000127, 0));
+  control_points.push_back(V3(103.938, 0.000149, 0));
   control_points.push_back(V3(199.982, 0.000553, 0.));
+  */
+  control_points.push_back(V3(0, 0, 0));
+  control_points.push_back(V3(-5.87187, 3.10612, 0));
+  control_points.push_back(V3(-105.603, 54.9112, 0));
   auto pchip = ConstructPChip(control_points);
-  auto pchip_derivative = pchip.derivative(1);
+  auto dot_pchip = pchip.derivative(1);
 
-  const auto start = pchip.value(0);
-  const auto middle = pchip.value(1);
-  // const auto end = pchip.value(2);
-  const auto start_derivative = pchip_derivative.value(0);
-  const auto middle_derivative = pchip_derivative.value(1);
-  // const auto end_derivative = pchip_derivative.value(2);
+  {
+    std::vector<V3> interpolation;
+    for (double t = 0.0; t <= 2.0; t += (kInterpolationStep * 2.0)) {
+      interpolation.push_back(pchip.value(t));
+    }
+    interpolation.push_back(pchip.value(2.0));
 
-  // Create the Spline and then add the points + tangents
-  ignition::math::Spline spline;
-  spline.AutoCalculate(true);
-  spline.AddPoint(FromV3(start), FromV3(start_derivative));
-  spline.AddPoint(FromV3(middle), FromV3(middle_derivative));
-  // spline.AddPoint(FromV3(end), FromV3(end_derivative));
-
-  // Interpolate both curves
-  double step = kInterpolationStep;
-  std::vector<V3> pchip_points, pchip_derivative_points;
-  std::vector<V3> spline_points, spline_derivative_points;
-  for (double t = 0; t < 1; t+= step) {
-    pchip_points.push_back(pchip.value(t));
-    pchip_derivative_points.push_back(pchip_derivative.value(t));
-  }
-  step = kInterpolationStep;
-  for (double t = 0; t < 1; t+= step) {
-    spline_points.push_back(FromVector3d(spline.InterpolateMthDerivative(0, t)));
-    spline_derivative_points.push_back(FromVector3d(spline.InterpolateMthDerivative(1, t)));
+    std::cout << "---------------------------------------------" << std::endl;
+    PrintVector(std::string("pchip_v:["), std::string("]"), interpolation);
+    std::cout << "---------------------------------------------" << std::endl;
   }
 
-  std::cout << "---------------------------------------------" << std::endl;
-  PrintVector(std::string("pchip_v:["), std::string("]"), pchip_points);
-  PrintVector(std::string("spline_v:["), std::string("]"), spline_points);
-  std::cout << "---------------------------------------------" << std::endl;
-  std::cout << "---------------------------------------------" << std::endl;
-  PrintVector(std::string("pchip_der_v:["), std::string("]"), pchip_derivative_points);
-  PrintVector(std::string("spline_der_v:["), std::string("]"), spline_derivative_points);
-  std::cout << "---------------------------------------------" << std::endl;
+  {
+    std::vector<V3> interpolation;
+    for (double t = 0.0; t <= 2.0; t += (kInterpolationStep * 2.0)) {
+      interpolation.push_back(dot_pchip.value(t));
+    }
+    interpolation.push_back(dot_pchip.value(2.0));
+
+    std::cout << "---------------------------------------------" << std::endl;
+    PrintVector(std::string("dot_pchip_v:["), std::string("]"), interpolation);
+    std::cout << "---------------------------------------------" << std::endl;
+  }
+
+  // const ignition::math::Spline& spline = ConstructSpline(control_points,
+  //     std::vector<V3>{dot_pchip.value(0.0), dot_pchip.value(1.0),
+  //                     dot_pchip.value(2.0), dot_pchip.value(3.0)});
+  const ignition::math::Spline& spline = ConstructSpline(control_points,
+      std::vector<V3>{dot_pchip.value(0.0), dot_pchip.value(1.0),
+                      dot_pchip.value(2.0)});
+
+  {
+    std::vector<V3> interpolation;
+    for (double t = 0.0; t <= 1.0; t += kInterpolationStep) {
+      interpolation.push_back(
+          FromVector3d(spline.InterpolateMthDerivative(0, t)));
+    }
+    interpolation.push_back(FromVector3d(spline.InterpolateMthDerivative(0, 1.0)));
+
+    //std::cout << "---------------------------------------------" << std::endl;
+    //PrintVector(std::string("spline_v:["), std::string("]"), interpolation);
+    //std::cout << "---------------------------------------------" << std::endl;
+  }
+
+  // std::cout << dot_pchip.value(0.0) << std::endl;
+  // std::cout << dot_pchip.value(1.0) << std::endl;
+  // std::cout << dot_pchip.value(2.0) << std::endl;
+  // std::cout << dot_pchip.value(3.0) << std::endl;
+
+  // std::cout << spline.Tangent(0) << std::endl;
+  // std::cout << spline.Tangent(1) << std::endl;
+  // std::cout << spline.Tangent(2) << std::endl;
+  // std::cout << spline.Tangent(3) << std::endl;
+
   return 0;
 }
 

@@ -330,6 +330,9 @@ class Builder {
   void GroupLanesByDirection(const std::vector<Connection>* lanes,
     std::map<int, std::vector<Connection>>* segments) const;
 
+  std::vector<DirectedWaypoint> CreateDirectedWaypointsForConnections(
+      const DirectedWaypoint& exit, const DirectedWaypoint& entry) const;
+
   const double linear_tolerance_ {};
   const double angular_tolerance_ {};
   std::map<std::string, std::vector<std::unique_ptr<Connection>>> connections_;

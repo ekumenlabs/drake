@@ -12,7 +12,7 @@ namespace maliput {
 namespace rndf {
 
 const double SplineLane::kSplineErrorBound = 1e-6;
-const double SplineLane::kTension = 0.3;
+const double SplineLane::kTension = 0.1;
 
 SplineLane::SplineLane(
   const api::LaneId& id, const api::Segment* segment,
@@ -243,7 +243,7 @@ double SplineLane::ComputeLength(
   DRAKE_THROW_UNLESS(points.size() >= 2);
   ignition::math::Spline spline;
   spline.AutoCalculate(true);
-  spline.Tension(kTension);
+  // spline.Tension(kTension);
   for (const auto &point : points) {
     spline.AddPoint(std::get<0>(point), std::get<1>(point));
   }
