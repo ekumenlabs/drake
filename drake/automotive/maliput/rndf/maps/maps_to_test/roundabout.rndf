@@ -1,0 +1,144 @@
+/* Map data from (c) OpenStreetMap contributors. */
+/* This city.rndf is made available under the */
+/* Open Database License: http://opendatacommons.org/licenses/odbl/1.0/. */
+/* Any rights in individual contents of the database are licensed under the */
+/* Database Contents License: http://opendatacommons.org/licenses/dbcl/1.0/ */
+
+RNDF_name	city_1
+num_segments	8
+num_zones	0
+format_version	1.0
+segment	1
+num_lanes	1
+segment_name	OSM_52975745
+lane	1.1
+num_waypoints	8
+lane_width	13
+exit	1.1.3	5.1.5
+exit	1.1.7	4.1.2
+1.1.1	9.999413	64.999850
+1.1.2	9.999446	64.999850
+1.1.3	9.999901	65.000177
+1.1.4	9.999938	65.000204
+1.1.5	9.999975	65.000230
+1.1.6	10.000149	65.000353
+1.1.7	10.000374	65.000497
+1.1.8	10.000412	65.000522
+end_lane
+end_segment
+segment	2
+num_lanes	1
+segment_name	OSM_52975746
+lane	2.1
+num_waypoints	4
+lane_width	13
+exit	2.1.3	7.1.3
+2.1.1	9.999413	64.999781
+2.1.2	9.999572	64.999521
+2.1.3	9.999614	64.999430
+2.1.4	9.999633	64.999388
+end_lane
+end_segment
+segment	3
+num_lanes	1
+segment_name	OSM_30637728
+lane	3.1
+num_waypoints	3
+lane_width	13
+3.1.1	10.000366	64.999855
+3.1.2	10.000402	64.999883
+3.1.3	10.000587	65.000025
+end_lane
+end_segment
+segment	4
+num_lanes	1
+segment_name	OSM_8954019
+lane	4.1
+num_waypoints	3
+lane_width	13
+4.1.1	10.000412	65.000522
+4.1.2	10.000383	65.000557
+4.1.3	10.000286	65.000674
+end_lane
+end_segment
+segment	5
+num_lanes	1
+segment_name	OSM_10330962
+lane	5.1
+num_waypoints	9
+lane_width	13
+exit	5.1.3	1.1.5
+exit	5.1.6	8.1.4
+5.1.1	10.000132	64.999907
+5.1.2	10.000107	64.999945
+5.1.3	9.999963	65.000166
+5.1.4	9.999938	65.000204
+5.1.5	9.999911	65.000240
+5.1.6	9.999699	65.000531
+5.1.7	9.999672	65.000568
+5.1.8	9.999646	65.000605
+5.1.9	9.999597	65.000674
+end_lane
+end_segment
+segment	6
+num_lanes	1
+segment_name	OSM_10330965
+lane	6.1
+num_waypoints	23
+lane_width	13
+exit	6.1.13	5.1.2
+exit	6.1.20	3.1.2
+6.1.1	10.000385	64.999728
+6.1.2	10.000358	64.999686
+6.1.3	10.000318	64.999645
+6.1.4	10.000269	64.999621
+6.1.5	10.000214	64.999616
+6.1.6	10.000164	64.999629
+6.1.7	10.000120	64.999657
+6.1.8	10.000088	64.999697
+6.1.9	10.000072	64.999738
+6.1.10	10.000072	64.999739
+6.1.11	10.000068	64.999791
+6.1.12	10.000079	64.999838
+6.1.13	10.000100	64.999874
+6.1.14	10.000101	64.999876
+6.1.15	10.000132	64.999907
+6.1.16	10.000182	64.999932
+6.1.17	10.000233	64.999938
+6.1.18	10.000282	64.999928
+6.1.19	10.000333	64.999896
+6.1.20	10.000338	64.999891
+6.1.21	10.000366	64.999855
+6.1.22	10.000384	64.999800
+6.1.23	10.000385	64.999728
+end_lane
+end_segment
+segment	7
+num_lanes	1
+segment_name	OSM_4744690
+lane	7.1
+num_waypoints	5
+lane_width	13
+exit	7.1.4	6.1.10
+7.1.1	9.999504	64.999326
+7.1.2	9.999633	64.999388
+7.1.3	9.999670	64.999414
+7.1.4	10.000051	64.999671
+7.1.5	10.000088	64.999697
+end_lane
+end_segment
+segment	8
+num_lanes	1
+segment_name	OSM_26509045
+lane	8.1
+num_waypoints	5
+lane_width	13
+exit	8.1.2	5.1.8
+8.1.1	9.999413	65.000395
+8.1.2	9.999634	65.000542
+8.1.3	9.999672	65.000568
+8.1.4	9.999708	65.000595
+8.1.5	9.999811	65.000674
+end_lane
+end_segment
+end_file

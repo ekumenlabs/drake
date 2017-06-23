@@ -43,16 +43,10 @@ void Builder::CreateConnection(const double width,
   const auto& entry_it = directed_waypoints_.find(entry.String());
   DRAKE_THROW_UNLESS(exit_it != directed_waypoints_.end());
   DRAKE_THROW_UNLESS(entry_it != directed_waypoints_.end());
-/*
-  std::vector<DirectedWaypoint> control_points = {
-    exit_it->second, entry_it->second};
-  std::string key_id = BuildName(exit) + std::string("-") + BuildName(entry);
-  CreateLane(key_id, width, control_points);
-*/
+
   std::vector<DirectedWaypoint> control_points =
      CreateDirectedWaypointsForConnections(exit_it->second, entry_it->second);
   std::string key_id = BuildName(exit) + std::string("-") + BuildName(entry);
-  // std::cout << "connection" << key_id << std::endl;
   CreateLane(key_id, width, control_points);
 }
 
@@ -185,10 +179,8 @@ void Builder::CreateConnectionsForZones(
   }
 }
 
-std::unique_ptr<ignition::math::Spline>
- Builder::CreatePChip(
-  const std::vector<DirectedWaypoint>* waypoints) {
-
+std::unique_ptr<ignition::math::Spline> Builder::CreatePChipBasedSpline(
+    const std::vector<DirectedWaypoint>* waypoints) {
   std::vector<ignition::math::Vector3d> positions;
   for (const DirectedWaypoint& waypoint : *waypoints) {
     if (!(waypoint.id().Valid())) {
@@ -196,7 +188,7 @@ std::unique_ptr<ignition::math::Spline>
     }
     positions.push_back(waypoint.position());
   }
-
+  DRAKE_THROW_UNLESS(positions.size() > 1);
   if (positions.size() == 2) {
     // We generate the spline
     std::unique_ptr<ignition::math::Spline> spline =
@@ -217,6 +209,7 @@ std::unique_ptr<ignition::math::Spline>
       const double length = (positions[i] - positions[i - 1]).Length();
       // TODO(@agalabachicar) We don't support yet duplicate waypoints in the
       // same lane which are continuous and share the same location.
+      // See issue https://bitbucket.org/ekumen/terminus-simulation/issues/171 .
       DRAKE_ASSERT(length > 0.0);
       breaks.push_back(length + breaks.back());
     }
@@ -242,23 +235,7 @@ std::unique_ptr<ignition::math::Spline>
 std::unique_ptr<ignition::math::Spline>
 Builder::CreateSpline(const std::vector<DirectedWaypoint>* waypoints) {
   // DRAKE_DEMAND(waypoints != nullptr);
-  return CreatePChip(waypoints);
-/*
-  // We generate the spline
-  std::unique_ptr<ignition::math::Spline> spline =
-      std::make_unique<ignition::math::Spline>();
-  spline->AutoCalculate(true);
-  // spline->Tension(SplineLane::Tension());
-  // Add only valid waypoints
-  for (const auto& point : *waypoints) {
-    if (!point.id().Valid())
-      continue;
-    spline->AddPoint(ignition::math::Vector3d(point.position().X(),
-      point.position().Y(), 0.));
-  }
-  // spline->EnsureNoLoop();
-  return spline;
-*/
+  return CreatePChipBasedSpline(waypoints);
 }
 
 void Builder::GroupLanesByDirection(

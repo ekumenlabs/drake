@@ -259,7 +259,7 @@ class Builder {
   std::unique_ptr<ignition::math::Spline>
   CreateSpline(const std::vector<DirectedWaypoint>* waypoints);
 
-  std::unique_ptr<ignition::math::Spline> CreatePChip(
+  std::unique_ptr<ignition::math::Spline> CreatePChipBasedSpline(
     const std::vector<DirectedWaypoint>* waypoints);
 
   // Given the waypoints of the lanes and index which is the item

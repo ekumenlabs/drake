@@ -1,0 +1,49 @@
+/* Map data from (c) OpenStreetMap contributors. */
+/* This city.rndf is made available under the */
+/* Open Database License: http://opendatacommons.org/licenses/odbl/1.0/. */
+/* Any rights in individual contents of the database are licensed under the */
+/* Database Contents License: http://opendatacommons.org/licenses/dbcl/1.0/ */
+
+RNDF_name	city_1
+num_segments	3
+num_zones	0
+format_version	1.0
+segment	1
+num_lanes	1
+segment_name	OSM_52975745
+lane	1.1
+num_waypoints	4
+lane_width	13
+1.1.1	10.000013	64.999979
+1.1.2	10.000058	64.999979
+1.1.3	10.000088	64.999979
+1.1.4	10.000145	65.000021
+end_lane
+end_segment
+segment	2
+num_lanes	1
+segment_name	OSM_52975746
+lane	2.1
+num_waypoints	4
+lane_width	13
+exit	2.1.2	3.1.2
+exit	2.1.2	1.1.2
+2.1.1	9.999929	65.000133
+2.1.2	9.999991	65.000019
+2.1.3	10.000013	64.999979
+2.1.4	10.000082	64.999867
+end_lane
+end_segment
+segment	3
+num_lanes	1
+segment_name	OSM_8955575
+lane	3.1
+num_waypoints	4
+lane_width	13
+3.1.1	10.000013	64.999979
+3.1.2	9.999968	64.999988
+3.1.3	9.999944	64.999993
+3.1.4	9.999855	64.999943
+end_lane
+end_segment
+end_file
