@@ -193,14 +193,14 @@ std::vector<ignition::math::Vector3d> SplineToBezier(
     const ignition::math::Vector3d& t1) {
   // This is the Bezier coefficient matrix.
   const ignition::math::Matrix4d bezier_matrix(1.0, 0.0, 0.0, 0.0,
-                                         -3.0, 3.0, 0.0, 0.0,
-                                         3.0, -6.0, 3.0, 0.0,
-                                         -1.0, 3.0, -3.0, 1.0);
+                                               -3.0, 3.0, 0.0, 0.0,
+                                               3.0, -6.0, 3.0, 0.0,
+                                               -1.0, 3.0, -3.0, 1.0);
   // This is the Hermite coefficient matrix.
   const ignition::math::Matrix4d hermite_matrix(1.0, 0.0, 0.0, 0.0,
-                                          0.0, 1.0, 0.0, 0.0,
-                                          -3.0, -2.0, 3.0, -1.0,
-                                          2.0, 1.0, -2.0, 1.0);
+                                                0.0, 1.0, 0.0, 0.0,
+                                                -3.0, -2.0, 3.0, -1.0,
+                                                2.0, 1.0, -2.0, 1.0);
   // These are the control points arranged by coordinate.
   const ignition::math::Matrix4d hermite_points(p0.X(), p0.Y(), p0.Z(), 0.0,
                                                 t0.X(), t0.Y(), t0.Z(), 0.0,
@@ -236,18 +236,27 @@ std::vector<ignition::math::Vector3d> BezierToSpline(
     const ignition::math::Vector3d& p3) {
   // This is the Bezier coefficient matrix.
   const ignition::math::Matrix4d bezier_matrix(1.0, 0.0, 0.0, 0.0,
-                                         -3.0, 3.0, 0.0, 0.0,
-                                         3.0, -6.0, 3.0, 0.0,
-                                         -1.0, 3.0, -3.0, 1.0);
+                                               -3.0, 3.0, 0.0, 0.0,
+                                               3.0, -6.0, 3.0, 0.0,
+                                               -1.0, 3.0, -3.0, 1.0);
   // This is the Hermite coefficient matrix.
   const ignition::math::Matrix4d hermite_matrix(1.0, 0.0, 0.0, 0.0,
-                                          0.0, 1.0, 0.0, 0.0,
-                                          -3.0, -2.0, 3.0, -1.0,
-                                          2.0, 1.0, -2.0, 1.0);
+                                                0.0, 1.0, 0.0, 0.0,
+                                                -3.0, -2.0, 3.0, -1.0,
+                                                2.0, 1.0, -2.0, 1.0);
+  // These are the control points arranged by coordinate.
   const ignition::math::Matrix4d bezier_points(p0.X(), p0.Y(), p0.Z(), 0.0,
                                                p1.X(), p1.Y(), p1.Z(), 0.0,
                                                p2.X(), p2.Y(), p2.Z(), 0.0,
                                                p3.X(), p3.Y(), p3.Z(), 0.0);
+  // Given a function F_B(t): ℝ --> ℝ^3 that represents a cubic Bezier curve,
+  // and F_H(t) : ℝ --> ℝ^3 that represents a cubic Hermite Spline curve, we can
+  // define them like:
+  // F_B(t) = [1 t t^2 t^3] * [bezier_matrix] * [bezier_points]
+  // F_H(t) = [1 t t^2 t^3] * [hermite_matrix] * [hermite_points]
+  // If both functions have the same image: F_B(t) = F_H(t), we can say:
+  // [bezier_points] = [bezier_matrix]^(-1) * [hermite_matrix] * [hermite_points]
+  // [hermite_points] = [hermite_matrix]^(-1) * [bezier_matrix] * [bezier_points]
   ignition::math::Matrix4d hermite_points =
       hermite_matrix.Inverse() * bezier_matrix * bezier_points;
   std::vector<ignition::math::Vector3d> result;
@@ -264,52 +273,75 @@ std::vector<ignition::math::Vector3d> BezierToSpline(
 
 
 std::vector<ignition::math::Vector3d> RemoveLoopsInBezier(
-    const std::vector<ignition::math::Vector3d>& cp) {
+    const std::vector<ignition::math::Vector3d>& cp,
+    double tension = 1.0) {
+  const double kAlmostZero = 1e-3;
   const ignition::math::Vector3d& p0 = cp[0];
   const ignition::math::Vector3d& p1 = cp[1];
   const ignition::math::Vector3d& p2 = cp[2];
   const ignition::math::Vector3d& p3 = cp[3];
 
+  // Tangents unit vectors.
   const ignition::math::Vector3d norm_t0 = (p1 - p0).Normalize();
   const ignition::math::Vector3d norm_t3 = (p3 - p2).Normalize();
+  // A vector that joins both extents.
   const ignition::math::Vector3d r = p3 - p0;
-
-  const double original_k1 = (p1 - p0).Length();
-  const double original_k3 = (p3 - p2).Length();
-
+  // Cross products to determine if the lines will intersect or not.
   const ignition::math::Vector3d norm_t3_x_r = norm_t3.Cross(r);
   const ignition::math::Vector3d norm_t3_x_norm_t0 = norm_t3.Cross(norm_t0);
 
-  // Check if we have intersection between t0 and t3
-  if (norm_t3_x_r.Length() == 0 || norm_t3_x_norm_t0.Length() == 0) {
-    // Here we won't have intersection
-    return cp;
+  std::vector<ignition::math::Vector3d> result;
+  if (norm_t3_x_r.Length() < kAlmostZero ||
+      norm_t3_x_norm_t0.Length() < kAlmostZero) {
+    // Here we won't have intersection as the lines are not coplanar or are
+    // parallel. As we currently do not use any other z coordinate different
+    // from 0.0, we assume they are coplanar and parallel. From this assumption
+    // we build the control points for the Spline that match the transition.
+    result.push_back(p0);
+    double r_dot_norm_t0 = norm_t0.Dot(r);
+    result.push_back(p0 + (0.5 * r_dot_norm_t0) * norm_t0);
+    result.push_back(p3 + (-0.5 * r_dot_norm_t0) * norm_t3);
+    result.push_back(p3);
+    return result;
   }
-
+  // The vector to move from p0 towards the control point.
   const ignition::math::Vector3d l =
     (norm_t3_x_r.Length() / norm_t3_x_norm_t0.Length()) * norm_t0;
-
+  // Check how we need to add l.
   double projection = norm_t3_x_r.Dot(norm_t3_x_norm_t0);
   ignition::math::Vector3d critical_point;
-  if (projection >= 0.) {
+  if (projection >= kAlmostZero) {
     critical_point = p0 + l;
   } else {
     critical_point = p0 - l;
   }
 
-  const double critical_k1 = (critical_point - p0).Length();
-  const double critical_k2 = (critical_point - p3).Length();
+  // We compute if the resulting Bezier curve will preserve convexity.
+  const ignition::math::Vector3d diff_to_p0 = (critical_point - p0);
+  const ignition::math::Vector3d diff_to_p3 = (p3 - critical_point);
 
-  std::vector<ignition::math::Vector3d> result;
-  if (std::abs(critical_k1) < std::abs(original_k1) ||
-    std::abs(critical_k2) < std::abs(original_k3)) {
+  if (diff_to_p3.Normalized().Dot(norm_t3) < kAlmostZero) {
     result.push_back(p0);
-    result.push_back(critical_point);
-    result.push_back(critical_point);
+    result.push_back(p0 + 0.1 * (critical_point - p0));
+    result.push_back(p3 + (-0.1) * (critical_point - p3));
     result.push_back(p3);
-  } else {
-    result.insert(result.end(), cp.begin(), cp.end());
   }
+  else if (diff_to_p0.Normalized().Dot(norm_t0) < kAlmostZero) {
+    result.push_back(p0);
+    result.push_back(p0 + (-0.1) * (critical_point - p0));
+    result.push_back(p3 + 0.1 * (critical_point - p3));
+    result.push_back(p3);
+
+  }
+  else {
+    result.push_back(p0);
+    result.push_back(p0 + tension * (critical_point - p0));
+    result.push_back(p3 + tension * (critical_point - p3));
+    result.push_back(p3);
+
+  }
+
+
   return result;
 }
 

@@ -104,7 +104,7 @@ class MatrixCubicBezier {
   const ignition::math::Vector3d p2_;
   const ignition::math::Vector3d p3_;
 };
-
+/*
 class MatrixHermiteSpline {
  public:
 
@@ -142,6 +142,7 @@ class MatrixHermiteSpline {
   const ignition::math::Vector3d p2_;
   const ignition::math::Vector3d p3_;
 };
+*/
 /*
 class MatrixBSpline {
  public:
@@ -181,7 +182,7 @@ class MatrixBSpline {
   const ignition::math::Vector3d p3_;
 };
 */
-
+/*
 std::vector<ignition::math::Vector3d> SplineToBezier(
     const std::vector<ignition::math::Vector3d>& cp) {
     ignition::math::Matrix4d bmatrix(1.0, 0.0, 0.0, 0.0,
@@ -204,8 +205,8 @@ std::vector<ignition::math::Vector3d> SplineToBezier(
     result.push_back(ignition::math::Vector3d(rm(3,0), rm(3,1), rm(3,2)));
     return result;
 }
-
-
+*/
+/*
 std::vector<ignition::math::Vector3d> BezierToSpline(
     const std::vector<ignition::math::Vector3d>& cp) {
     ignition::math::Matrix4d bmatrix(1.0, 0.0, 0.0, 0.0,
@@ -228,8 +229,8 @@ std::vector<ignition::math::Vector3d> BezierToSpline(
     result.push_back(ignition::math::Vector3d(rm(3,0), rm(3,1), rm(3,2)));
     return result;
 }
-
-
+*/
+/*
 std::vector<ignition::math::Vector3d> RemoveLoopsInBezier(
     const std::vector<ignition::math::Vector3d>& cp) {
   const ignition::math::Vector3d& p0 = cp[0];
@@ -279,15 +280,21 @@ std::vector<ignition::math::Vector3d> RemoveLoopsInBezier(
   }
   return result;
 }
-
+*/
 int main(int argc, char* argv[]) {
+  /*
   ignition::math::Vector3d p0(0.0, 0.0, 0.0);
   ignition::math::Vector3d p1(0.0, 10.0, 0.0);
   ignition::math::Vector3d p2(0.0, 10.0, 0.0);
   ignition::math::Vector3d p3(10.0, 10.0, 0.0);
   ignition::math::Vector3d t0(0.0, 50.0, 0.0);
   ignition::math::Vector3d t3(50.0, 0.0, 0.0);
-
+  */
+  ignition::math::Vector3d p0(28.8984, 40.9639, 0);
+  ignition::math::Vector3d p1(29.1009, 28.3639, 0);
+  ignition::math::Vector3d p2(29.0969, 36.9484, 0);
+  ignition::math::Vector3d p3(28.9852, 36.6344, 0);
+  /*
   // We generate a SplineLane and then print all the values from it.
   {
     MatrixHermiteSpline curve(p0, t0, p3, t3);
@@ -303,9 +310,11 @@ int main(int argc, char* argv[]) {
 
   std::vector<ignition::math::Vector3d> points =
     SplineToBezier(std::vector<ignition::math::Vector3d>{p0, t0, p3, t3});
+    */
   // Now we generate the same curve but as Bezier
   {
-    MatrixCubicBezier curve(points[0], points[1], points[2], points[3]);
+    // MatrixCubicBezier curve(points[0], points[1], points[2], points[3]);
+    MatrixCubicBezier curve(p0, p1, p2, p3);
 
     // Interpolation
     for (double t = 0.0;  t <= 1.0; t += 0.01) {
@@ -315,7 +324,7 @@ int main(int argc, char* argv[]) {
 
     std::cout << "-----------" << std::endl;
   }
-
+  /*
   points = RemoveLoopsInBezier(points);
   // Now we generate a Bezier curve but without loops or change in curvature.
   {
@@ -343,6 +352,7 @@ int main(int argc, char* argv[]) {
 
     std::cout << "-----------" << std::endl;
   }
+  */
 
   return 0;
 }

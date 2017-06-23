@@ -131,7 +131,8 @@ std::vector<ignition::math::Vector3d> BezierToSpline(
     const ignition::math::Vector3d& p2,
     const ignition::math::Vector3d& p3);
 std::vector<ignition::math::Vector3d> RemoveLoopsInBezier(
-    const std::vector<ignition::math::Vector3d>& cp);
+    const std::vector<ignition::math::Vector3d>& cp,
+    double tension);
 }  // namespace rndf
 }  // namespace maliput
 }  // namespace drake

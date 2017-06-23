@@ -15,7 +15,7 @@ namespace drake {
 namespace maliput {
 namespace rndf {
 
-const double Builder::kWaypointDistancePhase = 0.5;
+const double Builder::kWaypointDistancePhase = 2.0;
 
 const double Builder::kLinearStep = 1e-2;
 
@@ -52,6 +52,7 @@ void Builder::CreateConnection(const double width,
   std::vector<DirectedWaypoint> control_points =
      CreateDirectedWaypointsForConnections(exit_it->second, entry_it->second);
   std::string key_id = BuildName(exit) + std::string("-") + BuildName(entry);
+  // std::cout << "connection" << key_id << std::endl;
   CreateLane(key_id, width, control_points);
 }
 
@@ -62,7 +63,7 @@ std::vector<DirectedWaypoint> Builder::CreateDirectedWaypointsForConnections(
     exit.position(), exit.tangent(), entry.position(), entry.tangent());
   // We validate that these points will not generate a loop / cusp.
   const std::vector<ignition::math::Vector3d>& adapted_bezier_points =
-      RemoveLoopsInBezier(bezier_points);
+      RemoveLoopsInBezier(bezier_points, 1.0);
   // We convert back those Bezier control points to Hermite spline base.
   const std::vector<ignition::math::Vector3d>& hermite_points = BezierToSpline(
       adapted_bezier_points[0], adapted_bezier_points[1],
@@ -205,16 +206,19 @@ std::unique_ptr<ignition::math::Spline>
     spline->AddPoint(positions[1]);
     return spline;
   }
-
-  std::vector<double> breaks(positions.size(), 0.0);
+  std::vector<double> breaks;
   std::vector<MatrixX<double>> knots(positions.size(), MatrixX<double>::Zero(3, 1));
   for (int i = 0; i < static_cast<int>(positions.size()); i++) {
     knots[i] << positions[i].X(), positions[i].Y(), 0.0;
     if (i == 0) {
-      breaks[i] = 0.0;
+      breaks.push_back(0.0);
     }
     else {
-      breaks[i] = 0.2 * (positions[i] - positions[i - 1]).Length() + breaks[i - 1];
+      const double length = (positions[i] - positions[i - 1]).Length();
+      // TODO(@agalabachicar) We don't support yet duplicate waypoints in the
+      // same lane which are continuous and share the same location.
+      DRAKE_ASSERT(length > 0.0);
+      breaks.push_back(length + breaks.back());
     }
   }
 
