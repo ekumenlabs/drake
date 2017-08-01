@@ -25,22 +25,23 @@ drake_cc_library(
 drake_cc_library(
     name = "lanes",
     srcs = [
-        "arc_lane.cc",
+        "arc_segment_geometry.cc",
         "branch_point.cc",
         "junction.cc",
         "lane.cc",
-        "line_lane.cc",
+        "line_segment_geometry.cc",
         "road_geometry.cc",
         "segment.cc",
     ],
     hdrs = [
-        "arc_lane.h",
+        "arc_segment_geometry.h",
         "branch_point.h",
         "junction.h",
         "lane.h",
-        "line_lane.h",
+        "line_segment_geometry.h",
         "road_geometry.h",
         "segment.h",
+        "segment_geometry.h",
     ],
     deps = [
         "//drake/automotive/maliput/api",
@@ -86,6 +87,15 @@ filegroup(
 # === test/ ===
 
 drake_cc_googletest(
+    name = "multilane_arc_geometry_test",
+    srcs = ["test/multilane_arc_geometry_test.cc"],
+    deps = [
+        ":lanes",
+        "//drake/common:eigen_matrix_compare",
+    ],
+)
+
+drake_cc_googletest(
     name = "multilane_builder_test",
     size = "small",
     srcs = ["test/multilane_builder_test.cc"],
@@ -101,6 +111,15 @@ drake_cc_googletest(
     deps = [
         ":lanes",
         "//drake/automotive/maliput/api:maliput_types_compare",
+        "//drake/common:eigen_matrix_compare",
+    ],
+)
+
+drake_cc_googletest(
+    name = "multilane_line_geometry",
+    srcs = ["test/multilane_line_geometry.cc"],
+    deps = [
+        ":lanes",
         "//drake/common:eigen_matrix_compare",
     ],
 )

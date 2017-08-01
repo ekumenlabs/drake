@@ -7,6 +7,7 @@
 #include "drake/automotive/maliput/api/road_geometry.h"
 #include "drake/automotive/maliput/api/segment.h"
 #include "drake/automotive/maliput/multilane/segment.h"
+#include "drake/automotive/maliput/multilane/segment_geometry.h"
 #include "drake/common/drake_copyable.h"
 
 namespace drake {
@@ -27,7 +28,8 @@ class Junction : public api::Junction {
       : id_(id), road_geometry_(road_geometry) {}
 
   /// Creates and adds a new Segment with the specified @p id.
-  Segment* NewSegment(api::SegmentId id);
+  Segment* NewSegment(api::SegmentId id,
+                      std::unique_ptr<SegmentGeometry> geometry);
 
   ~Junction() override = default;
 
