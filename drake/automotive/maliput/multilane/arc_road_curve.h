@@ -1,28 +1,26 @@
 #pragma once
 
 #include <cmath>
-#include <utility>
 
-#include "drake/automotive/maliput/multilane/segment_geometry.h"
+#include "drake/automotive/maliput/multilane/road_curve.h"
 #include "drake/common/drake_copyable.h"
 #include "drake/common/drake_throw.h"
 #include "drake/common/eigen_types.h"
-#include "drake/common/unused.h"
 
 namespace drake {
 namespace maliput {
 namespace multilane {
 
-/// SegmentGeometry specification for a reference curve that describes a piece
+/// RoadCurve specification for a reference curve that describes a piece
 /// of an arc.
-class ArcGeometry : public SegmentGeometry {
+class ArcRoadCurve : public RoadCurve {
  public:
-  DRAKE_NO_COPY_NO_MOVE_NO_ASSIGN(ArcGeometry)
+  DRAKE_NO_COPY_NO_MOVE_NO_ASSIGN(ArcRoadCurve)
 
   /// Constructor. The reference curve is created from the circle @p center, the
   /// @p radius, initial angular position @p theta0 and the angle span
   /// @p d_theta. @p elevation and @p superelevation polynomials will be used to
-  /// feed SegmentGeoemetry parent class.
+  /// feed RoadGeometry parent class.
   /// @param center A 2D vector that describes the position of the arc's center
   /// of rotation in world coordinates (over the z=0 plane).
   /// @param radius Arc's radius length. It must be positive
@@ -37,11 +35,11 @@ class ArcGeometry : public SegmentGeometry {
   /// superelevation polynomial. Note that coefficients should be scaled to
   /// match the path length integral of the reference curve.
   /// @throws std::runtime_error When @p radius is not positive.
-  explicit ArcGeometry(const Vector2<double>& center, double radius,
-                       double theta0, double d_theta,
-                       const CubicPolynomial& elevation,
-                       const CubicPolynomial& superelevation)
-      : SegmentGeometry(elevation, superelevation),
+  explicit ArcRoadCurve(const Vector2<double>& center, double radius,
+                        double theta0, double d_theta,
+                        const CubicPolynomial& elevation,
+                        const CubicPolynomial& superelevation)
+      : RoadCurve(elevation, superelevation),
         center_(center),
         radius_(radius),
         theta0_(theta0),
@@ -49,7 +47,7 @@ class ArcGeometry : public SegmentGeometry {
     DRAKE_THROW_UNLESS(radius > 0.0);
   }
 
-  ~ArcGeometry() override = default;
+  ~ArcRoadCurve() override = default;
 
   /// Computes the position interpolation as a function of @p p.
   /// The result will be computed with the following function:
@@ -121,45 +119,31 @@ class ArcGeometry : public SegmentGeometry {
   /// reference curve, elevation and superelevation polynomials combination.
   /// @param geo_coordinate A 3D vector in the world frame to be converted to
   /// the composed curve frame.
-  /// @param lateral_bounds A pair that represents the lateral bounds of
-  /// the surface mapping. The first item in the pair is the minimum value and
-  /// the second is the maximum value in the lateral direction over the
-  /// composed curve.
-  /// @param height_bounds A pair that represents the height bounds of
-  /// the surface mapping. The first item in the pair is the minimum value and
-  /// the second is the maximum value in the vertical direction over the
-  /// composed curve.
+  /// @param lateral_bounds An api::RBounds object that represents the lateral
+  /// bounds of the surface mapping.
+  /// @param height_bounds An api::HBounds object that represents the elevation
+  /// bounds of the surface mapping.
+  /// @return True.
   /// @return A 3D vector that represents the coordinates with respect to the
   /// composed curve. The first dimension represents the path length coordinate,
   /// the second dimension is the lateral deviation from the composed curve and
   /// the third one is the vertical deviation from the composed curve too. The
   /// frame where this vector is defined is the same as api::LanePosition.
-  /// @throws std::runtime_error When @p lateral_bounds first value is bigger
-  /// than the second one.
-  /// @throws std::runtime_error When @p height_bounds first value is bigger
-  /// than the second one.
   Vector3<double> ToCurveFrame(
       const Vector3<double>& geo_coordinate,
-      const std::pair<double, double>& lateral_bounds,
-      const std::pair<double, double>& height_bounds) const override;
+      const api::RBounds& lateral_bounds,
+      const api::HBounds& height_bounds) const override;
 
   /// Evaluates extrema in superelevation polynomial to verify that for the
   /// given @p lateral_bounds the surface do not fold over itself.
-  /// @param lateral_bounds A pair that represents the lateral bounds of
-  /// the surface mapping. The first item in the pair is the minimum value and
-  /// the second is the maximum value in the lateral direction over the
-  /// composed curve.
-  /// @param height_bounds A pair that represents the height bounds of
-  /// the surface mapping. The first item in the pair is the minimum value and
-  /// the second is the maximum value in the vertical direction over the
-  /// composed curve.
-  /// @throws std::runtime_error When @p lateral_bounds first value is bigger
-  /// than the second one.
-  /// @throws std::runtime_error When @p height_bounds first value is bigger
-  /// than the second one.
+  /// @param lateral_bounds An api::RBounds object that represents the lateral
+  /// bounds of the surface mapping.
+  /// @param height_bounds An api::HBounds object that represents the elevation
+  /// bounds of the surface mapping.
+  /// @return True.
   bool IsValid(
-      const std::pair<double, double>& lateral_bounds,
-      const std::pair<double, double>& height_bounds) const override;
+      const api::RBounds& lateral_bounds,
+      const api::HBounds& height_bounds) const override;
 
  private:
   // Computes the absolute position along reference arc as an angle in

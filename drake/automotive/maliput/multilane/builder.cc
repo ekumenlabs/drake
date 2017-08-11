@@ -3,11 +3,11 @@
 #include <cmath>
 #include <utility>
 
-#include "drake/automotive/maliput/multilane/arc_segment_geometry.h"
+#include "drake/automotive/maliput/multilane/arc_road_curve.h"
 #include "drake/automotive/maliput/multilane/branch_point.h"
-#include "drake/automotive/maliput/multilane/line_segment_geometry.h"
+#include "drake/automotive/maliput/multilane/cubic_polynomial.h"
+#include "drake/automotive/maliput/multilane/line_road_curve.h"
 #include "drake/automotive/maliput/multilane/road_geometry.h"
-#include "drake/automotive/maliput/multilane/segment_geometry.h"
 #include "drake/common/drake_assert.h"
 #include "drake/common/text_logging.h"
 
@@ -188,7 +188,7 @@ Lane* Builder::BuildConnection(
     Junction* const junction,
     RoadGeometry* const road_geometry,
     std::map<Endpoint, BranchPoint*, EndpointFuzzyOrder>* const bp_map) const {
-  std::unique_ptr<SegmentGeometry> segment_geometry;
+  std::unique_ptr<RoadCurve> road_curve;
   switch (conn->type()) {
     case Connection::kLine: {
       const Vector2<double> xy0(conn->start().xy().x(),
@@ -207,7 +207,7 @@ Lane* Builder::BuildConnection(
           conn->end().z().theta() - conn->start().z().theta(),
           conn->start().z().theta_dot(),
           conn->end().z().theta_dot()));
-      segment_geometry = std::make_unique<LineGeometry>(xy0, dxy, elevation,
+      road_curve = std::make_unique<LineRoadCurve>(xy0, dxy, elevation,
           superelevation);
       break;
     }
@@ -230,7 +230,7 @@ Lane* Builder::BuildConnection(
           conn->end().z().theta() - conn->start().z().theta(),
           conn->start().z().theta_dot(),
           conn->end().z().theta_dot()));
-      segment_geometry = std::make_unique<ArcGeometry>(center, radius, theta0,
+      road_curve = std::make_unique<ArcRoadCurve>(center, radius, theta0,
           d_theta, elevation, superelevation);
       break;
     }
@@ -240,7 +240,7 @@ Lane* Builder::BuildConnection(
   }
   api::LaneId lane_id{std::string("l:") + conn->id()};
   Segment* segment = junction->NewSegment({std::string("s:") + conn->id()},
-                                          std::move(segment_geometry));
+                                          std::move(road_curve));
   Lane* lane = segment->NewLane(lane_id, lane_bounds_, driveable_bounds_,
                                 elevation_bounds_);
   AttachBranchPoint(

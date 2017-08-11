@@ -7,7 +7,7 @@
 #include "drake/automotive/maliput/api/lane.h"
 #include "drake/automotive/maliput/api/segment.h"
 #include "drake/automotive/maliput/multilane/lane.h"
-#include "drake/automotive/maliput/multilane/segment_geometry.h"
+#include "drake/automotive/maliput/multilane/road_curve.h"
 #include "drake/common/drake_copyable.h"
 #include "drake/common/drake_throw.h"
 
@@ -47,7 +47,7 @@ class Segment : public api::Segment {
 
   Segment(const api::SegmentId& id,
           api::Junction* junction,
-          std::unique_ptr<SegmentGeometry> geometry)
+          std::unique_ptr<RoadCurve> geometry)
       : id_(id), junction_(junction), geometry_(std::move(geometry)) {
     DRAKE_THROW_UNLESS(geometry_.get() != nullptr);
   }
@@ -59,7 +59,7 @@ class Segment : public api::Segment {
                 const api::RBounds& driveable_bounds,
                 const api::HBounds& elevation_bounds);
 
-  const SegmentGeometry& get_reference_geometry() const {
+  const RoadCurve& get_reference_geometry() const {
     return *geometry_;
   }
 
@@ -155,7 +155,7 @@ class Segment : public api::Segment {
   api::SegmentId id_;
   api::Junction* junction_{};
   std::unique_ptr<Lane> lane_;
-  std::unique_ptr<SegmentGeometry> geometry_;
+  std::unique_ptr<RoadCurve> geometry_;
 };
 
 }  // namespace multilane

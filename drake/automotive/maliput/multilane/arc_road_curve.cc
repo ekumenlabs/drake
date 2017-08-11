@@ -1,9 +1,9 @@
-#include "drake/automotive/maliput/multilane/arc_segment_geometry.h"
+#include "drake/automotive/maliput/multilane/arc_road_curve.h"
 
 #include <algorithm>
-#include <iostream>
 #include <limits>
 
+#include "drake/common/unused.h"
 #include "drake/math/saturate.h"
 
 namespace drake {
@@ -62,12 +62,10 @@ double saturate_on_wrapped_bounds(double theta, double theta_min,
 
 }  // namespace
 
-Vector3<double> ArcGeometry::ToCurveFrame(
+Vector3<double> ArcRoadCurve::ToCurveFrame(
     const Vector3<double>& geo_coordinate,
-    const std::pair<double, double>& lateral_bounds,
-    const std::pair<double, double>& height_bounds) const {
-  DRAKE_THROW_UNLESS(lateral_bounds.first < lateral_bounds.second);
-  DRAKE_THROW_UNLESS(height_bounds.first < height_bounds.second);
+    const api::RBounds& lateral_bounds,
+    const api::HBounds& height_bounds) const {
   // TODO(jadecastro): Lift the zero superelevation and zero elevation gradient
   // restriction.
   const Vector2<double> p(geo_coordinate.x(), geo_coordinate.y());
@@ -97,24 +95,23 @@ Vector3<double> ArcGeometry::ToCurveFrame(
   const double r_unsaturated = (d_theta_ >= 0.) ?
                                radius_ - v.norm() : v.norm() - radius_;
   // Saturate r within drivable bounds.
-  const double r = math::saturate(r_unsaturated, lateral_bounds.first,
-                                  lateral_bounds.second);
+  const double r = math::saturate(r_unsaturated, lateral_bounds.min(),
+                                  lateral_bounds.max());
 
   // Calculate the (uniform) road elevation.
   const double p_scale = length();
   // N.B. h is the geo z-coordinate referenced against the lane elevation (whose
   // `a` coefficient is normalized by lane length).
   const double h_unsaturated = geo_coordinate.z() - elevation().a() * p_scale;
-  const double h = math::saturate(h_unsaturated, height_bounds.first,
-                                  height_bounds.second);
+  const double h = math::saturate(h_unsaturated, height_bounds.min(),
+                                  height_bounds.max());
   return Vector3<double>(s, r, h);
 }
 
-bool ArcGeometry::IsValid(
-    const std::pair<double, double>& lateral_bounds,
-    const std::pair<double, double>& height_bounds) const {
-  DRAKE_THROW_UNLESS(lateral_bounds.first < lateral_bounds.second);
-  DRAKE_THROW_UNLESS(height_bounds.first < height_bounds.second);
+bool ArcRoadCurve::IsValid(
+    const api::RBounds& lateral_bounds,
+    const api::HBounds& height_bounds) const {
+  unused(height_bounds);
   // Whether or not user code pays attention to driveable_bounds, at least
   // ensure that bounds are sane.  Given the singularity at the center of
   // the arc, it is not well-defined to consider parallel curves offset
@@ -174,11 +171,10 @@ bool ArcGeometry::IsValid(
                    : std::min(std::abs(theta_min), std::abs(theta_max)));
   // TODO(maddog@tri.global)  When you have nothing better to do, handle the
   //                          improbable case of superelevation >= 90 deg, too.
-  std::cerr << (lateral_bounds.second * max_cos_theta) << std::endl;
   if (d_theta_ > 0.) {
-    return ((lateral_bounds.second * max_cos_theta) < radius_);
+    return ((lateral_bounds.max() * max_cos_theta) < radius_);
   } else {
-    return ((lateral_bounds.first * max_cos_theta) > -radius_);
+    return ((lateral_bounds.min() * max_cos_theta) > -radius_);
   }
   return true;
 }

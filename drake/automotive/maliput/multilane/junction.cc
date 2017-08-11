@@ -12,7 +12,7 @@ const api::RoadGeometry* Junction::do_road_geometry() const {
 
 
 Segment* Junction::NewSegment(api::SegmentId id,
-                              std::unique_ptr<SegmentGeometry> geometry) {
+                              std::unique_ptr<RoadCurve> geometry) {
   segments_.push_back(std::make_unique<Segment>(id, this, std::move(geometry)));
   return segments_.back().get();
 }

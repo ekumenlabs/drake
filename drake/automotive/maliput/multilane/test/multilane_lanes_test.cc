@@ -9,12 +9,12 @@
 #include <gtest/gtest.h>
 
 #include "drake/automotive/maliput/api/test/maliput_types_compare.h"
-#include "drake/automotive/maliput/multilane/arc_segment_geometry.h"
+#include "drake/automotive/maliput/multilane/arc_road_curve.h"
 #include "drake/automotive/maliput/multilane/junction.h"
-#include "drake/automotive/maliput/multilane/line_segment_geometry.h"
+#include "drake/automotive/maliput/multilane/line_road_curve.h"
+#include "drake/automotive/maliput/multilane/road_curve.h"
 #include "drake/automotive/maliput/multilane/road_geometry.h"
 #include "drake/automotive/maliput/multilane/segment.h"
-#include "drake/automotive/maliput/multilane/segment_geometry.h"
 #include "drake/common/eigen_matrix_compare.h"
 
 namespace drake {
@@ -43,13 +43,13 @@ GTEST_TEST(MultilaneLanesTest, FlatLineLane) {
   const double kHalfWidth = 10.;
   const double kMaxHeight = 5.;
   RoadGeometry rg({"apple"}, kLinearTolerance, kAngularTolerance);
-  std::unique_ptr<SegmentGeometry> segment_geometry_1 =
-      std::make_unique<LineGeometry>(Vector2<double>(100., -75.),
+  std::unique_ptr<RoadCurve> road_curve_1 =
+      std::make_unique<LineRoadCurve>(Vector2<double>(100., -75.),
                                      Vector2<double>(100., 50.),
                                      zp,
                                      zp);
   Segment* s1 = rg.NewJunction({"j1"})->NewSegment({"s1"},
-      std::move(segment_geometry_1));
+      std::move(road_curve_1));
   Lane* l1 = s1->NewLane({"l1"},
       // lane/driveable/elevation bounds
       {-5., 5.}, {-kHalfWidth, kHalfWidth}, {0., kMaxHeight});
@@ -127,13 +127,13 @@ GTEST_TEST(MultilaneLanesTest, FlatLineLane) {
   // Case 3: Tests LineLane::ToLanePosition() at a non-zero but flat elevation.
   const double elevation = 10.;
   const double length = std::sqrt(std::pow(100, 2.) + std::pow(50, 2.));
-  std::unique_ptr<SegmentGeometry> segment_geometry_2 =
-      std::make_unique<LineGeometry>(Vector2<double>(100., -75.),
+  std::unique_ptr<RoadCurve> road_curve_2 =
+      std::make_unique<LineRoadCurve>(Vector2<double>(100., -75.),
           Vector2<double>(100., 50.),
           CubicPolynomial(elevation / length, 0.0, 0.0, 0.0),
           zp);
   Segment* s2 = rg.NewJunction({"j2"})->NewSegment({"s2"},
-      std::move(segment_geometry_2));
+      std::move(road_curve_2));
   Lane* l1_with_z = s2->NewLane(
       {"l1_with_z"},
       {-5., 5.}, {-kHalfWidth, kHalfWidth}, {0., kMaxHeight});
@@ -211,10 +211,10 @@ GTEST_TEST(MultilaneLanesTest, FlatArcLane) {
   const Vector2<double> center{100., -75.};
   const double kHalfWidth = 10.;
   const double kMaxHeight = 5.;
-  std::unique_ptr<SegmentGeometry> segment_geometry_1 =
-      std::make_unique<ArcGeometry>(center, radius, theta0, d_theta, zp, zp);
+  std::unique_ptr<RoadCurve> road_curve_1 =
+      std::make_unique<ArcRoadCurve>(center, radius, theta0, d_theta, zp, zp);
   Segment* s1 = rg.NewJunction({"j1"})->NewSegment({"s1"},
-      std::move(segment_geometry_1));
+      std::move(road_curve_1));
   Lane* l2 = s1->NewLane(
       {"l2"},
       // lane/driveable/elevation bounds
@@ -311,12 +311,12 @@ GTEST_TEST(MultilaneLanesTest, FlatArcLane) {
 
   // Case 3: Tests ArcLane::ToLanePosition() at a non-zero but flat elevation.
   const double elevation = 10.;
-  std::unique_ptr<SegmentGeometry> segment_geometry_2 =
-      std::make_unique<ArcGeometry>(center, radius, theta0, d_theta,
+  std::unique_ptr<RoadCurve> road_curve_2 =
+      std::make_unique<ArcRoadCurve>(center, radius, theta0, d_theta,
           CubicPolynomial(elevation / radius / d_theta, 0.0, 0.0, 0.0),
           zp);
   Segment* s2 = rg.NewJunction({"j2"})->NewSegment({"s2"},
-                               std::move(segment_geometry_2));
+                               std::move(road_curve_2));
   Lane* l2_with_z = s2->NewLane(
       {"l2_with_z"},
       {-5., 5.}, {-kHalfWidth, kHalfWidth}, {0., kMaxHeight});
@@ -338,11 +338,11 @@ GTEST_TEST(MultilaneLanesTest, FlatArcLane) {
   // Case 4: Tests ArcLane::ToLanePosition() with a lane that overlaps itself.
   // The result should be identical to Case 1.
   const double d_theta_overlap = 3 * M_PI;
-  std::unique_ptr<SegmentGeometry> segment_geometry_3 =
-      std::make_unique<ArcGeometry>(center, radius, theta0, d_theta_overlap, zp,
+  std::unique_ptr<RoadCurve> road_curve_3 =
+      std::make_unique<ArcRoadCurve>(center, radius, theta0, d_theta_overlap, zp,
           zp);
   Segment* s3 = rg.NewJunction({"j3"})->NewSegment({"s3"},
-      std::move(segment_geometry_3));
+      std::move(road_curve_3));
   Lane* l2_overlapping = s3->NewLane(
       {"l2_overlapping"},
       {-5., 5.}, {-kHalfWidth, kHalfWidth}, {0., kMaxHeight});
@@ -368,11 +368,11 @@ GTEST_TEST(MultilaneLanesTest, FlatArcLane) {
   // in the third quadrant.
   const double theta0_wrap = 1.2 * M_PI;
   const double d_theta_wrap = -0.4 * M_PI;
-  std::unique_ptr<SegmentGeometry> segment_geometry_4 =
-      std::make_unique<ArcGeometry>(center, radius, theta0_wrap, d_theta_wrap,
+  std::unique_ptr<RoadCurve> road_curve_4 =
+      std::make_unique<ArcRoadCurve>(center, radius, theta0_wrap, d_theta_wrap,
                                     zp, zp);
   Segment* s4 = rg.NewJunction({"j4"})->NewSegment({"s4"},
-      std::move(segment_geometry_4));
+      std::move(road_curve_4));
   Lane* l2_wrap = s4->NewLane(
       {"l2_wrap"},
       {-5., 5.}, {-kHalfWidth, kHalfWidth}, {0., kMaxHeight});
@@ -454,12 +454,12 @@ GTEST_TEST(MultilaneLanesTest, ArcLaneWithConstantSuperelevation) {
   CubicPolynomial zp {0., 0., 0., 0.};
   const double kTheta = 0.10 * M_PI;  // superelevation
   RoadGeometry rg({"apple"}, kLinearTolerance, kAngularTolerance);
-  std::unique_ptr<SegmentGeometry> segment_geometry_1 =
-      std::make_unique<ArcGeometry>(Vector2<double>(100., -75.), 100.0,
+  std::unique_ptr<RoadCurve> road_curve_1 =
+      std::make_unique<ArcRoadCurve>(Vector2<double>(100., -75.), 100.0,
           0.25 * M_PI, 1.5 * M_PI, zp,
           CubicPolynomial((kTheta) / (100. * 1.5 * M_PI), 0., 0., 0.));
   Segment* s1 = rg.NewJunction({"j1"})->NewSegment({"s1"},
-      std::move(segment_geometry_1));
+      std::move(road_curve_1));
   Lane* l2 = s1->NewLane(
       {"l2"},
       {-5., 5.}, {-10., 10.}, {0., 5.});
@@ -580,11 +580,11 @@ GTEST_TEST(MultilaneLanesTest, HillIntegration) {
                                         0.,
                                         (3. * (z1 - z0) / p_scale),
                                         (-2. * (z1 - z0) / p_scale));
-  std::unique_ptr<SegmentGeometry> segment_geometry_1 =
-      std::make_unique<ArcGeometry>(Vector2<double>(-100., -100.), 100., theta0,
+  std::unique_ptr<RoadCurve> road_curve_1 =
+      std::make_unique<ArcRoadCurve>(Vector2<double>(-100., -100.), 100., theta0,
           d_theta, kHillPolynomial, zp);
   Segment* s1 = rg.NewJunction({"j1"})->NewSegment({"s1"},
-      std::move(segment_geometry_1));
+      std::move(road_curve_1));
   Lane* l1 = s1->NewLane(
       {"l2"},
       {-5., 5.}, {-10., 10.}, {0., 5.});

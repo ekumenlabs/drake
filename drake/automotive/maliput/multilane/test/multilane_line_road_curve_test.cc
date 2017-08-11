@@ -1,10 +1,12 @@
-#include "drake/automotive/maliput/multilane/line_segment_geometry.h"
+/* clang-format off to disable clang-format-includes */
+#include "drake/automotive/maliput/multilane/line_road_geometry.h"
+/* clang-format on */
 
 #include <utility>
 
 #include <gtest/gtest.h>
 
-#include "drake/automotive/maliput/multilane/segment_geometry.h"
+#include "drake/automotive/maliput/api/lane_data.h"
 #include "drake/common/eigen_matrix_compare.h"
 #include "drake/common/eigen_types.h"
 
@@ -12,7 +14,8 @@ namespace drake {
 namespace maliput {
 namespace multilane {
 
-GTEST_TEST(MultilaneLineGeometry, LineGeometryTest) {
+// Checks line reference curve interpolations, derivatives, and lengths.
+GTEST_TEST(MultilaneLineRoadCurve, LineRoadCurve) {
   const Vector2<double> kOrigin(10.0, 10.0);
   const Vector2<double> kDirection(10.0, 10.0);
   const CubicPolynomial zp;
@@ -20,7 +23,7 @@ GTEST_TEST(MultilaneLineGeometry, LineGeometryTest) {
   const double kHeadingDerivative = 0.0;
   const double kVeryExact = 1e-12;
 
-  const LineGeometry flat_line_geometry(kOrigin, kDirection, zp, zp);
+  const LineRoadCurve flat_line_geometry(kOrigin, kDirection, zp, zp);
   // Checks the length.
   EXPECT_NEAR(flat_line_geometry.length(),
               std::sqrt(kDirection.x() * kDirection.x() +
@@ -53,42 +56,28 @@ GTEST_TEST(MultilaneLineGeometry, LineGeometryTest) {
               kVeryExact);
 }
 
-GTEST_TEST(MultilaneLineGeometry, IsValidTest) {
+// Checks that LineRoadCurve::IsValid() returns true.
+GTEST_TEST(MultilaneLineRoadCurve, IsValidTest) {
   const Vector2<double> kOrigin(10.0, 10.0);
   const Vector2<double> kDirection(10.0, 10.0);
   const CubicPolynomial zp;
-  const std::pair<double, double> lateral_bounds = std::make_pair(-10.0, 10.0);
-  const std::pair<double, double> elevation_bounds = std::make_pair(0.0, 10.0);
-
-  const LineGeometry flat_line_geometry(kOrigin, kDirection, zp, zp);
-  EXPECT_THROW(
-      flat_line_geometry.IsValid(std::make_pair(0.0, -10.0), elevation_bounds),
-      std::runtime_error);
-  EXPECT_THROW(
-      flat_line_geometry.IsValid(lateral_bounds, std::make_pair(0.0, -10.0)),
-      std::runtime_error);
-  EXPECT_NO_THROW(flat_line_geometry.IsValid(lateral_bounds, elevation_bounds));
+  const api::Rbounds lateral_bounds(-10.0, 10.0);
+  const api::HBounds elevation_bounds(0.0, 10.0);
+  const LineRoadCurve flat_line_geometry(kOrigin, kDirection, zp, zp);
   EXPECT_TRUE(flat_line_geometry.IsValid(lateral_bounds, elevation_bounds));
 }
 
-GTEST_TEST(MultilaneLineGeometry, ToCurveFrameTest) {
+// Checks the validity of the surface for different lateral bounds and
+// geometries.
+GTEST_TEST(MultilaneLineRoadCurve, ToCurveFrameTest) {
   const Vector2<double> kOrigin(10.0, 10.0);
   const Vector2<double> kDirection(10.0, 10.0);
   const double kVeryExact = 1e-12;
   const CubicPolynomial zp;
-  const std::pair<double, double> lateral_bounds = std::make_pair(-10.0, 10.0);
-  const std::pair<double, double> elevation_bounds = std::make_pair(0.0, 10.0);
+  const api::RBounds lateral_bounds(-10.0, 10.0);
+  const api::HBounds elevation_bounds(0.0, 10.0);
 
-  const LineGeometry flat_line_geometry(kOrigin, kDirection, zp, zp);
-  // Checks that it throws when lateral_bounds or elevation_bounds are wrong.
-  EXPECT_THROW(flat_line_geometry.ToCurveFrame(Vector3<double>(10.0, 10.0, 0.0),
-                                               std::make_pair(0.0, -10.0),
-                                               elevation_bounds),
-               std::runtime_error);
-  EXPECT_THROW(flat_line_geometry.ToCurveFrame(Vector3<double>(10.0, 10.0, 0.0),
-                                               lateral_bounds,
-                                               std::make_pair(0.0, -10.0)),
-               std::runtime_error);
+  const LineRoadCurve flat_line_geometry(kOrigin, kDirection, zp, zp);
   // Checks over the base line.
   EXPECT_TRUE(CompareMatrices(
       flat_line_geometry.ToCurveFrame(Vector3<double>(10.0, 10.0, 0.0),

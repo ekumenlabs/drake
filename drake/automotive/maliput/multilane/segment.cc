@@ -101,13 +101,9 @@ api::LanePosition Segment::DoToLanePosition(
     const api::GeoPosition& geo_position,
     const api::RBounds& driveable_bounds,
     const api::HBounds& elevation_bounds) const {
-  const std::pair<double, double> lateral_bounds =
-      std::make_pair(driveable_bounds.min(), driveable_bounds.max());
-  const std::pair<double, double> height_bounds =
-      std::make_pair(elevation_bounds.min(), elevation_bounds.max());
   return api::LanePosition::FromSrh(geometry_->ToCurveFrame(geo_position.xyz(),
-                                                            lateral_bounds,
-                                                            height_bounds));
+                                                            driveable_bounds,
+                                                            elevation_bounds));
 }
 
 double Segment::p_from_s(double s) const {

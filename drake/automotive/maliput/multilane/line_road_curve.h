@@ -3,7 +3,8 @@
 #include <cmath>
 #include <utility>
 
-#include "drake/automotive/maliput/multilane/segment_geometry.h"
+#include "drake/automotive/maliput/api/lane_data.h"
+#include "drake/automotive/maliput/multilane/road_curve.h"
 #include "drake/common/drake_copyable.h"
 #include "drake/common/drake_throw.h"
 #include "drake/common/eigen_types.h"
@@ -13,10 +14,10 @@ namespace drake {
 namespace maliput {
 namespace multilane {
 
-/// SegmentGeometry specification for a reference curve that describes a line.
-class LineGeometry : public SegmentGeometry {
+/// RoadCurve specification for a reference curve that describes a line.
+class LineRoadCurve : public RoadCurve {
  public:
-  DRAKE_NO_COPY_NO_MOVE_NO_ASSIGN(LineGeometry)
+  DRAKE_NO_COPY_NO_MOVE_NO_ASSIGN(LineRoadCurve)
 
   /// Constructor. Computes a line from @p xy0 as the initial point of the line
   /// and @p dxy as the difference vector that connects the @p xy0 with the end
@@ -29,15 +30,15 @@ class LineGeometry : public SegmentGeometry {
   /// @param superelevation CubicPolynomial object that represents the
   /// superelevation polynomial. Note that coefficients should be scaled to
   /// match the path length integral of the reference curve.
-  explicit LineGeometry(const Vector2<double>& xy0, const Vector2<double>& dxy,
-                        const CubicPolynomial& elevation,
-                        const CubicPolynomial& superelevation)
-      : SegmentGeometry(elevation, superelevation),
+  explicit LineRoadCurve(const Vector2<double>& xy0, const Vector2<double>& dxy,
+                         const CubicPolynomial& elevation,
+                         const CubicPolynomial& superelevation)
+      : RoadCurve(elevation, superelevation),
         p0_(xy0),
         dp_(dxy),
         heading_(std::atan2(dxy.y(), dxy.x())) {}
 
-  ~LineGeometry() override = default;
+  ~LineRoadCurve() override = default;
 
   /// Computes the interpolation of the position at @p p, which is a scale
   /// factor of the constructor's difference vector dxy.
@@ -85,49 +86,33 @@ class LineGeometry : public SegmentGeometry {
   /// combination.
   /// @param geo_coordinate A 3D vector in the world frame to be converted to
   /// the composed curve frame.
-  /// @param lateral_bounds A pair that represents the lateral bounds of
-  /// the surface mapping. The first item in the pair is the minimum value and
-  /// the second is the maximum value in the lateral direction over the
-  /// composed curve.
-  /// @param height_bounds A pair that represents the height bounds of
-  /// the surface mapping. The first item in the pair is the minimum value and
-  /// the second is the maximum value in the vertical direction over the
-  /// composed curve.
+  /// @param lateral_bounds An api::RBounds object that represents the lateral
+  /// bounds of the surface mapping.
+  /// @param height_bounds An api::HBounds object that represents the elevation
+  /// bounds of the surface mapping.
   /// @return A 3D vector that represents the coordinates with respect to the
   /// composed curve. The first dimension represents the path length coordinate,
   /// the second dimension is the lateral deviation from the composed curve and
   /// the third one is the vertical deviation from the composed curve too. The
   /// frame where this vector is defined is the same as api::LanePosition.
-  /// @throws std::runtime_error When @p lateral_bounds first value is bigger
-  /// than the second one.
-  /// @throws std::runtime_error When @p height_bounds first value is bigger
-  /// than the second one.
   Vector3<double> ToCurveFrame(
       const Vector3<double>& geo_coordinate,
-      const std::pair<double, double>& lateral_bounds,
-      const std::pair<double, double>& height_bounds) const override;
+      const api::RBounds& lateral_bounds,
+      const api::HBounds& height_bounds) const override;
 
   /// As the reference curve is a line, the curvature radius is infinitum at any
   /// point in the range of p = [0;1] so no value of elevation or superelevation
   /// may derive in a geometry that intersects with itself.
-  /// @param lateral_bounds A pair that represents the lateral bounds of
-  /// the surface mapping. The first item in the pair is the minimum value and
-  /// the second is the maximum value in the lateral direction over the
-  /// composed curve.
-  /// @param height_bounds A pair that represents the height bounds of
-  /// the surface mapping. The first item in the pair is the minimum value and
-  /// the second is the maximum value in the vertical direction over the
-  /// composed curve.
+  /// @param lateral_bounds An api::RBounds object that represents the lateral
+  /// bounds of the surface mapping.
+  /// @param height_bounds An api::HBounds object that represents the elevation
+  /// bounds of the surface mapping.
   /// @return True.
-  /// @throws std::runtime_error When @p lateral_bounds first value is bigger
-  /// than the second one.
-  /// @throws std::runtime_error When @p height_bounds first value is bigger
-  /// than the second one.
   bool IsValid(
-      const std::pair<double, double>& lateral_bounds,
-      const std::pair<double, double>& height_bounds) const override {
-    DRAKE_THROW_UNLESS(lateral_bounds.first < lateral_bounds.second);
-    DRAKE_THROW_UNLESS(height_bounds.first < height_bounds.second);
+      const api::RBounds& lateral_bounds,
+      const api::HBounds& height_bounds) const override {
+    unused(lateral_bounds);
+    unused(height_bounds);
     return true;
   }
 
