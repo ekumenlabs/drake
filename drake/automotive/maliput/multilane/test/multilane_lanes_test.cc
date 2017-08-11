@@ -339,8 +339,8 @@ GTEST_TEST(MultilaneLanesTest, FlatArcLane) {
   // The result should be identical to Case 1.
   const double d_theta_overlap = 3 * M_PI;
   std::unique_ptr<RoadCurve> road_curve_3 =
-      std::make_unique<ArcRoadCurve>(center, radius, theta0, d_theta_overlap, zp,
-          zp);
+      std::make_unique<ArcRoadCurve>(center, radius, theta0, d_theta_overlap,
+                                     zp, zp);
   Segment* s3 = rg.NewJunction({"j3"})->NewSegment({"s3"},
       std::move(road_curve_3));
   Lane* l2_overlapping = s3->NewLane(
@@ -581,8 +581,8 @@ GTEST_TEST(MultilaneLanesTest, HillIntegration) {
                                         (3. * (z1 - z0) / p_scale),
                                         (-2. * (z1 - z0) / p_scale));
   std::unique_ptr<RoadCurve> road_curve_1 =
-      std::make_unique<ArcRoadCurve>(Vector2<double>(-100., -100.), 100., theta0,
-          d_theta, kHillPolynomial, zp);
+      std::make_unique<ArcRoadCurve>(Vector2<double>(-100., -100.), 100.,
+          theta0, d_theta, kHillPolynomial, zp);
   Segment* s1 = rg.NewJunction({"j1"})->NewSegment({"s1"},
       std::move(road_curve_1));
   Lane* l1 = s1->NewLane(
