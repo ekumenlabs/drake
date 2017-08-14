@@ -2,6 +2,7 @@
 
 #include <cmath>
 
+#include "drake/automotive/maliput/multilane/c2_scalar_function.h"
 #include "drake/common/drake_copyable.h"
 #include "drake/common/unused.h"
 
@@ -10,7 +11,7 @@ namespace maliput {
 namespace multilane {
 
 /// A cubic polynomial, f(p) = a + b*p + c*p^2 + d*p^3.
-class CubicPolynomial {
+template<typename T> class CubicPolynomial : public C2ScalarFunction<T> {
  public:
   DRAKE_DEFAULT_COPY_AND_MOVE_AND_ASSIGN(CubicPolynomial)
 
@@ -18,36 +19,38 @@ class CubicPolynomial {
   CubicPolynomial() : CubicPolynomial(0., 0., 0., 0.) {}
 
   /// Constructs a cubic polynomial given all four coefficients.
-  CubicPolynomial(double a, double b, double c, double d)
+  CubicPolynomial(T a, T b, T c, T d)
       : a_(a), b_(b), c_(c), d_(d) {
-    const double df = f_p(1.) - f_p(0.);
-    s_1_ = std::sqrt(1. + (df * df));
+    const T df = f_p(T(1.)) - f_p(T(0.));
+    s_1_ = std::sqrt(T(1.) + (df * df));
   }
 
   // Returns the a coefficient.
-  double a() const { return a_; }
+  T a() const { return a_; }
 
   // Returns the b coefficient.
-  double b() const { return b_; }
+  T b() const { return b_; }
 
   // Returns the c coefficient.
-  double c() const { return c_; }
+  T c() const { return c_; }
 
   // Returns the d coefficient.
-  double d() const { return d_; }
+  T d() const { return d_; }
 
   /// Evaluates the polynomial f at @p p.
-  double f_p(double p) const {
+  T f_p(T p) const override {
     return a_ + (b_ * p) + (c_ * p * p) + (d_ * p * p * p);
   }
 
   /// Evaluates the derivative df/dp at @p p.
-  double f_dot_p(double p) const {
-    return b_ + (2. * c_ * p) + (3. * d_ * p * p);
+  T f_dot_p(T p) const override {
+    return b_ + (T(2.) * c_ * p) + (T(3.) * d_ * p * p);
   }
 
   /// Evaluates the double-derivative d^2f/dp^2 at @p p.
-  double f_ddot_p(double p) const { return (2. * c_) + (6. * d_ * p); }
+  T f_dot_dot_p(T p) const override {
+    return (T(2.) * c_) + (T(6.) * d_ * p);
+  }
 
   // TODO(maddog@tri.global)  s_p() and p_s() need to be replaced with a
   //                          properly integrated path-length parameterization.
@@ -56,27 +59,27 @@ class CubicPolynomial {
   //                          segment from (0, f(0)) to (1, f(1)), which is
   //                          not entirely awful for relatively flat curves.
   /// Returns the path-length s along the curve (p, f(p)) from p = 0 to @p p.
-  double s_p(double p) const { return s_1_ * p; }
+  T s_p(T p) const override { return s_1_ * p; }
 
   /// Returns the inverse of the path-length parameterization s_p(p).
-  double p_s(double s) const { return s / s_1_; }
+  T p_s(T s) const override { return s / s_1_; }
 
   // TODO(maddog@tri.global) Until s(p) is a properly integrated path-length
   //                         parameterization, we have a need to calculate the
   //                         derivative of the actual linear function
   //                         involved in our bogus path-length approximation.
-  double fake_gprime(double p) const {
+  T fake_gprime(T p) const {
     unused(p);
     // return df;  which is...
-    return f_p(1.) - f_p(0.);
+    return f_p(T(1.)) - f_p(T(0.));
   }
 
  private:
-  double a_{};
-  double b_{};
-  double c_{};
-  double d_{};
-  double s_1_{};
+  const T a_{};
+  const T b_{};
+  const T c_{};
+  const T d_{};
+  T s_1_{};
 };
 
 }  // namespace multilane

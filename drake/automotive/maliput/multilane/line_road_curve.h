@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cmath>
+#include <memory>
 #include <utility>
 
 #include "drake/automotive/maliput/api/lane_data.h"
@@ -31,8 +32,8 @@ class LineRoadCurve : public RoadCurve {
   /// superelevation polynomial. Note that coefficients should be scaled to
   /// match the path length integral of the reference curve.
   explicit LineRoadCurve(const Vector2<double>& xy0, const Vector2<double>& dxy,
-                         const CubicPolynomial& elevation,
-                         const CubicPolynomial& superelevation)
+                         const CubicPolynomial<double>& elevation,
+                         const CubicPolynomial<double>& superelevation)
       : RoadCurve(elevation, superelevation),
         p0_(xy0),
         dp_(dxy),
@@ -115,6 +116,8 @@ class LineRoadCurve : public RoadCurve {
     unused(height_bounds);
     return true;
   }
+
+  std::unique_ptr<RoadCurve> Offset(double r) const override;
 
  private:
   // The first point in world coordinates over the z=0 plane of the reference

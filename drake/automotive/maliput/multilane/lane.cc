@@ -72,7 +72,7 @@ V3 Lane::W_prime_of_prh(const double p, const double r, const double h,
   // Evaluate dα/dp, dβ/dp, dγ/dp...
   const double d_alpha = road_curve_->superelevation().f_dot_p(p) *
                          road_curve_->length();
-  const double d_beta = -cb * cb * road_curve_->elevation().f_ddot_p(p);
+  const double d_beta = -cb * cb * road_curve_->elevation().f_dot_dot_p(p);
   const double d_gamma = road_curve_->heading_dot_of_p(p);
 
   const double p_scale = road_curve_->length();

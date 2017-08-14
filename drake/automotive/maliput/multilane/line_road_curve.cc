@@ -32,6 +32,16 @@ Vector3<double> LineRoadCurve::ToCurveFrame(
   return Vector3<double>(s, r, h);
 }
 
+std::unique_ptr<RoadCurve> LineRoadCurve::Offset(double r) const {
+  // Computes the new p0 point.
+  const Vector2<double> s_unit_vector = dp_ / dp_.norm();
+  const Vector2<double> r_unit_vector{-s_unit_vector(1), s_unit_vector(0)};
+  const Vector2<double> p0 = p0_ + r_unit_vector * r;
+  return std::make_unique<LineRoadCurve>(p0, dp_, elevation(),
+                                         superelevation());
+}
+
+
 }  // namespace multilane
 }  // namespace maliput
 }  // namespace drake

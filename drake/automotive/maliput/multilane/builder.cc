@@ -98,9 +98,9 @@ namespace {
 //    g(0) = Y0          g'(0) = Ydot0
 //    g(dX) = Y0 + dY    g'(1) = Ydot1
 // and isotropically scaling it (scale both axes) by a factor of 1/dX
-CubicPolynomial MakeCubic(double dX, double Y0, double dY,
+CubicPolynomial<double> MakeCubic(double dX, double Y0, double dY,
                           double Ydot0, double Ydot1) {
-  return CubicPolynomial(Y0 / dX,
+  return CubicPolynomial<double>(Y0 / dX,
                          Ydot0,
                          (3. * dY / dX) - (2. * Ydot0) - Ydot1,
                          Ydot0 + Ydot1 - (2. * dY / dX));
@@ -195,13 +195,13 @@ Lane* Builder::BuildConnection(
                                 conn->start().xy().y());
       const Vector2<double> dxy(conn->end().xy().x() - xy0.x(),
                                 conn->end().xy().y() - xy0.y());
-      const CubicPolynomial elevation(MakeCubic(
+      const CubicPolynomial<double> elevation(MakeCubic(
           dxy.norm(),
           conn->start().z().z(),
           conn->end().z().z() - conn->start().z().z(),
           conn->start().z().z_dot(),
           conn->end().z().z_dot()));
-      const CubicPolynomial superelevation(MakeCubic(
+      const CubicPolynomial<double> superelevation(MakeCubic(
           dxy.norm(),
           conn->start().z().theta(),
           conn->end().z().theta() - conn->start().z().theta(),
@@ -218,13 +218,13 @@ Lane* Builder::BuildConnection(
                                        conn->start().xy().x() - center.x());
       const double d_theta = conn->d_theta();
       const double arc_length = radius * std::abs(d_theta);
-      const CubicPolynomial elevation(MakeCubic(
+      const CubicPolynomial<double> elevation(MakeCubic(
           arc_length,
           conn->start().z().z(),
           conn->end().z().z() - conn->start().z().z(),
           conn->start().z().z_dot(),
           conn->end().z().z_dot()));
-      const CubicPolynomial superelevation(MakeCubic(
+      const CubicPolynomial<double> superelevation(MakeCubic(
           arc_length,
           conn->start().z().theta(),
           conn->end().z().theta() - conn->start().z().theta(),

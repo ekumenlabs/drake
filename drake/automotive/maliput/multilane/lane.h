@@ -120,11 +120,11 @@ class Lane : public api::Lane {
   // TODO(maddog@tri.global)  Allow superelevation to have a center-of-rotation
   //                          which is different from r = 0.
 
-  const CubicPolynomial& elevation() const {
+  const CubicPolynomial<double>& elevation() const {
     return road_curve_->elevation();
   }
 
-  const CubicPolynomial& superelevation() const {
+  const CubicPolynomial<double>& superelevation() const {
     return road_curve_->superelevation();
   }
 

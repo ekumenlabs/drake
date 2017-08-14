@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cmath>
+#include <memory>
 
 #include "drake/automotive/maliput/multilane/road_curve.h"
 #include "drake/common/drake_copyable.h"
@@ -37,8 +38,8 @@ class ArcRoadCurve : public RoadCurve {
   /// @throws std::runtime_error When @p radius is not positive.
   explicit ArcRoadCurve(const Vector2<double>& center, double radius,
                         double theta0, double d_theta,
-                        const CubicPolynomial& elevation,
-                        const CubicPolynomial& superelevation)
+                        const CubicPolynomial<double>& elevation,
+                        const CubicPolynomial<double>& superelevation)
       : RoadCurve(elevation, superelevation),
         center_(center),
         radius_(radius),
@@ -144,6 +145,8 @@ class ArcRoadCurve : public RoadCurve {
   bool IsValid(
       const api::RBounds& lateral_bounds,
       const api::HBounds& height_bounds) const override;
+
+  std::unique_ptr<RoadCurve> Offset(double r) const override;
 
  private:
   // Computes the absolute position along reference arc as an angle in

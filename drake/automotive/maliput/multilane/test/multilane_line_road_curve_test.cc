@@ -18,7 +18,7 @@ namespace multilane {
 GTEST_TEST(MultilaneLineRoadCurve, LineRoadCurve) {
   const Vector2<double> kOrigin(10.0, 10.0);
   const Vector2<double> kDirection(10.0, 10.0);
-  const CubicPolynomial zp;
+  const CubicPolynomial<double> zp;
   const double kHeading = std::atan2(kDirection.y(), kDirection.x());
   const double kHeadingDerivative = 0.0;
   const double kVeryExact = 1e-12;
@@ -60,7 +60,7 @@ GTEST_TEST(MultilaneLineRoadCurve, LineRoadCurve) {
 GTEST_TEST(MultilaneLineRoadCurve, IsValidTest) {
   const Vector2<double> kOrigin(10.0, 10.0);
   const Vector2<double> kDirection(10.0, 10.0);
-  const CubicPolynomial zp;
+  const CubicPolynomial<double> zp;
   const api::Rbounds lateral_bounds(-10.0, 10.0);
   const api::HBounds elevation_bounds(0.0, 10.0);
   const LineRoadCurve flat_line_geometry(kOrigin, kDirection, zp, zp);
@@ -73,7 +73,7 @@ GTEST_TEST(MultilaneLineRoadCurve, ToCurveFrameTest) {
   const Vector2<double> kOrigin(10.0, 10.0);
   const Vector2<double> kDirection(10.0, 10.0);
   const double kVeryExact = 1e-12;
-  const CubicPolynomial zp;
+  const CubicPolynomial<double> zp;
   const api::RBounds lateral_bounds(-10.0, 10.0);
   const api::HBounds elevation_bounds(0.0, 10.0);
 

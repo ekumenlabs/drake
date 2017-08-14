@@ -129,7 +129,7 @@ bool ArcRoadCurve::IsValid(
   // at which an extremum can occur, since superelevation is cubic.
   double theta_min = std::numeric_limits<double>::max();
   double theta_max = std::numeric_limits<double>::min();
-  const CubicPolynomial& f_superelevation = superelevation();
+  const CubicPolynomial<double>& f_superelevation = superelevation();
   auto update_range_given_p = [&theta_min, &theta_max,
                                &f_superelevation](double p) {
     // Skip p if outside of domain [0, 1].
@@ -178,6 +178,30 @@ bool ArcRoadCurve::IsValid(
   }
   return true;
 }
+
+std::unique_ptr<RoadCurve> ArcRoadCurve::Offset(double r) const {
+  if (r < 0.0 && d_theta_ < 0.0) {
+    DRAKE_THROW_UNLESS(std::abs(r) < radius_);
+  }
+  if (r > 0.0 && d_theta_ > 0.0) {
+    DRAKE_THROW_UNLESS(r < radius_);
+  }
+
+  // Computes the new radius.
+  const double radius = radius_ - std::copysign(1.0, d_theta_) * r;
+  // Computes the elevation and superelevation polynomials.
+  const double length = std::abs(d_theta_ * radius);
+  const CubicPolynomial<double> scaled_elevation =
+      RoadCurve::ScaleCubicPolynomial(elevation(), radius_ * std::abs(d_theta_),
+                                      length);
+  const CubicPolynomial<double> scaled_superelevation =
+      RoadCurve::ScaleCubicPolynomial(superelevation(),
+                                      radius_ * std::abs(d_theta_), length);
+  return std::make_unique<ArcRoadCurve>(center_, radius, theta0_, d_theta_,
+                                        scaled_elevation,
+                                        scaled_superelevation);
+}
+
 
 }  // namespace multilane
 }  // namespace maliput

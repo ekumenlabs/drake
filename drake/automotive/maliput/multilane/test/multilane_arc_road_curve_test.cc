@@ -19,7 +19,7 @@ GTEST_TEST(MultilaneArcRoadCurve, ConstructorTest) {
   const double kTheta0 = M_PI / 4.0;
   const double kTheta1 = 3.0 * M_PI / 4.0;
   const double kDTheta = kTheta1 - kTheta0;
-  const CubicPolynomial zp;
+  const CubicPolynomial<double> zp;
   EXPECT_THROW(ArcRoadCurve(kCenter, -kRadius, kTheta0, kDTheta, zp, zp),
                std::runtime_error);
   EXPECT_NO_THROW(ArcRoadCurve(kCenter, kRadius, kTheta0, kDTheta, zp, zp));
@@ -33,7 +33,7 @@ GTEST_TEST(MultilaneArcRoadCurve, ArcGeometryTest) {
   const double kTheta1 = 3.0 * M_PI / 4.0;
   const double kDTheta = kTheta1 - kTheta0;
   const double kVeryExact = 1e-12;
-  const CubicPolynomial zp;
+  const CubicPolynomial<double> zp;
   const ArcRoadCurve flat_arc_geometry(kCenter, kRadius, kTheta0, kDTheta, zp,
                                       zp);
   // Checks the length.
@@ -95,8 +95,9 @@ GTEST_TEST(MultilaneArcRoadCurve, IsValidTest) {
   const double kDTheta1 = kTheta1 - kTheta0;
   const double kTheta2 = -2.0 * M_PI;
   const double kDTheta2 = kTheta2 - kTheta0;
-  const CubicPolynomial zp;
-  const CubicPolynomial constant_superelevation(M_PI / 4.0, 0.0, 0.0, 0.0);
+  const CubicPolynomial<double> zp;
+  const CubicPolynomial<double> constant_superelevation(M_PI / 4.0, 0.0, 0.0,
+                                                        0.0);
   const api::RBounds lateral_bounds(-kRadius * 0.5, kRadius * 0.5);
   const api::RBounds large_lateral_bounds(-kRadius * 1.5, kRadius * 1.5);
   const api::RBounds critical_cone_lateral_bounds(
@@ -135,7 +136,7 @@ GTEST_TEST(MultilaneArcRoadCurve, ToCurveFrameTest) {
   const double kTheta1 = 3.0 * M_PI / 4.0;
   const double kDTheta = kTheta1 - kTheta0;
   const double kVeryExact = 1e-12;
-  const CubicPolynomial zp;
+  const CubicPolynomial<double> zp;
   const api::RBounds lateral_bounds(-5.0, 5.0);
   const api::HBounds height_bounds(0.0, 10.0);
 

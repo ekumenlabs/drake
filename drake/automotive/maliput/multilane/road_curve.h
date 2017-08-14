@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <utility>
 
 #include "drake/automotive/maliput/api/lane_data.h"
@@ -23,7 +24,7 @@ namespace multilane {
 /// By implementing this interface the road curve is defined and a complete.
 class RoadCurve {
  public:
-  DRAKE_DEFAULT_COPY_AND_MOVE_AND_ASSIGN(RoadCurve)
+  DRAKE_NO_COPY_NO_MOVE_NO_ASSIGN(RoadCurve)
 
   /// Constructor.
   /// @param elevation CubicPolynomial object that represents the elevation
@@ -32,15 +33,17 @@ class RoadCurve {
   /// @param superelevation CubicPolynomial object that represents the
   /// superelevation polynomial. Note that coefficients should be scaled to
   /// match the path length integral of the reference curve.
-  RoadCurve(const CubicPolynomial& elevation,
-                  const CubicPolynomial& superelevation)
+  RoadCurve(const CubicPolynomial<double>& elevation,
+            const CubicPolynomial<double>& superelevation)
       : elevation_(elevation), superelevation_(superelevation) {}
 
   virtual ~RoadCurve() = default;
 
-  const CubicPolynomial& elevation() const { return elevation_; }
+  const CubicPolynomial<double>& elevation() const { return elevation_; }
 
-  const CubicPolynomial& superelevation() const { return superelevation_; }
+  const CubicPolynomial<double>& superelevation() const {
+    return superelevation_;
+  }
 
   /// Computes the composed curve path integral in the interval of p = [0; 1].
   /// @return The path length integral of the curve composed with the elevation
@@ -48,6 +51,11 @@ class RoadCurve {
   double trajectory_length() const {
     return elevation_.s_p(1.0) * length();
   }
+
+  CubicPolynomial<double> ScaleCubicPolynomial(
+      const CubicPolynomial<double>& cubic_polynomial,
+      double scale_0,
+      double scale_1) const;
 
   /// Computes the interpolation of the reference curve.
   /// @param p The reference curve parameter.
@@ -113,12 +121,14 @@ class RoadCurve {
       const api::RBounds& lateral_bounds,
       const api::HBounds& height_bounds) const = 0;
 
+  virtual std::unique_ptr<RoadCurve> Offset(double r) const = 0;
+
  private:
   // A polynomial that represents the elevation change as a function of p.
-  CubicPolynomial elevation_;
+  CubicPolynomial<double> elevation_;
   // A polynomial that represents the superelevation angle change as a function
   // of p.
-  CubicPolynomial superelevation_;
+  CubicPolynomial<double> superelevation_;
 };
 
 }  // namespace multilane
