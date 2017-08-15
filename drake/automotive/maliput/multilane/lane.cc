@@ -187,7 +187,9 @@ api::LanePosition Lane::DoEvalMotionDerivatives(
 
   // TODO(maddog@tri.global)  When s(p) is integrated properly, do this:
   //                          const double g_prime = elevation().fdot_p(p);
-  const double g_prime = road_curve_->elevation().fake_gprime(p);
+  // const double g_prime = road_curve_->elevation().fake_gprime(p);
+  const double g_prime = road_curve_->elevation().f_p(1.0) -
+                         road_curve_->elevation().f_p(0.0);
 
   const Rot3 R = Rabg_of_p(p);
   const V3 W_prime = W_prime_of_prh(p, r, h, R);
