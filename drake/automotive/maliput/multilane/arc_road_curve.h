@@ -38,7 +38,7 @@ class ArcRoadCurve : public RoadCurve {
   /// @throws std::runtime_error When @p radius is not positive.
   explicit ArcRoadCurve(const Vector2<double>& center, double radius,
                         double theta0, double d_theta,
-                        const CubicPolynomial<double>& elevation,
+                        const Elevation<double>& elevation,
                         const CubicPolynomial<double>& superelevation)
       : RoadCurve(elevation, superelevation),
         center_(center),

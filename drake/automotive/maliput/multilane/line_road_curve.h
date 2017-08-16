@@ -5,6 +5,7 @@
 #include <utility>
 
 #include "drake/automotive/maliput/api/lane_data.h"
+#include "drake/automotive/maliput/multilane/elevation.h"
 #include "drake/automotive/maliput/multilane/road_curve.h"
 #include "drake/common/drake_copyable.h"
 #include "drake/common/drake_throw.h"
@@ -31,13 +32,15 @@ class LineRoadCurve : public RoadCurve {
   /// @param superelevation CubicPolynomial object that represents the
   /// superelevation polynomial. Note that coefficients should be scaled to
   /// match the path length integral of the reference curve.
-  explicit LineRoadCurve(const Vector2<double>& xy0, const Vector2<double>& dxy,
-                         const CubicPolynomial<double>& elevation,
-                         const CubicPolynomial<double>& superelevation)
-      : RoadCurve(elevation, superelevation),
-        p0_(xy0),
-        dp_(dxy),
-        heading_(std::atan2(dxy.y(), dxy.x())) {}
+  explicit LineRoadCurve(
+      const Vector2<double>& xy0,
+      const Vector2<double>& dxy,
+      const Elevation<double> elevation,
+      const CubicPolynomial<double>& superelevation) :
+      RoadCurve(elevation, superelevation),
+      p0_(xy0),
+      dp_(dxy),
+      heading_(std::atan2(dxy.y(), dxy.x())) {}
 
   ~LineRoadCurve() override = default;
 

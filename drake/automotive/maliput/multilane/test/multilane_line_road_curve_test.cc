@@ -18,12 +18,14 @@ namespace multilane {
 GTEST_TEST(MultilaneLineRoadCurve, LineRoadCurve) {
   const Vector2<double> kOrigin(10.0, 10.0);
   const Vector2<double> kDirection(10.0, 10.0);
-  const CubicPolynomial<double> zp;
+  const CubicPolynomial<double> zp(0.0, 0.0, 0.0, 0.0);
+  const Elevation<double> flat_elevation(0.0, zp, zp);
   const double kHeading = std::atan2(kDirection.y(), kDirection.x());
   const double kHeadingDerivative = 0.0;
   const double kVeryExact = 1e-12;
 
-  const LineRoadCurve flat_line_geometry(kOrigin, kDirection, zp, zp);
+  const LineRoadCurve flat_line_geometry(kOrigin, kDirection, flat_elevation,
+                                         zp);
   // Checks the length.
   EXPECT_NEAR(flat_line_geometry.length(),
               std::sqrt(kDirection.x() * kDirection.x() +
@@ -60,10 +62,12 @@ GTEST_TEST(MultilaneLineRoadCurve, LineRoadCurve) {
 GTEST_TEST(MultilaneLineRoadCurve, IsValidTest) {
   const Vector2<double> kOrigin(10.0, 10.0);
   const Vector2<double> kDirection(10.0, 10.0);
-  const CubicPolynomial<double> zp;
+  const CubicPolynomial<double> zp(0.0, 0.0, 0.0, 0.0);
+  const Elevation<double> flat_elevation(0.0, zp, zp);
   const api::Rbounds lateral_bounds(-10.0, 10.0);
   const api::HBounds elevation_bounds(0.0, 10.0);
-  const LineRoadCurve flat_line_geometry(kOrigin, kDirection, zp, zp);
+  const LineRoadCurve flat_line_geometry(kOrigin, kDirection, flat_elevation,
+                                         zp);
   EXPECT_TRUE(flat_line_geometry.IsValid(lateral_bounds, elevation_bounds));
 }
 
@@ -73,11 +77,12 @@ GTEST_TEST(MultilaneLineRoadCurve, ToCurveFrameTest) {
   const Vector2<double> kOrigin(10.0, 10.0);
   const Vector2<double> kDirection(10.0, 10.0);
   const double kVeryExact = 1e-12;
-  const CubicPolynomial<double> zp;
+  const CubicPolynomial<double> zp(0.0, 0.0, 0.0, 0.0);
+  const Elevation<double> flat_elevation(0.0, zp, zp);
   const api::RBounds lateral_bounds(-10.0, 10.0);
   const api::HBounds elevation_bounds(0.0, 10.0);
 
-  const LineRoadCurve flat_line_geometry(kOrigin, kDirection, zp, zp);
+  const LineRoadCurve flat_line_geometry(kOrigin, kDirection, flat_elevation, zp);
   // Checks over the base line.
   EXPECT_TRUE(CompareMatrices(
       flat_line_geometry.ToCurveFrame(Vector3<double>(10.0, 10.0, 0.0),

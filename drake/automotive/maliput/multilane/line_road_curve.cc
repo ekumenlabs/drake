@@ -26,7 +26,8 @@ Vector3<double> LineRoadCurve::ToCurveFrame(
                                   lateral_bounds.max());
   // N.B. h is the geo z-coordinate referenced against the lane elevation (whose
   // `a` coefficient is normalized by lane length).
-  const double h_unsaturated = geo_coordinate.z() - elevation().a() * length();
+  const double h_unsaturated = geo_coordinate.z() -
+                               elevation().f_p(0) * length();
   const double h = math::saturate(h_unsaturated, height_bounds.min(),
                                   height_bounds.max());
   return Vector3<double>(s, r, h);
@@ -34,11 +35,14 @@ Vector3<double> LineRoadCurve::ToCurveFrame(
 
 std::unique_ptr<RoadCurve> LineRoadCurve::Offset(double r) const {
   // Computes the new p0 point.
-  const Vector2<double> s_unit_vector = dp_ / dp_.norm();
+  const double scale = dp_.norm();
+  const Vector2<double> s_unit_vector = dp_ / scale;
   const Vector2<double> r_unit_vector{-s_unit_vector(1), s_unit_vector(0)};
   const Vector2<double> p0 = p0_ + r_unit_vector * r;
-  return std::make_unique<LineRoadCurve>(p0, dp_, elevation(),
-                                         superelevation());
+  return std::make_unique<LineRoadCurve>(p0, dp_,
+      Elevation<double>(r, elevation().reference_elevation(),
+                        elevation().reference_superelevation()),
+      superelevation());
 }
 
 

@@ -102,7 +102,8 @@ Vector3<double> ArcRoadCurve::ToCurveFrame(
   const double p_scale = length();
   // N.B. h is the geo z-coordinate referenced against the lane elevation (whose
   // `a` coefficient is normalized by lane length).
-  const double h_unsaturated = geo_coordinate.z() - elevation().a() * p_scale;
+  const double h_unsaturated = geo_coordinate.z() -
+                               elevation().f_p(0.0) * p_scale;
   const double h = math::saturate(h_unsaturated, height_bounds.min(),
                                   height_bounds.max());
   return Vector3<double>(s, r, h);
@@ -190,16 +191,18 @@ std::unique_ptr<RoadCurve> ArcRoadCurve::Offset(double r) const {
   // Computes the new radius.
   const double radius = radius_ - std::copysign(1.0, d_theta_) * r;
   // Computes the elevation and superelevation polynomials.
-  const double length = std::abs(d_theta_ * radius);
-  const CubicPolynomial<double> scaled_elevation =
-      RoadCurve::ScaleCubicPolynomial(elevation(), radius_ * std::abs(d_theta_),
-                                      length);
-  const CubicPolynomial<double> scaled_superelevation =
-      RoadCurve::ScaleCubicPolynomial(superelevation(),
-                                      radius_ * std::abs(d_theta_), length);
-  return std::make_unique<ArcRoadCurve>(center_, radius, theta0_, d_theta_,
-                                        scaled_elevation,
-                                        scaled_superelevation);
+  const double scale_0 = std::abs(d_theta_ * radius_);
+  const double scale_1 = std::abs(d_theta_ * radius);
+  CubicPolynomial<double> scaled_elevation(
+      elevation().reference_elevation());
+  scaled_elevation.scale(scale_0, scale_1);
+  CubicPolynomial<double> scaled_superelevation(
+      elevation().reference_elevation());
+  scaled_superelevation.scale(scale_0, scale_1);
+  return std::make_unique<ArcRoadCurve>(
+      center_, radius, theta0_, d_theta_,
+      Elevation<double>(r, scaled_elevation, scaled_superelevation),
+      scaled_superelevation);
 }
 
 

@@ -116,7 +116,7 @@ class Lane : public api::Lane {
     DRAKE_DEMAND(lane_bounds_.max() <= driveable_bounds_.max());
     DRAKE_DEMAND(road_curve != nullptr);
   }
-
+/*
   // TODO(maddog@tri.global)  Allow superelevation to have a center-of-rotation
   //                          which is different from r = 0.
 
@@ -127,7 +127,7 @@ class Lane : public api::Lane {
   const CubicPolynomial<double>& superelevation() const {
     return road_curve_->superelevation();
   }
-
+*/
   void SetStartBp(BranchPoint* bp) { start_bp_ = bp; }
   void SetEndBp(BranchPoint* bp) { end_bp_ = bp; }
 

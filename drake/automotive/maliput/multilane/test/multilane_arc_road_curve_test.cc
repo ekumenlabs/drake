@@ -20,9 +20,12 @@ GTEST_TEST(MultilaneArcRoadCurve, ConstructorTest) {
   const double kTheta1 = 3.0 * M_PI / 4.0;
   const double kDTheta = kTheta1 - kTheta0;
   const CubicPolynomial<double> zp;
-  EXPECT_THROW(ArcRoadCurve(kCenter, -kRadius, kTheta0, kDTheta, zp, zp),
+  const Elevation<double> flat_elevation(0.0, zp, zp);
+  EXPECT_THROW(ArcRoadCurve(kCenter, -kRadius, kTheta0, kDTheta,
+                            flat_elevation, zp),
                std::runtime_error);
-  EXPECT_NO_THROW(ArcRoadCurve(kCenter, kRadius, kTheta0, kDTheta, zp, zp));
+  EXPECT_NO_THROW(ArcRoadCurve(kCenter, kRadius, kTheta0, kDTheta,
+                               flat_elevation, zp));
 }
 
 // Checks arc reference curve interpolations, derivatives, and lengths.
@@ -34,8 +37,9 @@ GTEST_TEST(MultilaneArcRoadCurve, ArcGeometryTest) {
   const double kDTheta = kTheta1 - kTheta0;
   const double kVeryExact = 1e-12;
   const CubicPolynomial<double> zp;
-  const ArcRoadCurve flat_arc_geometry(kCenter, kRadius, kTheta0, kDTheta, zp,
-                                      zp);
+  const Elevation<double> flat_elevation(0.0, zp, zp);
+  const ArcRoadCurve flat_arc_geometry(kCenter, kRadius, kTheta0, kDTheta,
+                                       flat_elevation, zp);
   // Checks the length.
   EXPECT_NEAR(flat_arc_geometry.length(), kDTheta * kRadius, kVeryExact);
   EXPECT_NEAR(flat_arc_geometry.trajectory_length(), kDTheta * kRadius,
@@ -98,19 +102,22 @@ GTEST_TEST(MultilaneArcRoadCurve, IsValidTest) {
   const CubicPolynomial<double> zp;
   const CubicPolynomial<double> constant_superelevation(M_PI / 4.0, 0.0, 0.0,
                                                         0.0);
+  const Elevation<double> flat_elevation(0.0, zp, zp);
+  const Elevation<double> cone_elevation(0.0, zp, constant_superelevation);
   const api::RBounds lateral_bounds(-kRadius * 0.5, kRadius * 0.5);
   const api::RBounds large_lateral_bounds(-kRadius * 1.5, kRadius * 1.5);
   const api::RBounds critical_cone_lateral_bounds(
       -kRadius / std::cos(M_PI / 4.0), kRadius / std::cos(M_PI / 4.0));
   const api::HBounds height_bounds(0.0, 10.0);
   // Checks over a flat arc surface.
-  const ArcRoadCurve flat_arc_geometry(kCenter, kRadius, kTheta0, kDTheta1, zp,
-                                      zp);
+  const ArcRoadCurve flat_arc_geometry(kCenter, kRadius, kTheta0, kDTheta1,
+                                       flat_elevation, zp);
   EXPECT_TRUE(flat_arc_geometry.IsValid(lateral_bounds, height_bounds));
   EXPECT_FALSE(flat_arc_geometry.IsValid(large_lateral_bounds, height_bounds));
   // Checks over a right handed cone.
   const ArcRoadCurve right_handed_cone_geometry(
-      kCenter, kRadius, kTheta0, kDTheta1, zp, constant_superelevation);
+      kCenter, kRadius, kTheta0, kDTheta1, cone_elevation,
+      constant_superelevation);
   EXPECT_TRUE(
       right_handed_cone_geometry.IsValid(lateral_bounds, height_bounds));
   EXPECT_FALSE(
@@ -119,7 +126,8 @@ GTEST_TEST(MultilaneArcRoadCurve, IsValidTest) {
                                                   height_bounds));
   // Checks over a left handed cone.
   const ArcRoadCurve left_handed_cone_geometry(
-      kCenter, kRadius, kTheta0, kDTheta2, zp, constant_superelevation);
+      kCenter, kRadius, kTheta0, kDTheta2, cone_elevation,
+      constant_superelevation);
   EXPECT_TRUE(left_handed_cone_geometry.IsValid(lateral_bounds, height_bounds));
   EXPECT_FALSE(
       left_handed_cone_geometry.IsValid(large_lateral_bounds, height_bounds));
@@ -137,11 +145,12 @@ GTEST_TEST(MultilaneArcRoadCurve, ToCurveFrameTest) {
   const double kDTheta = kTheta1 - kTheta0;
   const double kVeryExact = 1e-12;
   const CubicPolynomial<double> zp;
+  const Elevation<double> flat_elevation(0.0, zp, zp);
   const api::RBounds lateral_bounds(-5.0, 5.0);
   const api::HBounds height_bounds(0.0, 10.0);
 
-  const ArcRoadCurve flat_arc_geometry(kCenter, kRadius, kTheta0, kDTheta, zp,
-                                      zp);
+  const ArcRoadCurve flat_arc_geometry(kCenter, kRadius, kTheta0, kDTheta,
+                                       flat_elevation, zp);
   // Checks points over the composed curve.
   EXPECT_TRUE(CompareMatrices(
       flat_arc_geometry.ToCurveFrame(

@@ -39,14 +39,15 @@ GTEST_TEST(MultilaneLanesTest, Rot3) {
 
 
 GTEST_TEST(MultilaneLanesTest, FlatLineLane) {
-  CubicPolynomial<double> zp {0., 0., 0., 0.};
+  const CubicPolynomial<double> zp(0., 0., 0., 0.);
+  const Elevation<double> flat_elevation(0.0, zp, zp);
   const double kHalfWidth = 10.;
   const double kMaxHeight = 5.;
   RoadGeometry rg({"apple"}, kLinearTolerance, kAngularTolerance);
   std::unique_ptr<RoadCurve> road_curve_1 =
       std::make_unique<LineRoadCurve>(Vector2<double>(100., -75.),
                                      Vector2<double>(100., 50.),
-                                     zp,
+                                     flat_elevation,
                                      zp);
   Segment* s1 = rg.NewJunction({"j1"})->NewSegment({"s1"},
       std::move(road_curve_1));
@@ -125,12 +126,16 @@ GTEST_TEST(MultilaneLanesTest, FlatLineLane) {
               kVeryExact);
 
   // Case 3: Tests LineLane::ToLanePosition() at a non-zero but flat elevation.
-  const double elevation = 10.;
+  const double elevation_offset = 10.;
   const double length = std::sqrt(std::pow(100, 2.) + std::pow(50, 2.));
+  const CubicPolynomial<double> constant_elevation_function(
+      elevation_offset / length, 0.0, 0.0, 0.0);
+  const Elevation<double> constant_elevation(0.0,
+      constant_elevation_function, zp);
   std::unique_ptr<RoadCurve> road_curve_2 =
       std::make_unique<LineRoadCurve>(Vector2<double>(100., -75.),
           Vector2<double>(100., 50.),
-          CubicPolynomial<double>(elevation / length, 0.0, 0.0, 0.0),
+          constant_elevation,
           zp);
   Segment* s2 = rg.NewJunction({"j2"})->NewSegment({"s2"},
       std::move(road_curve_2));
@@ -144,11 +149,12 @@ GTEST_TEST(MultilaneLanesTest, FlatLineLane) {
   EXPECT_TRUE(api::test::IsGeoPositionClose(
       nearest_position,
       api::GeoPosition(100. - x_dist_to_edge, -75. + y_dist_to_edge,
-                       kMaxHeight + elevation),
+                       kMaxHeight + elevation_offset),
       kVeryExact));
-  EXPECT_NEAR(distance, std::sqrt(std::pow(175. - x_dist_to_edge, 2.) +
-                                  std::pow(100. - y_dist_to_edge, 2.) +
-                                  std::pow(20. - kMaxHeight - elevation, 2.)),
+  EXPECT_NEAR(distance,
+              std::sqrt(std::pow(175. - x_dist_to_edge, 2.) +
+                        std::pow(100. - y_dist_to_edge, 2.) +
+                        std::pow(20. - kMaxHeight - elevation_offset, 2.)),
               kVeryExact);
 
   // Tests the integrity of LineLane::ToLanePosition() with various null
@@ -203,7 +209,8 @@ GTEST_TEST(MultilaneLanesTest, FlatLineLane) {
 
 
 GTEST_TEST(MultilaneLanesTest, FlatArcLane) {
-  CubicPolynomial<double> zp {0., 0., 0., 0.};
+  const CubicPolynomial<double> zp(0., 0., 0., 0.);
+  const Elevation<double> flat_elevation(0., zp, zp);
   RoadGeometry rg({"apple"}, kLinearTolerance, kAngularTolerance);
   const double theta0 = 0.25 * M_PI;
   const double d_theta = 1.5 * M_PI;
@@ -212,7 +219,8 @@ GTEST_TEST(MultilaneLanesTest, FlatArcLane) {
   const double kHalfWidth = 10.;
   const double kMaxHeight = 5.;
   std::unique_ptr<RoadCurve> road_curve_1 =
-      std::make_unique<ArcRoadCurve>(center, radius, theta0, d_theta, zp, zp);
+      std::make_unique<ArcRoadCurve>(center, radius, theta0, d_theta,
+                                     flat_elevation, zp);
   Segment* s1 = rg.NewJunction({"j1"})->NewSegment({"s1"},
       std::move(road_curve_1));
   Lane* l2 = s1->NewLane(
@@ -310,11 +318,14 @@ GTEST_TEST(MultilaneLanesTest, FlatArcLane) {
                    (nearest_position.xyz() - point_outside_lane.xyz()).norm());
 
   // Case 3: Tests ArcLane::ToLanePosition() at a non-zero but flat elevation.
-  const double elevation = 10.;
+  const double elevation_offset = 10.;
+  const CubicPolynomial<double> constant_offset_polynomial(
+      elevation_offset / radius / d_theta, 0.0, 0.0, 0.0);
+  const Elevation<double> constant_offset_elevation(0.,
+      constant_offset_polynomial, zp);
   std::unique_ptr<RoadCurve> road_curve_2 =
       std::make_unique<ArcRoadCurve>(center, radius, theta0, d_theta,
-          CubicPolynomial<double>(elevation / radius / d_theta, 0.0, 0.0, 0.0),
-          zp);
+          constant_offset_elevation, zp);
   Segment* s2 = rg.NewJunction({"j2"})->NewSegment({"s2"},
                                std::move(road_curve_2));
   Lane* l2_with_z = s2->NewLane(
@@ -330,7 +341,7 @@ GTEST_TEST(MultilaneLanesTest, FlatArcLane) {
       api::GeoPosition(
           (radius + kHalfWidth) * std::cos(theta0 + d_theta) + center(0),
           (radius + kHalfWidth) * std::sin(theta0 + d_theta) + center(1),
-          kMaxHeight + elevation),
+          kMaxHeight + elevation_offset),
       kVeryExact));
   EXPECT_DOUBLE_EQ(distance,
                    (nearest_position.xyz() - point_outside_lane.xyz()).norm());
@@ -340,7 +351,7 @@ GTEST_TEST(MultilaneLanesTest, FlatArcLane) {
   const double d_theta_overlap = 3 * M_PI;
   std::unique_ptr<RoadCurve> road_curve_3 =
       std::make_unique<ArcRoadCurve>(center, radius, theta0, d_theta_overlap,
-                                     zp, zp);
+                                     flat_elevation, zp);
   Segment* s3 = rg.NewJunction({"j3"})->NewSegment({"s3"},
       std::move(road_curve_3));
   Lane* l2_overlapping = s3->NewLane(
@@ -370,7 +381,7 @@ GTEST_TEST(MultilaneLanesTest, FlatArcLane) {
   const double d_theta_wrap = -0.4 * M_PI;
   std::unique_ptr<RoadCurve> road_curve_4 =
       std::make_unique<ArcRoadCurve>(center, radius, theta0_wrap, d_theta_wrap,
-                                    zp, zp);
+                                     flat_elevation, zp);
   Segment* s4 = rg.NewJunction({"j4"})->NewSegment({"s4"},
       std::move(road_curve_4));
   Lane* l2_wrap = s4->NewLane(
@@ -451,13 +462,15 @@ GTEST_TEST(MultilaneLanesTest, FlatArcLane) {
 
 
 GTEST_TEST(MultilaneLanesTest, ArcLaneWithConstantSuperelevation) {
-  CubicPolynomial<double> zp {0., 0., 0., 0.};
+  const CubicPolynomial<double> zp(0., 0., 0., 0.);
   const double kTheta = 0.10 * M_PI;  // superelevation
+  const CubicPolynomial<double> constant_superelevation(
+      (kTheta) / (100. * 1.5 * M_PI), 0., 0., 0.);
+  const Elevation<double> tilted_elevation(0.0, zp, constant_superelevation);
   RoadGeometry rg({"apple"}, kLinearTolerance, kAngularTolerance);
   std::unique_ptr<RoadCurve> road_curve_1 =
       std::make_unique<ArcRoadCurve>(Vector2<double>(100., -75.), 100.0,
-          0.25 * M_PI, 1.5 * M_PI, zp,
-          CubicPolynomial<double>((kTheta) / (100. * 1.5 * M_PI), 0., 0., 0.));
+          0.25 * M_PI, 1.5 * M_PI, tilted_elevation, constant_superelevation);
   Segment* s1 = rg.NewJunction({"j1"})->NewSegment({"s1"},
       std::move(road_curve_1));
   Lane* l2 = s1->NewLane(
@@ -566,7 +579,6 @@ api::LanePosition IntegrateTrivially(const api::Lane* lane,
 
 
 GTEST_TEST(MultilaneLanesTest, HillIntegration) {
-  CubicPolynomial<double> zp {0., 0., 0., 0.};
   RoadGeometry rg({"apple"}, kLinearTolerance, kAngularTolerance);
   const double theta0 = 0.25 * M_PI;
   const double d_theta = 0.5 * M_PI;
@@ -574,15 +586,17 @@ GTEST_TEST(MultilaneLanesTest, HillIntegration) {
   const double p_scale = 100. * d_theta;
   const double z0 = 0.;
   const double z1 = 20.;
+  const CubicPolynomial<double> zp(0., 0., 0., 0.);
   // A cubic polynomial such that:
   //   f(0) = (z0 / p_scale), f(1) = (z1 / p_scale), and f'(0) = f'(1) = 0.
   const CubicPolynomial<double> kHillPolynomial(z0 / p_scale,
                                         0.,
                                         (3. * (z1 - z0) / p_scale),
                                         (-2. * (z1 - z0) / p_scale));
+  const Elevation<double> kHillElevation(0.0, kHillPolynomial, zp);
   std::unique_ptr<RoadCurve> road_curve_1 =
       std::make_unique<ArcRoadCurve>(Vector2<double>(-100., -100.), 100.,
-          theta0, d_theta, kHillPolynomial, zp);
+          theta0, d_theta, kHillElevation, zp);
   Segment* s1 = rg.NewJunction({"j1"})->NewSegment({"s1"},
       std::move(road_curve_1));
   Lane* l1 = s1->NewLane(

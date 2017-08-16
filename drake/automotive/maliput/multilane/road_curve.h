@@ -5,7 +5,9 @@
 
 #include "drake/automotive/maliput/api/lane_data.h"
 #include "drake/automotive/maliput/multilane/cubic_polynomial.h"
+#include "drake/automotive/maliput/multilane/elevation.h"
 #include "drake/common/drake_copyable.h"
+#include "drake/common/drake_throw.h"
 #include "drake/common/eigen_types.h"
 #include "drake/common/unused.h"
 
@@ -33,13 +35,14 @@ class RoadCurve {
   /// @param superelevation CubicPolynomial object that represents the
   /// superelevation polynomial. Note that coefficients should be scaled to
   /// match the path length integral of the reference curve.
-  RoadCurve(const CubicPolynomial<double>& elevation,
-            const CubicPolynomial<double>& superelevation)
-      : elevation_(elevation), superelevation_(superelevation) {}
+  RoadCurve(const Elevation<double>& elevation,
+            const CubicPolynomial<double>& superelevation) :
+      elevation_(elevation),
+      superelevation_(superelevation) {}
 
   virtual ~RoadCurve() = default;
 
-  const CubicPolynomial<double>& elevation() const { return elevation_; }
+  const Elevation<double>& elevation() const { return elevation_; }
 
   const CubicPolynomial<double>& superelevation() const {
     return superelevation_;
@@ -51,11 +54,6 @@ class RoadCurve {
   double trajectory_length() const {
     return elevation_.s_p(1.0) * length();
   }
-
-  CubicPolynomial<double> ScaleCubicPolynomial(
-      const CubicPolynomial<double>& cubic_polynomial,
-      double scale_0,
-      double scale_1) const;
 
   /// Computes the interpolation of the reference curve.
   /// @param p The reference curve parameter.
@@ -125,7 +123,7 @@ class RoadCurve {
 
  private:
   // A polynomial that represents the elevation change as a function of p.
-  CubicPolynomial<double> elevation_;
+  Elevation<double> elevation_;
   // A polynomial that represents the superelevation angle change as a function
   // of p.
   CubicPolynomial<double> superelevation_;
