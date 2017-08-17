@@ -75,11 +75,11 @@ template<typename T> class CubicPolynomial : public C2ScalarFunction<T> {
   }
 
   void scale(T scale_0, T scale_1) override {
-    const T d_y{ f_p(T(1.0)) - f_p(T(0.0)) * scale_0 };
+    const T d_y{ (f_p(T(1.0)) - f_p(T(0.0))) * scale_0 };
     a_ = a_ * scale_0 / scale_1;
     // b_ = b_;
-    c_ = c_ - 3.0 * d_y / scale_0 + 3.0 * d_y / scale_1,
-    d_ = d_ + 2.0 * d_y / scale_0 - 2.0 * d_y / scale_1;
+    c_ = c_ - T(3.0) * d_y / scale_0 + T(3.0) * d_y / scale_1,
+    d_ = d_ + T(2.0) * d_y / scale_0 - T(2.0) * d_y / scale_1;
     const T df = f_p(T(1.)) - f_p(T(0.));
     s_1_ = std::sqrt(T(1.) + (df * df));
   }
