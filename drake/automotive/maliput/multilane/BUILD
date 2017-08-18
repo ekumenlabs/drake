@@ -117,6 +117,15 @@ drake_cc_googletest(
 )
 
 drake_cc_googletest(
+    name = "multilane_elevation_test",
+    size = "small",
+    srcs = ["test/multilane_elevation_test.cc"],
+    deps = [
+        ":lanes",
+    ],
+)
+
+drake_cc_googletest(
     name = "multilane_lanes_test",
     size = "small",
     srcs = ["test/multilane_lanes_test.cc"],

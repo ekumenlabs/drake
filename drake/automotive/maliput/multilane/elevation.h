@@ -22,8 +22,7 @@ template<typename T> class Elevation : public C2ScalarFunction<T> {
             const CubicPolynomial<T>& reference_superelevation) :
       r_(r), reference_elevation_(reference_elevation),
       reference_superelevation_(reference_superelevation) {
-  const T df = f_p(T(1.)) - f_p(T(0.));
-    s_1_ = std::sqrt(T(1.) + (df * df));
+    UpdateScale();
   }
 
   ~Elevation() = default;
@@ -62,6 +61,7 @@ template<typename T> class Elevation : public C2ScalarFunction<T> {
   void scale(T scale_0, T scale_1) override {
     reference_elevation_.scale(scale_0, scale_1);
     reference_superelevation_.scale(scale_0, scale_1);
+    UpdateScale();
   }
 
   const CubicPolynomial<T>& reference_elevation() const {
@@ -74,9 +74,17 @@ template<typename T> class Elevation : public C2ScalarFunction<T> {
 
   T r() const { return r_; }
 
-  void set_r(T r) { r_ = r; }
+  void set_r(T r) {
+    r_ = r;
+    UpdateScale();
+  }
 
  private:
+  void UpdateScale() {
+    const T df = f_p(T(1.)) - f_p(T(0.));
+    s_1_ = std::sqrt(T(1.) + (df * df));
+  }
+
   T r_{};
   T s_1_{};
   CubicPolynomial<T> reference_elevation_;

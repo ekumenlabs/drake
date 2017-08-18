@@ -21,8 +21,7 @@ template<typename T> class CubicPolynomial : public C2ScalarFunction<T> {
   /// Constructs a cubic polynomial given all four coefficients.
   CubicPolynomial(T a, T b, T c, T d)
       : a_(a), b_(b), c_(c), d_(d) {
-    const T df = f_p(T(1.)) - f_p(T(0.));
-    s_1_ = std::sqrt(T(1.) + (df * df));
+    UpdateScale();
   }
 
   // Returns the a coefficient.
@@ -80,11 +79,15 @@ template<typename T> class CubicPolynomial : public C2ScalarFunction<T> {
     // b_ = b_;
     c_ = c_ - T(3.0) * d_y / scale_0 + T(3.0) * d_y / scale_1,
     d_ = d_ + T(2.0) * d_y / scale_0 - T(2.0) * d_y / scale_1;
+    UpdateScale();
+  }
+
+ private:
+  void UpdateScale() {
     const T df = f_p(T(1.)) - f_p(T(0.));
     s_1_ = std::sqrt(T(1.) + (df * df));
   }
 
- private:
   T a_{};
   T b_{};
   T c_{};
