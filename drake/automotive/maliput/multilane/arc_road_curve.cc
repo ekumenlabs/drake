@@ -1,6 +1,7 @@
 #include "drake/automotive/maliput/multilane/arc_road_curve.h"
 
 #include <algorithm>
+#include <iostream>
 #include <limits>
 
 #include "drake/common/unused.h"
@@ -181,30 +182,17 @@ bool ArcRoadCurve::IsValid(
 }
 
 std::unique_ptr<RoadCurve> ArcRoadCurve::Offset(double r) const {
-  if (r < 0.0 && d_theta_ < 0.0) {
-    DRAKE_THROW_UNLESS(std::abs(r) < radius_);
-  }
-  if (r > 0.0 && d_theta_ > 0.0) {
-    DRAKE_THROW_UNLESS(r < radius_);
-  }
-
   // Computes the new radius.
-  const double radius = radius_ - std::copysign(1.0, d_theta_) * r;
+  const double radius_sign = - std::copysign(1.0, d_theta_) *
+                               std::copysign(1.0, r);
+  const double radius = radius_ + radius_sign * std::abs(r);
   // Computes the elevation and superelevation polynomials.
-  const double scale_0 = std::abs(d_theta_ * radius_);
-  const double scale_1 = std::abs(d_theta_ * radius);
-  CubicPolynomial<double> scaled_elevation(
-      elevation().reference_elevation());
-  scaled_elevation.scale(scale_0, scale_1);
-  CubicPolynomial<double> scaled_superelevation(
-      elevation().reference_elevation());
-  scaled_superelevation.scale(scale_0, scale_1);
-  return std::make_unique<ArcRoadCurve>(
-      center_, radius, theta0_, d_theta_,
-      Elevation<double>(r, scaled_elevation, scaled_superelevation),
-      scaled_superelevation);
+  Elevation<double> composed_elevation(elevation());
+  composed_elevation.set_r(radius_sign * std::abs(r));
+  return std::make_unique<ArcRoadCurve>(center_, radius, theta0_, d_theta_,
+                                        composed_elevation,
+                                        superelevation());
 }
-
 
 }  // namespace multilane
 }  // namespace maliput

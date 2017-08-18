@@ -195,6 +195,42 @@ GTEST_TEST(MultilaneArcRoadCurve, ToCurveFrameTest) {
       kVeryExact));
 }
 
+GTEST_TEST(MultilaneArcRoadCurve, OffsetTest) {
+  const Vector2<double> kCenter(10.0, 10.0);
+  const double kRadius = 10.0;
+  const double kTheta0 = 0.0;
+  const double kTheta1 = 2.0 * M_PI;
+  const double kDTheta = kTheta1 - kTheta0;
+  const CubicPolynomial<double> reference_elevation(0.0, 0.0, 0.0, 0.0);
+  const double kSuperelevationOffset = (M_PI / 4.0);
+  const CubicPolynomial<double> reference_superelevation(
+      kSuperelevationOffset, 0.0, 0.0, 0.0);
+  const Elevation<double> composed_elevation(
+      0.0, reference_elevation, reference_superelevation);
+  const ArcRoadCurve arc_road(
+      kCenter, kRadius, kTheta0, kDTheta, composed_elevation,
+      reference_superelevation);
+
+  const std::vector<double> kPVector = {0.0, 0.1, 0.2, 0.5, 0.7, 1.0};
+  for (const double p : kPVector) {
+    EXPECT_DOUBLE_EQ(arc_road.elevation().f_p(p), 0.0);
+  }
+
+  EXPECT_THROW(arc_road.Offset(kRadius), std::runtime_error);
+  std::unique_ptr<RoadCurve> offset_road_curve = arc_road.Offset(-kRadius);
+  EXPECT_DOUBLE_EQ(offset_road_curve->length(), 2.0 * arc_road.length());
+  EXPECT_DOUBLE_EQ(offset_road_curve->trajectory_length(),
+                   2.0 * arc_road.trajectory_length());
+  EXPECT_DOUBLE_EQ(offset_road_curve->elevation().r(), kRadius);
+  std::cerr << "Arc scale elevation" << std::endl;
+  std::cerr << "-------------------------------------------" << std::endl;
+  std::cerr << "-------------------------------------------" << std::endl;
+  std::cerr << "-------------------------------------------" << std::endl;
+  for (const double p : kPVector) {
+    EXPECT_DOUBLE_EQ(offset_road_curve->elevation().f_p(p), kRadius);
+  }
+}
+
 }  // namespace multilane
 }  // namespace maliput
 }  // namespace drake

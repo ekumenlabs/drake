@@ -39,10 +39,11 @@ std::unique_ptr<RoadCurve> LineRoadCurve::Offset(double r) const {
   const Vector2<double> s_unit_vector = dp_ / scale;
   const Vector2<double> r_unit_vector{-s_unit_vector(1), s_unit_vector(0)};
   const Vector2<double> p0 = p0_ + r_unit_vector * r;
+  Elevation<double> composed_elevation(elevation());
+  composed_elevation.set_r(r + elevation().r());
   return std::make_unique<LineRoadCurve>(p0, dp_,
-      Elevation<double>(r, elevation().reference_elevation(),
-                        elevation().reference_superelevation()),
-      superelevation());
+                                         composed_elevation,
+                                         superelevation());
 }
 
 

@@ -107,6 +107,34 @@ GTEST_TEST(MultilaneLineRoadCurve, ToCurveFrameTest) {
       Vector3<double>(0.707106781186547, -0.707106781186547, 7.0), kVeryExact));
 }
 
+GTEST_TEST(MultilaneLineRoadCurve, OffsetTest) {
+  const Vector2<double> kOrigin(10.0, 10.0);
+  const Vector2<double> kDirection(10.0, 10.0);
+  const CubicPolynomial<double> reference_elevation(0.0, 0.0, 0.0, 0.0);
+  const double kSuperelevationOffset = (M_PI / 4.0) / kDirection.norm();
+  const CubicPolynomial<double> reference_superelevation(
+      kSuperelevationOffset, 0.0, 0.0, 0.0);
+  const Elevation<double> composed_elevation(
+      0.0, reference_elevation, reference_superelevation);
+  const LineRoadCurve line_road(
+      kOrigin, kDirection, composed_superelevation, zp);
+
+  const std::vector<double> kPVector = {0.0, 0.1, 0.2, 0.5, 0.7, 1.0};
+  for (const double p : kPVector) {
+    EXPECT_DOUBLE_EQ(line_road->elevation.f_p(p), 0.0);
+  }
+
+  const double kOffsetDistance = 10.0;
+  std::unique_ptr<RoadCurve<double>> offset_line_road =
+    line_road.Offset(kOffsetDistance);
+  EXPECT_DOUBLE_EQ(offset_line_road->length(), line_road->length());
+  EXPECT_DOUBLE_EQ(offset_line_road->trajectory_length(),
+                   line_road->trajectory_length());
+  for (const double p : kPVector) {
+    EXPECT_DOUBLE_EQ(offset_line_road->elevation().f_p(p), kOffsetDistance);
+  }
+}
+
 }  // namespace multilane
 }  // namespace maliput
 }  // namespace drake
