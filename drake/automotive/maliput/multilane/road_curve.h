@@ -40,10 +40,15 @@ class RoadCurve {
       elevation_(elevation),
       superelevation_(superelevation) {}
 
+  /// Destructor.
   virtual ~RoadCurve() = default;
 
+  /// Getter of the composed elevation function.
+  /// @return the composed elevation.
   const Elevation<double>& elevation() const { return elevation_; }
 
+  /// Getter of the superelevation function.
+  /// @return The superelevation function.
   const CubicPolynomial<double>& superelevation() const {
     return superelevation_;
   }
@@ -119,6 +124,10 @@ class RoadCurve {
       const api::RBounds& lateral_bounds,
       const api::HBounds& height_bounds) const = 0;
 
+  /// Computes an offset of the reference road curve at @p r lateral distance.
+  /// @param r The lateral distance to offset the reference curve.
+  /// @return A std::unique_ptr<RoadCurve> object of the same type as the
+  /// implementation with the curve offset.
   virtual std::unique_ptr<RoadCurve> Offset(double r) const = 0;
 
  private:

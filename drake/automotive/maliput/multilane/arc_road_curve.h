@@ -146,6 +146,18 @@ class ArcRoadCurve : public RoadCurve {
       const api::RBounds& lateral_bounds,
       const api::HBounds& height_bounds) const override;
 
+  /// Computes the offset of the reference curve at @p r lateral displacement.
+  /// Original lateral displacement of the elevation is taken into account, so
+  /// it is added to @p r. This translates to a bigger or smaller radius.
+  /// The offset is done in the normal direction of the curve over the z = 0
+  /// plane. Consequently, it depends on the sign of both @p r and the
+  /// angle path (d_thetha) to let the offset be increasing always to the left
+  /// side of the curve taking into account how the reference curve flows with
+  /// increasing p.
+  /// @param r The lateral displacement of the offset.
+  /// @return A new ArcRoadCurve object with an offset on the radius.
+  /// @throws std::runtime_error When the resulting radius is less or equal to
+  /// 0.0.
   std::unique_ptr<RoadCurve> Offset(double r) const override;
 
  private:

@@ -143,14 +143,20 @@ template<typename T> class Elevation : public C2ScalarFunction<T> {
     return s / s_1_;
   }
 
+  /// Getter of the reference_elevation function.
+  /// @return The reference_elevation.
   const CubicPolynomial<T>& reference_elevation() const {
     return reference_elevation_;
   }
 
+  /// Getter of the reference_superelevation function.
+  /// @return The reference_superelevation.
   const CubicPolynomial<T>& reference_superelevation() const {
     return reference_superelevation_;
   }
 
+  /// Getter of the lateral displacement of the composed elevation.
+  /// @return The lateral displacement.
   T r() const { return r_; }
 
   /// Sets a new lateral distance of the composed elevation.

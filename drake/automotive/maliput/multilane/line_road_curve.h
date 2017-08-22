@@ -42,6 +42,7 @@ class LineRoadCurve : public RoadCurve {
       dp_(dxy),
       heading_(std::atan2(dxy.y(), dxy.x())) {}
 
+  /// Destructor.
   ~LineRoadCurve() override = default;
 
   /// Computes the interpolation of the position at @p p, which is a scale
@@ -120,6 +121,14 @@ class LineRoadCurve : public RoadCurve {
     return true;
   }
 
+  /// Computes the offset of the reference curve at @p r lateral displacement.
+  /// Original lateral displacement of the elevation is taken into account, so
+  /// it is added to @p r.
+  /// The offset is done in the normal direction of dp over the z = 0 plane.
+  /// Being @p r a positive number will move the reference curve to the left of
+  /// the dp vector. The opposite when @p r is negative.
+  /// @param r The lateral displacement of the offset.
+  /// @return A new LineRoadCurve moved on the normal direction of dp.
   std::unique_ptr<RoadCurve> Offset(double r) const override;
 
  private:

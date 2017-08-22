@@ -186,9 +186,10 @@ std::unique_ptr<RoadCurve> ArcRoadCurve::Offset(double r) const {
   const double radius_sign = - std::copysign(1.0, d_theta_) *
                                std::copysign(1.0, r);
   const double radius = radius_ + radius_sign * std::abs(r);
+  DRAKE_THROW_UNLESS(radius > 0);
   // Computes the elevation and superelevation polynomials.
   Elevation<double> composed_elevation(elevation());
-  composed_elevation.set_r(radius_sign * std::abs(r));
+  composed_elevation.set_r(composed_elevation.r() + radius_sign * std::abs(r));
   return std::make_unique<ArcRoadCurve>(center_, radius, theta0_, d_theta_,
                                         composed_elevation,
                                         superelevation());

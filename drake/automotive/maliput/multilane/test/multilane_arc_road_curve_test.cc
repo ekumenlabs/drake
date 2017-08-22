@@ -222,10 +222,6 @@ GTEST_TEST(MultilaneArcRoadCurve, OffsetTest) {
   EXPECT_DOUBLE_EQ(offset_road_curve->trajectory_length(),
                    2.0 * arc_road.trajectory_length());
   EXPECT_DOUBLE_EQ(offset_road_curve->elevation().r(), kRadius);
-  std::cerr << "Arc scale elevation" << std::endl;
-  std::cerr << "-------------------------------------------" << std::endl;
-  std::cerr << "-------------------------------------------" << std::endl;
-  std::cerr << "-------------------------------------------" << std::endl;
   for (const double p : kPVector) {
     EXPECT_DOUBLE_EQ(offset_road_curve->elevation().f_p(p), kRadius);
   }
