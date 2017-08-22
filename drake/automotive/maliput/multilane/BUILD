@@ -137,6 +137,15 @@ drake_cc_googletest(
 )
 
 drake_cc_googletest(
+    name = "multilane_line_road_curve_test",
+    srcs = ["test/multilane_line_road_curve_test.cc"],
+    deps = [
+        ":lanes",
+        "//drake/common:eigen_matrix_compare",
+    ],
+)
+
+drake_cc_googletest(
     name = "multilane_road_geometry_test",
     size = "small",
     srcs = ["test/multilane_road_geometry_test.cc"],

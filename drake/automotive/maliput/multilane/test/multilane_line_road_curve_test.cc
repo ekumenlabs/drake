@@ -1,5 +1,5 @@
 /* clang-format off to disable clang-format-includes */
-#include "drake/automotive/maliput/multilane/line_road_geometry.h"
+#include "drake/automotive/maliput/multilane/line_road_curve.h"
 /* clang-format on */
 
 #include <utility>
@@ -64,7 +64,7 @@ GTEST_TEST(MultilaneLineRoadCurve, IsValidTest) {
   const Vector2<double> kDirection(10.0, 10.0);
   const CubicPolynomial<double> zp(0.0, 0.0, 0.0, 0.0);
   const Elevation<double> flat_elevation(0.0, zp, zp);
-  const api::Rbounds lateral_bounds(-10.0, 10.0);
+  const api::RBounds lateral_bounds(-10.0, 10.0);
   const api::HBounds elevation_bounds(0.0, 10.0);
   const LineRoadCurve flat_line_geometry(kOrigin, kDirection, flat_elevation,
                                          zp);
@@ -82,7 +82,8 @@ GTEST_TEST(MultilaneLineRoadCurve, ToCurveFrameTest) {
   const api::RBounds lateral_bounds(-10.0, 10.0);
   const api::HBounds elevation_bounds(0.0, 10.0);
 
-  const LineRoadCurve flat_line_geometry(kOrigin, kDirection, flat_elevation, zp);
+  const LineRoadCurve flat_line_geometry(kOrigin, kDirection, flat_elevation,
+                                         zp);
   // Checks over the base line.
   EXPECT_TRUE(CompareMatrices(
       flat_line_geometry.ToCurveFrame(Vector3<double>(10.0, 10.0, 0.0),
@@ -107,31 +108,53 @@ GTEST_TEST(MultilaneLineRoadCurve, ToCurveFrameTest) {
       Vector3<double>(0.707106781186547, -0.707106781186547, 7.0), kVeryExact));
 }
 
+// Checks the offset computation of a LineRoadCurve object.
 GTEST_TEST(MultilaneLineRoadCurve, OffsetTest) {
+  const double kVeryExact = 1e-12;
   const Vector2<double> kOrigin(10.0, 10.0);
   const Vector2<double> kDirection(10.0, 10.0);
   const CubicPolynomial<double> reference_elevation(0.0, 0.0, 0.0, 0.0);
-  const double kSuperelevationOffset = (M_PI / 4.0) / kDirection.norm();
+  const double kSuperelevationOffset = M_PI / 4.0;
   const CubicPolynomial<double> reference_superelevation(
       kSuperelevationOffset, 0.0, 0.0, 0.0);
   const Elevation<double> composed_elevation(
       0.0, reference_elevation, reference_superelevation);
   const LineRoadCurve line_road(
-      kOrigin, kDirection, composed_superelevation, zp);
+      kOrigin, kDirection, composed_elevation, reference_superelevation);
 
   const std::vector<double> kPVector = {0.0, 0.1, 0.2, 0.5, 0.7, 1.0};
   for (const double p : kPVector) {
-    EXPECT_DOUBLE_EQ(line_road->elevation.f_p(p), 0.0);
+    EXPECT_DOUBLE_EQ(line_road.elevation().f_p(p), 0.0);
   }
-
+  // Computes an offset of the line to the left.
   const double kOffsetDistance = 10.0;
-  std::unique_ptr<RoadCurve<double>> offset_line_road =
-    line_road.Offset(kOffsetDistance);
-  EXPECT_DOUBLE_EQ(offset_line_road->length(), line_road->length());
+  std::unique_ptr<RoadCurve> offset_line_road =
+      line_road.Offset(kOffsetDistance);
+  EXPECT_DOUBLE_EQ(offset_line_road->length(), line_road.length());
   EXPECT_DOUBLE_EQ(offset_line_road->trajectory_length(),
-                   line_road->trajectory_length());
+                   line_road.trajectory_length());
+  const Vector2<double> kLeftDifferenceVector(
+      -kOffsetDistance / std::sqrt(2.0), kOffsetDistance / std::sqrt(2.0));
   for (const double p : kPVector) {
     EXPECT_DOUBLE_EQ(offset_line_road->elevation().f_p(p), kOffsetDistance);
+    const Vector2<double> difference_vector = offset_line_road->xy_of_p(p) -
+                                              line_road.xy_of_p(p);
+    EXPECT_TRUE(CompareMatrices(difference_vector, kLeftDifferenceVector,
+                                kVeryExact));
+  }
+  // Computes an offset of the line to the right.
+  offset_line_road = line_road.Offset(-kOffsetDistance);
+  EXPECT_DOUBLE_EQ(offset_line_road->length(), line_road.length());
+  EXPECT_DOUBLE_EQ(offset_line_road->trajectory_length(),
+                   line_road.trajectory_length());
+  const Vector2<double> kRightDifferenceVector(
+      kOffsetDistance / std::sqrt(2.0), -kOffsetDistance / std::sqrt(2.0));
+  for (const double p : kPVector) {
+    EXPECT_DOUBLE_EQ(offset_line_road->elevation().f_p(p), -kOffsetDistance);
+    const Vector2<double> difference_vector = offset_line_road->xy_of_p(p) -
+                                              line_road.xy_of_p(p);
+    EXPECT_TRUE(CompareMatrices(difference_vector, kRightDifferenceVector,
+                                kVeryExact));
   }
 }
 
