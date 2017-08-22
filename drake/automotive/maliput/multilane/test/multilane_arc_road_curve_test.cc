@@ -196,6 +196,7 @@ GTEST_TEST(MultilaneArcRoadCurve, ToCurveFrameTest) {
 }
 
 GTEST_TEST(MultilaneArcRoadCurve, OffsetTest) {
+  const double kVeryExact = 1e-12;
   const Vector2<double> kCenter(10.0, 10.0);
   const double kRadius = 10.0;
   const double kTheta0 = 0.0;
@@ -215,15 +216,35 @@ GTEST_TEST(MultilaneArcRoadCurve, OffsetTest) {
   for (const double p : kPVector) {
     EXPECT_DOUBLE_EQ(arc_road.elevation().f_p(p), 0.0);
   }
-
+  // Checks the case where the resulting radius becomes zero.
   EXPECT_THROW(arc_road.Offset(kRadius), std::runtime_error);
-  std::unique_ptr<RoadCurve> offset_road_curve = arc_road.Offset(-kRadius);
+  // Computes an offset to the left of the reference curve.
+  std::unique_ptr<RoadCurve> offset_road_curve = arc_road.Offset(kRadius / 2.0);
+  const double left_offset_radius = kRadius / 2.0;
+  EXPECT_DOUBLE_EQ(offset_road_curve->length(), arc_road.length() / 2.0);
+  EXPECT_DOUBLE_EQ(offset_road_curve->trajectory_length(),
+                   arc_road.trajectory_length() / 2.0);
+  EXPECT_DOUBLE_EQ(offset_road_curve->elevation().r(), -kRadius / 2.0);
+  for (const double p : kPVector) {
+    EXPECT_DOUBLE_EQ(offset_road_curve->elevation().f_p(p), -kRadius / 2.0);
+    EXPECT_TRUE(CompareMatrices(offset_road_curve->xy_of_p(p),
+        Vector2<double>(left_offset_radius * std::cos(p * kDTheta),
+                        left_offset_radius * std::sin(p * kDTheta)) + kCenter,
+        kVeryExact));
+  }
+  // Computes an offset to the right of the reference curve.
+  offset_road_curve = arc_road.Offset(-kRadius);
+  const double right_offset_radius = 2.0 * kRadius;
   EXPECT_DOUBLE_EQ(offset_road_curve->length(), 2.0 * arc_road.length());
   EXPECT_DOUBLE_EQ(offset_road_curve->trajectory_length(),
                    2.0 * arc_road.trajectory_length());
   EXPECT_DOUBLE_EQ(offset_road_curve->elevation().r(), kRadius);
   for (const double p : kPVector) {
     EXPECT_DOUBLE_EQ(offset_road_curve->elevation().f_p(p), kRadius);
+    EXPECT_TRUE(CompareMatrices(offset_road_curve->xy_of_p(p),
+        Vector2<double>(right_offset_radius * std::cos(p * kDTheta),
+                        right_offset_radius * std::sin(p * kDTheta)) + kCenter,
+        kVeryExact));
   }
 }
 
