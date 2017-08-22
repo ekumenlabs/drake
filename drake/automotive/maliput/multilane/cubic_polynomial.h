@@ -72,7 +72,7 @@ template<typename T> class CubicPolynomial : public C2ScalarFunction<T> {
     // return df;  which is...
     return f_p(T(1.)) - f_p(T(0.));
   }
-
+  /*
   void scale(T scale_0, T scale_1) override {
     const T d_y{ (f_p(T(1.0)) - f_p(T(0.0))) * scale_0 };
     a_ = a_ * scale_0 / scale_1;
@@ -81,7 +81,7 @@ template<typename T> class CubicPolynomial : public C2ScalarFunction<T> {
     d_ = d_ + T(2.0) * d_y / scale_0 - T(2.0) * d_y / scale_1;
     UpdateScale();
   }
-
+  */
  private:
   void UpdateScale() {
     const T df = f_p(T(1.)) - f_p(T(0.));

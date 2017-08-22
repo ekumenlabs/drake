@@ -103,7 +103,7 @@ GTEST_TEST(MultilaneElevation, ComposedElevationTest) {
                      reference_elevation_f_p + superelevation_correction);
   }
 }
-
+/*
 GTEST_TEST(MultilaneElevation, ScaleTest) {
   const double dX = 10.0;
   const double Y0 = 10.0;
@@ -138,7 +138,7 @@ GTEST_TEST(MultilaneElevation, ScaleTest) {
       1 + (kF_p_End - kF_p_Init) * (kF_p_End - kF_p_Init));
   EXPECT_DOUBLE_EQ(elevation.s_p(1.0), kPathScale);
 }
-
+*/
 }  // namespace multilane
 }  // namespace maliput
 }  // namespace drake
