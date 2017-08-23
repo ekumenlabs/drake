@@ -108,7 +108,40 @@ GTEST_TEST(MultilaneLineRoadCurve, ToCurveFrameTest) {
       Vector3<double>(0.707106781186547, -0.707106781186547, 7.0), kVeryExact));
 }
 
-// Checks the offset computation of a LineRoadCurve object.
+// Checks the Offset() computation of a LineRoadCurve object. Aerial view of the
+// geometry is the following:
+//
+// <pre>
+//
+//            *             <---- Left LineRoadCurve offset.
+//          *
+//        *
+//      *           *       <---- Base LineRoadCurve, elevation = 0.0.
+//    *           *
+//              *
+//            *         *   <---- Right LineRoadCurve offset.
+//          *         *
+//                  *
+//                *
+//              *
+// </pre>
+//
+// A cross section of the three curves will show the following:
+//
+// <pre>
+//
+//    x                   <---- Left LineRoadCurve offset.
+//    | *
+//    |   *
+//    |     x             <---- Base LineRoadCurve, elevation = 0.0.
+//    |       *
+//    |         *
+//    |___________x       <---- Right LineRoadCurve offset.
+//
+// </pre>
+//
+// Note that 'x' characters denote the curve cut, '*' characters show the
+// surface that holds all the curves and with '|' and '_' axis are denoted.
 GTEST_TEST(MultilaneLineRoadCurve, OffsetTest) {
   const double kVeryExact = 1e-12;
   const Vector2<double> kOrigin(10.0, 10.0);
