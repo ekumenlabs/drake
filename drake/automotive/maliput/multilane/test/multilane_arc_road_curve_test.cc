@@ -195,6 +195,56 @@ GTEST_TEST(MultilaneArcRoadCurve, ToCurveFrameTest) {
       kVeryExact));
 }
 
+// Computes two offsets from a base ArcRoadCurve object. One is computed to the
+// left and the other to the right lateral direction with respect to the tangent
+// at any point over the reference curve. The resulting RoadCurves are shown in
+// the following graph (aerial view):
+//
+// <pre>
+//
+//              *   ***   *
+//           *       |       *
+//        *          |          *
+//      *         * *** *         *
+//     *       *     |     *       *
+//    *      *       |       *      *
+//   *     *       * * *       *     *
+//        *     *    |    *     *         ^
+// *     *     *     |     *     *     *  |
+// *-----*-----*-----o-----*-----*-----*  |
+// *     *     *     |     *     *     *
+//        *     *    |    *     *
+//   *     *       * * *       *     *
+//    *      *       |       *      *
+//     *       *     |     *       *
+//      *         * *** *         *
+//        *          |          *
+//           *       |       *
+//              *   ***   *
+//
+// </pre>
+//
+// The three circles have a counterclockwise flow, (see the arrow at the right
+// of the circles). Also, the intermediate circle is the original one, and the
+// inner and external circles are created from the Offset() call. The 'o' means
+// the center of the circle and with '|' and '-' axis are denoted.
+// Regarding the superelevation profile, a cross section will be seen like
+// the following graph:
+//
+// <pre>
+//
+//    x                            x <--- External road curve.
+//    | *                        * |
+//    |  *                     *   |
+//    |    x                  x    | <--- Original road curve (elevation = 0).
+//    |      *              *      |
+//    |       *            *       |
+//    |         x         x        | <--- Inner road curve.
+//    |          *       *         |
+//    |           *     *          |
+//    |--------------o-------------|
+//
+// </pre>
 GTEST_TEST(MultilaneArcRoadCurve, OffsetTest) {
   const double kVeryExact = 1e-12;
   const Vector2<double> kCenter(10.0, 10.0);
