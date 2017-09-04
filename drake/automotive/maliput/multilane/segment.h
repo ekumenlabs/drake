@@ -53,7 +53,8 @@ class Segment : public api::Segment {
   Lane* NewLane(api::LaneId id,
                 const api::RBounds& lane_bounds,
                 const api::RBounds& driveable_bounds,
-                const api::HBounds& elevation_bounds);
+                const api::HBounds& elevation_bounds,
+                double r0);
 
   ~Segment() override = default;
 

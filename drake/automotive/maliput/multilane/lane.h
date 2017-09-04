@@ -72,12 +72,14 @@ class Lane : public api::Lane {
        const api::RBounds& lane_bounds,
        const api::RBounds& driveable_bounds,
        const api::HBounds& elevation_bounds,
-       const RoadCurve *road_curve)
+       const RoadCurve *road_curve,
+       double r0)
       : id_(id), segment_(segment),
         lane_bounds_(lane_bounds),
         driveable_bounds_(driveable_bounds),
         elevation_bounds_(elevation_bounds),
-        road_curve_(road_curve) {
+        road_curve_(road_curve),
+        r0_(r0) {
     DRAKE_DEMAND(lane_bounds_.min() >= driveable_bounds_.min());
     DRAKE_DEMAND(lane_bounds_.max() <= driveable_bounds_.max());
     DRAKE_DEMAND(road_curve != nullptr);
@@ -218,6 +220,8 @@ class Lane : public api::Lane {
   // avoid recomputing it.)
   V3 r_hat_of_Rabg(const Rot3& Rabg) const;
 
+  double p_scale_offset_factor() const;
+
   const api::LaneId id_;
   const api::Segment* segment_{};
   BranchPoint* start_bp_{};
@@ -227,6 +231,7 @@ class Lane : public api::Lane {
   const api::RBounds driveable_bounds_;
   const api::HBounds elevation_bounds_;
   const RoadCurve* road_curve_{};
+  const double r0_;
 };
 
 

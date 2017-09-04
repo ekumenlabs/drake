@@ -110,6 +110,9 @@ class ArcRoadCurve : public RoadCurve {
       const api::RBounds& lateral_bounds,
       const api::HBounds& height_bounds) const override;
 
+  double radius() const { return radius_; }
+  double d_theta() const { return d_theta_; }
+
  private:
   // Computes the absolute position along reference arc as an angle in
   // range [theta0_, (theta0 + d_theta_)],

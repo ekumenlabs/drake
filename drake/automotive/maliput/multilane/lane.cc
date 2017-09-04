@@ -1,5 +1,6 @@
 #include "drake/automotive/maliput/multilane/lane.h"
 
+#include "drake/automotive/maliput/multilane/arc_road_curve.h"
 #include "drake/automotive/maliput/multilane/branch_point.h"
 #include "drake/common/drake_assert.h"
 
@@ -35,7 +36,7 @@ std::unique_ptr<api::LaneEnd> Lane::DoGetDefaultBranch(
 
 
 double Lane::do_length() const {
-  return road_curve_->trajectory_length();
+  return road_curve_->trajectory_length() * p_scale_offset_factor();
 }
 
 
@@ -47,7 +48,16 @@ Rot3 Lane::Rabg_of_p(const double p) const {
 
 
 double Lane::p_from_s(const double s) const {
-  return road_curve_->elevation().p_s(s / road_curve_->p_scale());
+  /*
+  const ArcRoadCurve* arc_road_curve =
+      dynamic_cast<const ArcRoadCurve*>(road_curve_);
+  const double p_scale = arc_road_curve != nullptr ?
+      road_curve_->p_scale() * (r0_ + arc_road_curve->radius())
+      / arc_road_curve->radius() : road_curve_->p_scale();
+  return road_curve_->elevation().p_s(s / p_scale);
+  */
+  return road_curve_->elevation().p_s(
+      s / road_curve_->p_scale() * p_scale_offset_factor());
 }
 
 
@@ -133,8 +143,10 @@ api::GeoPosition Lane::DoToGeoPosition(
   const Rot3 ypr = Rabg_of_p(p);
 
   // Rotate (0,r,h) and sum with mapped (s,0,0).
-  const V3 xyz =
-      ypr.apply({0., lane_pos.r(), lane_pos.h()}) + V3(xy.x(), xy.y(), z);
+  const V3 lane_position_over_reference_curve(0., lane_pos.r(), lane_pos.h());
+  const V3 lane_offset(0, r0_, 0);
+  const V3 xyz = ypr.apply(lane_position_over_reference_curve + lane_offset) +
+                 V3(xy.x(), xy.y(), z);
   return {xyz.x(), xyz.y(), xyz.z()};
 }
 
@@ -142,7 +154,7 @@ api::GeoPosition Lane::DoToGeoPosition(
 api::Rotation Lane::DoGetOrientation(const api::LanePosition& lane_pos) const {
   // Recover linear parameter p from arc-length position s.
   const double p = p_from_s(lane_pos.s());
-  const double r = lane_pos.r();
+  const double r = lane_pos.r() + r0_;
   const double h = lane_pos.h();
   // Calculate orientation of (s,r,h) basis at (s,0,0).
   const Rot3 Rabg = Rabg_of_p(p);
@@ -180,7 +192,7 @@ api::LanePosition Lane::DoEvalMotionDerivatives(
     const api::IsoLaneVelocity& velocity) const {
 
   const double p = p_from_s(position.s());
-  const double r = position.r();
+  const double r = position.r() + r0_;
   const double h = position.h();
 
   // TODO(maddog@tri.global)  When s(p) is integrated properly, do this:
@@ -206,9 +218,14 @@ api::LanePosition Lane::DoToLanePosition(
       const api::GeoPosition& geo_position,
       api::GeoPosition* nearest_position,
       double* distance) const {
-  const api::LanePosition lane_position = api::LanePosition::FromSrh(
-      road_curve_->ToCurveFrame(
-          geo_position.xyz(), driveable_bounds_, elevation_bounds_));
+  const api::RBounds segment_bounds(driveable_bounds_.min() + r0_,
+                                    driveable_bounds_.max() + r0_);
+  const V3 lane_position_in_segment_curve_frame = road_curve_->ToCurveFrame(
+      geo_position.xyz(), segment_bounds, elevation_bounds_);
+  const api::LanePosition lane_position = api::LanePosition(
+      lane_position_in_segment_curve_frame.x() / p_scale_offset_factor(),
+      lane_position_in_segment_curve_frame.y() - r0_,
+      lane_position_in_segment_curve_frame.z());
 
   const api::GeoPosition nearest = ToGeoPosition(lane_position);
   if (nearest_position != nullptr) {
@@ -222,6 +239,19 @@ api::LanePosition Lane::DoToLanePosition(
   return lane_position;
 }
 
+double Lane::p_scale_offset_factor() const {
+  const ArcRoadCurve* arc_road_curve =
+      dynamic_cast<const ArcRoadCurve*>(road_curve_);
+  if (arc_road_curve != nullptr) {
+    const double radius = arc_road_curve->radius();
+    if (arc_road_curve->d_theta() > 0.0) {
+      return radius / (radius - r0_);
+    } else {
+      return radius / (radius + r0_);
+    }
+  }
+  return 1.0;
+}
 
 }  // namespace multilane
 }  // namespace maliput
