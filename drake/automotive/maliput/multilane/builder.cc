@@ -291,7 +291,6 @@ std::vector<Lane*> Builder::BuildConnection(
                       road_geometry, bp_map);
     lanes.push_back(lane);
   }
-
   return lanes;
 }
 
