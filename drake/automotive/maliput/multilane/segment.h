@@ -32,8 +32,7 @@ class Segment : public api::Segment {
   /// @param junction Parent junction.
   /// @param road_curve A curve that defines the reference trajectory over the
   /// segment. A child Lane object will be constructed from an offset of the
-  /// road_curve. Offset distance is set to zero as the segment is able to
-  /// create only one Lane.
+  /// road_curve's reference curve.
   Segment(const api::SegmentId& id,
           api::Junction* junction,
           std::unique_ptr<RoadCurve> road_curve)
@@ -50,10 +49,14 @@ class Segment : public api::Segment {
   /// @param driveable_bounds Lateral extents of the Lane's frame in which the
   /// car is supposed to be inside the segment.
   /// @param elevation_bounds Height extents of the Lane's frame.
+  /// @param r0 Lateral displacement of the Lane with respect to segment
+  /// RoadCurve's reference curve.
+  /// @return A Lane object.
   Lane* NewLane(api::LaneId id,
                 const api::RBounds& lane_bounds,
                 const api::RBounds& driveable_bounds,
-                const api::HBounds& elevation_bounds);
+                const api::HBounds& elevation_bounds,
+                double r0);
 
   ~Segment() override = default;
 

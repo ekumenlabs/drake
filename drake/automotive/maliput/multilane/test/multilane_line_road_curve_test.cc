@@ -61,7 +61,7 @@ TEST_F(MultilaneLineRoadCurveTest, LineRoadCurve) {
 // Checks that LineRoadCurve::IsValid() returns true.
 TEST_F(MultilaneLineRoadCurveTest, IsValidTest) {
   const LineRoadCurve dut(kOrigin, kDirection, zp, zp);
-  EXPECT_TRUE(dut.IsValid(lateral_bounds, elevation_bounds));
+  EXPECT_TRUE(dut.IsValid(lateral_bounds, elevation_bounds, 0.0));
 }
 
 // Checks the validity of the surface for different lateral bounds and
@@ -90,6 +90,29 @@ TEST_F(MultilaneLineRoadCurveTest, ToCurveFrameTest) {
       dut.ToCurveFrame(Vector3<double>(11.0, 10.0, 7.0), lateral_bounds,
                        elevation_bounds),
       Vector3<double>(0.707106781186547, -0.707106781186547, 7.0), kVeryExact));
+}
+
+// Checks that p_scale(), trajectory_length() and p_scale_offset_factor() with
+// constant superelevation polynomial behave properly.
+TEST_F(MultilaneLineRoadCurveTest, OffsetTest) {
+  const LineRoadCurve dut(kOrigin, kDirection, zp, zp);
+  const std::vector<double> r_vector{-10., 0., 10.};
+  const std::vector<double> p_vector{0., 0.1, 0.2, 0.5, 0.7, 1.0};
+  // Checks that the scale factor for any offset is one as the line has an
+  // infinite curvature radius at any point.
+  for (double r : r_vector) {
+    EXPECT_DOUBLE_EQ(dut.p_scale_offset_factor(r), 1.0);
+  }
+  // Evaluates inverse function for different path length and offset values.
+  for (double r : r_vector) {
+    for (double p : p_vector) {
+      EXPECT_DOUBLE_EQ(dut.p_from_s(p * kDirection.norm(), r), p);
+    }
+  }
+  // Evaluates the path length integral for different offset values.
+  for (double r : r_vector) {
+    EXPECT_DOUBLE_EQ(dut.trajectory_length(r), kDirection.norm());
+  }
 }
 
 }  // namespace multilane
