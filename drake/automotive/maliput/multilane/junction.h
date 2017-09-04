@@ -29,7 +29,17 @@ class Junction : public api::Junction {
 
   /// Creates and adds a new Segment.
   /// @param id Segment's ID.
-  /// @param road_curve Reference trajectory over the Segment's surface.
+  /// @param road_curve A curve that defines the reference trajectory over the
+  /// segment. A child Lane object will be constructed from an offset of the
+  /// road_curve's reference curve.
+  /// @param num_lanes The number of Lane objects it is allowed to hold. It
+  /// must be positive an non zero.
+  /// @param r0 Lateral distance from the @p road_curve reference curve where
+  /// the first Lane centerline lies. It must be in the range of
+  /// [@p r_min, @p r_max].
+  /// @param r_spacing Lateral and constant distance between centerlines of two
+  /// consecutive lanes. It must be positive and make up to the last lane
+  /// lateral offset fit inside the bounds.
   /// @param r_min Lateral distance to the minimum extent of road_curve's curve
   /// from where Segment's surface starts.
   /// @param r_max Lateral distance to the maximum extent of road_curve's curve
