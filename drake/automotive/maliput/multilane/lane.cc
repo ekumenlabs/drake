@@ -38,6 +38,7 @@ std::unique_ptr<api::LaneEnd> Lane::DoGetDefaultBranch(
 
 double Lane::do_length() const { return road_curve_->s_from_p(1., r0_); }
 
+
 api::GeoPosition Lane::DoToGeoPosition(
     const api::LanePosition& lane_pos) const {
   // Recover parameter p from arc-length position s.

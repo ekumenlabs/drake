@@ -36,9 +36,10 @@ class Junction : public api::Junction {
   /// from where Segment's surface ends.
   /// @param elevation_bounds The height bounds over the segment' surface.
   /// @return A Segment object.
-  Segment* NewSegment(api::SegmentId id, std::unique_ptr<RoadCurve> road_curve,
-                      double r_min, double r_max,
-                      const api::HBounds elevation_bounds);
+  Segment* NewSegment(const api::SegmentId& id,
+                      std::unique_ptr<RoadCurve> road_curve, int num_lanes,
+                      double r0, double r_spacing, double r_min, double r_max,
+                      const api::HBounds& elevation_bounds);
 
   ~Junction() override = default;
 
