@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <utility>
+#include <vector>
 
 #include "drake/automotive/maliput/api/junction.h"
 #include "drake/automotive/maliput/api/lane.h"
@@ -26,9 +27,9 @@ class Segment : public api::Segment {
 
   /// Constructs a new Segment.
   ///
-  /// The Segment is not fully initialized until NewLane() is called exactly
+  /// The Segment is not fully initialized until NewLane() is called at least
   /// once. @p junction must remain valid for the lifetime of this class.
-  /// @param id ID of the segment.
+  /// @param id Segment's ID.
   /// @param junction Parent junction.
   /// @param road_curve A curve that defines the reference trajectory over the
   /// segment. A child Lane object will be constructed from an offset of the
@@ -55,13 +56,17 @@ class Segment : public api::Segment {
   }
 
   /// Creates a new Lane object.
-  /// This method should be called only once in the lifespan of the object. The
-  /// Segment class only supports one Lane.
-  /// Lane's lane bounds will be assigned as the driveable_bounds of the
-  /// segment.
+  ///
+  /// Driveable bounds of the lane will be derived based on the lateral offset
+  /// of it so as to reach r_min and r_max distances (see class constructor
+  /// for more details).
   /// @param id Lane's ID.
   /// @param r0 Lateral displacement of the Lane with respect to segment
-  /// RoadCurve's reference curve.
+  /// RoadCurve's reference curve. It must be greater than r_min and smaller
+  /// than r_max, and be greater than the last lane's r0 displacement (if any).
+  /// @param lane_bounds Nominal bounds of the lane, uniform along the entire
+  /// reference path. It must fit inside segments bounds when those are
+  /// translated to @p r0 offset distance.
   /// @return A Lane object.
   Lane* NewLane(api::LaneId id, double r0, const api::RBounds& lane_bounds);
 
@@ -72,7 +77,7 @@ class Segment : public api::Segment {
 
   const api::Junction* do_junction() const override;
 
-  int do_num_lanes() const override { return 1; }
+  int do_num_lanes() const override { return lanes_.size(); }
 
   const api::Lane* do_lane(int index) const override;
 
@@ -80,8 +85,8 @@ class Segment : public api::Segment {
   api::SegmentId id_;
   // Parent junction.
   api::Junction* junction_{};
-  // Child Lane pointer.
-  std::unique_ptr<Lane> lane_;
+  // Child Lane vector.
+  std::vector<std::unique_ptr<Lane>> lanes_;
   // Reference trajectory over the Segment's surface.
   std::unique_ptr<RoadCurve> road_curve_;
   // Lateral distance to the minimum extent of road_curve_'s curve from where
