@@ -11,10 +11,13 @@ const api::Junction* Segment::do_junction() const {
 Lane* Segment::NewLane(api::LaneId id,
                        const api::RBounds& lane_bounds,
                        const api::RBounds& driveable_bounds,
-                       const api::HBounds& elevation_bounds) {
+                       const api::HBounds& elevation_bounds,
+                       double r0) {
   DRAKE_DEMAND(lane_.get() == nullptr);
+  DRAKE_DEMAND(
+      road_curve_->IsValid(driveable_bounds, elevation_bounds, r0) == true);
   lane_ = std::make_unique<Lane>(id, this, lane_bounds, driveable_bounds,
-                                 elevation_bounds, road_curve_.get());
+                                 elevation_bounds, road_curve_.get(), r0);
   return lane_.get();
 }
 

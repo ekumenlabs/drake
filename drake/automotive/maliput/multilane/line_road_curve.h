@@ -42,6 +42,21 @@ class LineRoadCurve : public RoadCurve {
 
   ~LineRoadCurve() override = default;
 
+  double trajectory_length(double r) const override {
+    return elevation().s_p(1.0) * p_scale() / p_scale_offset_factor(r);
+  }
+
+  double p_from_s(double s, double r) const override {
+    return elevation().p_s(s / (p_scale() / p_scale_offset_factor(r)));
+  }
+
+  double p_scale_offset_factor(double r) const override {
+    // TODO() We should take care of the superelevation() scale that will modify
+    // curve's path length.
+    unused(r);
+    return 1.0;
+  }
+
   Vector2<double> xy_of_p(double p) const override { return p0_ + p * dp_; }
 
   Vector2<double> xy_dot_of_p(double p) const override {
@@ -73,12 +88,15 @@ class LineRoadCurve : public RoadCurve {
   /// bounds of the surface mapping.
   /// @param height_bounds An api::HBounds object that represents the elevation
   /// bounds of the surface mapping.
+  /// @param r Lateral offset of the reference curve over the z=0 plane.
   /// @return True.
   bool IsValid(
       const api::RBounds& lateral_bounds,
-      const api::HBounds& height_bounds) const override {
+      const api::HBounds& height_bounds,
+      double r) const override {
     unused(lateral_bounds);
     unused(height_bounds);
+    unused(r);
     return true;
   }
 

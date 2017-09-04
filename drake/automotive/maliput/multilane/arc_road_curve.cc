@@ -109,7 +109,8 @@ Vector3<double> ArcRoadCurve::ToCurveFrame(
 
 bool ArcRoadCurve::IsValid(
     const api::RBounds& lateral_bounds,
-    const api::HBounds& height_bounds) const {
+    const api::HBounds& height_bounds,
+    double r) const {
   // TODO(@agalbachicar)      There is no check on height constraints. When the
   //                          curve bends over itself, if it does, it must do it
   //                          with a difference in height greater than
@@ -121,11 +122,18 @@ bool ArcRoadCurve::IsValid(
   // TODO(maddog@tri.global)  Check for self-intersecting volumes (e.g., when
   //                          arc angle >= 2π).
   unused(height_bounds);
+  // Computes the offset radius given r displacement and checks that it is not
+  // negative nor zero.
+  const double effective_radius = offset_radius(r);
+  if (effective_radius <= 0.0) {
+    return false;
+  }
   // Whether or not user code pays attention to driveable_bounds, at least
   // ensure that bounds are sane.  Given the singularity at the center of
   // the arc, it is not well-defined to consider parallel curves offset
   // from the reference by a distance greater than or equal to the radius
-  // radius_.
+  // effective_radius (it takes into account r displacement with respect to the
+  // reference radius radius_).
   //
   // In the presence of superelevation, the bounds are effectively scaled
   // by cos(superelevation) (the more tilted the road, the narrower the
@@ -181,9 +189,9 @@ bool ArcRoadCurve::IsValid(
   // TODO(maddog@tri.global)  When you have nothing better to do, handle the
   //                          improbable case of superelevation >= 90 deg, too.
   if (d_theta_ > 0.) {
-    return ((lateral_bounds.max() * max_cos_theta) < radius_);
+    return ((lateral_bounds.max() * max_cos_theta) < effective_radius);
   } else {
-    return ((lateral_bounds.min() * max_cos_theta) > -radius_);
+    return ((lateral_bounds.min() * max_cos_theta) > -effective_radius);
   }
   return true;
 }
