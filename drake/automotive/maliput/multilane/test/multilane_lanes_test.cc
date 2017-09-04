@@ -47,6 +47,8 @@ class MultilaneLanesParamTest : public ::testing::TestWithParam<double> {
   const double kHalfWidth{10.};
   const double kMaxHeight{5.};
   const double kHalfLaneWidth{5.};
+  const int kNumLanes{1};
+  const double kRSpacing{0.};
   double r0{};
   // NB:  kIntegrationScaleMap and kIntegrationFactorMap are regression
   //      coefficients to match within the integration tolerance the path
