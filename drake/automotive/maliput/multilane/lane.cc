@@ -36,7 +36,7 @@ std::unique_ptr<api::LaneEnd> Lane::DoGetDefaultBranch(
 
 
 double Lane::do_length() const {
-  return road_curve_->trajectory_length() * p_scale_offset_factor();
+  return road_curve_->trajectory_length() / p_scale_offset_factor();
 }
 
 
