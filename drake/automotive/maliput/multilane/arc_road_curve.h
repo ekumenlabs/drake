@@ -47,6 +47,18 @@ class ArcRoadCurve : public RoadCurve {
 
   ~ArcRoadCurve() override = default;
 
+  double trajectory_length(double r) const override {
+    return elevation().s_p(1.0) * p_scale() / p_scale_offset_factor(r);
+  }
+
+  double p_from_s(double s, double r) const override {
+    return elevation().p_s(s / trajectory_length(r));
+  }
+
+  double p_scale_offset_factor(double r) const override {
+    return radius_ / (radius_ - std::copysign(1.0, d_theta_) * r);
+  }
+
   Vector2<double> xy_of_p(double p) const override {
     // The result will be computed with the following function:
     //      [x;y] = center + [radius * cos(θ); radius * sin(θ)]

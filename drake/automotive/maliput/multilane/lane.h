@@ -220,8 +220,6 @@ class Lane : public api::Lane {
   // avoid recomputing it.)
   V3 r_hat_of_Rabg(const Rot3& Rabg) const;
 
-  double p_scale_offset_factor() const;
-
   const api::LaneId id_;
   const api::Segment* segment_{};
   BranchPoint* start_bp_{};

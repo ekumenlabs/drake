@@ -34,9 +34,11 @@ class RoadCurve {
   /// Computes the composed curve path integral in the interval of p = [0; 1].
   /// @return The path length integral of the curve composed with the elevation
   /// polynomial.
-  double trajectory_length() const {
-    return elevation_.s_p(1.0) * p_scale();
-  }
+  virtual double trajectory_length(double r) const = 0;
+
+  virtual double p_from_s(double s, double r) const = 0;
+
+  virtual double p_scale_offset_factor(double r) const = 0;
 
   /// Computes the reference curve.
   /// @param p The reference curve parameter.

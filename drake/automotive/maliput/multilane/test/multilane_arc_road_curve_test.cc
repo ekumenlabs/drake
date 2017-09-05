@@ -23,6 +23,7 @@ class MultilaneArcRoadCurveTest : public ::testing::Test {
   const api::RBounds lateral_bounds{-kRadius * 0.5, kRadius * 0.5};
   const api::HBounds height_bounds{0.0, 10.0};
   const double kVeryExact{1e-12};
+  const double kNoOffset{0.0};
 };
 
 // Checks ArcRoadCurve constructor constraints.
@@ -37,7 +38,7 @@ TEST_F(MultilaneArcRoadCurveTest, ArcGeometryTest) {
   const ArcRoadCurve dut(kCenter, kRadius, kTheta0, kDTheta, zp, zp);
   // Checks the length.
   EXPECT_NEAR(dut.p_scale(), kDTheta * kRadius, kVeryExact);
-  EXPECT_NEAR(dut.trajectory_length(), kDTheta * kRadius, kVeryExact);
+  EXPECT_NEAR(dut.trajectory_length(kNoOffset), kDTheta * kRadius, kVeryExact);
   // Checks the evaluation of xy at different values over the reference curve.
   EXPECT_TRUE(
       CompareMatrices(dut.xy_of_p(0.0),
@@ -169,6 +170,26 @@ TEST_F(MultilaneArcRoadCurveTest, ToCurveFrameTest) {
           lateral_bounds, height_bounds),
       Vector3<double>(kRadius * (kDTheta / 2.0 + M_PI / 8.0), 2.0, 3.0),
       kVeryExact));
+}
+
+TEST_F(MultilaneArcRoadCurveTest, OffsetTest) {
+  const ArcRoadCurve dut(kCenter, kRadius, kTheta0, kDTheta, zp, zp);
+  const std::vector<double> r_vector{-0.5 * kRadius, 0.0, 0.5 * kRadius};
+  // Checks that the scale factor for any offset is one (it does not take into
+  // account superelevation effect).
+  for (double r : r_vector) {
+    EXPECT_DOUBLE_EQ(dut.p_scale_offset_factor(r), kRadius / (kRadius - r));
+  }
+  // Evaluates inverse function for different path length and offset values.
+  for (double r : r_vector) {
+    EXPECT_DOUBLE_EQ(dut.p_from_s(0.0 * (kRadius - r) * kDTheta, r), 0.0);
+    EXPECT_DOUBLE_EQ(dut.p_from_s(0.5 * (kRadius - r) * kDTheta, r), 0.5);
+    EXPECT_DOUBLE_EQ(dut.p_from_s(1.0 * (kRadius - r) * kDTheta, r), 1.0);
+  }
+  // Evaluates the path length integral for different offset values.
+  for (double r : r_vector) {
+    EXPECT_DOUBLE_EQ(dut.trajectory_length(r), (kRadius - r) * kDTheta);
+  }
 }
 
 }  // namespace multilane

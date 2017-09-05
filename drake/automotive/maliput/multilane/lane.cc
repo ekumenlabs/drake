@@ -36,7 +36,7 @@ std::unique_ptr<api::LaneEnd> Lane::DoGetDefaultBranch(
 
 
 double Lane::do_length() const {
-  return road_curve_->trajectory_length() / p_scale_offset_factor();
+  return road_curve_->trajectory_length(r0_);
 }
 
 
@@ -48,16 +48,7 @@ Rot3 Lane::Rabg_of_p(const double p) const {
 
 
 double Lane::p_from_s(const double s) const {
-  /*
-  const ArcRoadCurve* arc_road_curve =
-      dynamic_cast<const ArcRoadCurve*>(road_curve_);
-  const double p_scale = arc_road_curve != nullptr ?
-      road_curve_->p_scale() * (r0_ + arc_road_curve->radius())
-      / arc_road_curve->radius() : road_curve_->p_scale();
-  return road_curve_->elevation().p_s(s / p_scale);
-  */
-  return road_curve_->elevation().p_s(
-      s / road_curve_->p_scale() * p_scale_offset_factor());
+  return road_curve_->p_from_s(s, r0_);
 }
 
 
@@ -223,7 +214,8 @@ api::LanePosition Lane::DoToLanePosition(
   const V3 lane_position_in_segment_curve_frame = road_curve_->ToCurveFrame(
       geo_position.xyz(), segment_bounds, elevation_bounds_);
   const api::LanePosition lane_position = api::LanePosition(
-      lane_position_in_segment_curve_frame.x() / p_scale_offset_factor(),
+      lane_position_in_segment_curve_frame.x() /
+      road_curve_->p_scale_offset_factor(r0_),
       lane_position_in_segment_curve_frame.y() - r0_,
       lane_position_in_segment_curve_frame.z());
 
@@ -237,20 +229,6 @@ api::LanePosition Lane::DoToLanePosition(
   }
 
   return lane_position;
-}
-
-double Lane::p_scale_offset_factor() const {
-  const ArcRoadCurve* arc_road_curve =
-      dynamic_cast<const ArcRoadCurve*>(road_curve_);
-  if (arc_road_curve != nullptr) {
-    const double radius = arc_road_curve->radius();
-    if (arc_road_curve->d_theta() > 0.0) {
-      return radius / (radius - r0_);
-    } else {
-      return radius / (radius + r0_);
-    }
-  }
-  return 1.0;
 }
 
 }  // namespace multilane

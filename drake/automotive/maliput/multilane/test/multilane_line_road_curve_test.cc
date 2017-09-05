@@ -92,6 +92,26 @@ TEST_F(MultilaneLineRoadCurveTest, ToCurveFrameTest) {
       Vector3<double>(0.707106781186547, -0.707106781186547, 7.0), kVeryExact));
 }
 
+TEST_F(MultilaneLineRoadCurveTest, OffsetTest) {
+  const LineRoadCurve dut(kOrigin, kDirection, zp, zp);
+  const std::vector<double> r_vector{-1.0, 0.0, 1.0};
+  // Checks that the scale factor for any offset is one (it does not take into
+  // account superelevation effect).
+  for (double r : r_vector) {
+    EXPECT_DOUBLE_EQ(dut.p_scale_offset_factor(r), 1.0);
+  }
+  // Evaluates inverse function for different path length and offset values.
+  for (double r : r_vector) {
+    EXPECT_DOUBLE_EQ(dut.p_from_s(0.0 * kDirection.norm(), r), 0.0);
+    EXPECT_DOUBLE_EQ(dut.p_from_s(0.5 * kDirection.norm(), r), 0.5);
+    EXPECT_DOUBLE_EQ(dut.p_from_s(1.0 * kDirection.norm(), r), 1.0);
+  }
+  // Evaluates the path length integral for different offset values.
+  for (double r : r_vector) {
+    EXPECT_DOUBLE_EQ(dut.trajectory_length(r), kDirection.norm());
+  }
+}
+
 }  // namespace multilane
 }  // namespace maliput
 }  // namespace drake

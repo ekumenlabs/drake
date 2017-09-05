@@ -42,6 +42,22 @@ class LineRoadCurve : public RoadCurve {
 
   ~LineRoadCurve() override = default;
 
+  double trajectory_length(double r) const override {
+    return elevation().s_p(1.0) * p_scale() / p_scale_offset_factor(r);
+  }
+
+  double p_from_s(double s, double r) const override {
+    return elevation().p_s(
+        s / p_scale() * p_scale_offset_factor(r));
+  }
+
+  double p_scale_offset_factor(double r) const override {
+    // TODO() We should take care of the superelevation() scale that will modify
+    // curve path length.
+    unused(r);
+    return 1.0;
+  }
+
   Vector2<double> xy_of_p(double p) const override { return p0_ + p * dp_; }
 
   Vector2<double> xy_dot_of_p(double p) const override {
