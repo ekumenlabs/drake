@@ -854,213 +854,225 @@ GTEST_TEST(MultilaneLanesTest, FlatArcLaneWithOffset) {
   EXPECT_TRUE(api::test::IsGeoPositionClose(
       l2->ToGeoPosition({0., 0., 0.}),
       api::GeoPosition::FromXyz(geo_center +
-          Vector3<double>(std::cos(0.25 * M_PI), std::sin(0.25 * M_PI), 0.0) *
+          Vector3<double>(std::cos(theta0), std::sin(theta0), 0.0) *
           offset_radius),
       kLinearTolerance));
 
   EXPECT_TRUE(api::test::IsGeoPositionClose(
       l2->ToGeoPosition({1., 0., 0.}),
       api::GeoPosition::FromXyz(geo_center +
-          Vector3<double>(std::cos(0.25 * M_PI), std::sin(0.25 * M_PI), 0.0) *
-          offset_radius +
-          Vector3<double>(M_PI, M_PI, 0.) * (1.5 / l2->length())),
+          Vector3<double>(
+              offset_radius * std::cos(theta0 + 1.0 / offset_radius),
+              offset_radius * std::sin(theta0 + 1.0 / offset_radius),
+              0.0)),
       kLinearTolerance));
 
-  // EXPECT_TRUE(api::test::IsGeoPositionClose(
-  //     l2->ToGeoPosition({0., 1., 0.}),
-  //     api::GeoPosition(
-  //         100. + (100. * std::cos(0.25 * M_PI)) + (1. * std::cos(1.25 * M_PI)),
-  //         -75. + (100. * std::sin(0.25 * M_PI)) + (1. * std::sin(1.25 * M_PI)),
-  //         0.),
-  //     kLinearTolerance));
+  EXPECT_TRUE(api::test::IsGeoPositionClose(
+      l2->ToGeoPosition({0., 1., 0.}),
+      api::GeoPosition::FromXyz(geo_center +
+          Vector3<double>(
+              (offset_radius - 1.) * std::cos(theta0),
+              (offset_radius - 1.) * std::sin(theta0),
+              0.0)),
+      kLinearTolerance));
 
-  // EXPECT_TRUE(api::test::IsGeoPositionClose(
-  //     l2->ToGeoPosition({l2->length(), 0., 0.}),
-  //     api::GeoPosition(100. + (100. * std::cos(1.75 * M_PI)),
-  //                      -75. + (100. * std::sin(1.75 * M_PI)), 0.),
-  //     kLinearTolerance));
+  EXPECT_TRUE(api::test::IsGeoPositionClose(
+      l2->ToGeoPosition({l2->length(), 0., 0.}),
+      api::GeoPosition::FromXyz(geo_center +
+          Vector3<double>(
+              offset_radius * std::cos(theta0 + d_theta),
+              offset_radius * std::sin(theta0 + d_theta),
+              0.0)),
+      kLinearTolerance));
 
-  // // Case 1: Tests ArcLane::ToLanePosition() with a closest point that lies
-  // // within the lane bounds.
-  // const api::GeoPosition point_within_lane{
-  //   center(0) - 50., center(1) + 50., 0.};  // θ = 0.5π.
-  // api::GeoPosition nearest_position;
-  // double distance{};
-  // const double expected_s = 0.5 * M_PI / d_theta * l2->length();
-  // const double expected_r = std::min(radius - std::sqrt(2) * 50., kHalfWidth);
-  // EXPECT_TRUE(api::test::IsLanePositionClose(
-  //     l2->ToLanePosition(point_within_lane, &nearest_position, &distance),
-  //     api::LanePosition(expected_s, expected_r, 0.), kVeryExact));
-  // EXPECT_TRUE(api::test::IsGeoPositionClose(
-  //     nearest_position,
-  //     api::GeoPosition(
-  //         (radius - kHalfWidth) * std::cos(0.5 * M_PI + theta0) + center(0),
-  //         (radius - kHalfWidth) * std::sin(0.5 * M_PI + theta0) + center(1),
-  //         0.),
-  //     kVeryExact));
-  // EXPECT_NEAR(distance,
-  //             (radius - kHalfWidth) - std::sqrt(std::pow(50., 2.) +
-  //                                               std::pow(50., 2.)),
-  //             kVeryExact);
+  // Case 1: Tests ArcLane::ToLanePosition() with a closest point that lies
+  // within the lane bounds.
+  const api::GeoPosition point_within_lane{
+    center(0) - 50., center(1) + 50., 0.};  // θ = 0.5π.
+  api::GeoPosition nearest_position;
+  double distance{};
+  const double expected_s = 0.5 * M_PI / d_theta * l2->length();
+  const double expected_r =
+      std::min(offset_radius - std::sqrt(2) * 50., kHalfWidth);
+  EXPECT_TRUE(api::test::IsLanePositionClose(
+      l2->ToLanePosition(point_within_lane, &nearest_position, &distance),
+      api::LanePosition(expected_s, expected_r, 0.), kVeryExact));
+  EXPECT_TRUE(api::test::IsGeoPositionClose(
+      nearest_position,
+      api::GeoPosition(
+          (offset_radius - kHalfWidth) * std::cos(0.5 * M_PI + theta0) + center(0),
+          (offset_radius - kHalfWidth) * std::sin(0.5 * M_PI + theta0) + center(1),
+          0.),
+      kVeryExact));
+  EXPECT_NEAR(distance,
+              (offset_radius - kHalfWidth) - std::sqrt(std::pow(50., 2.) +
+                                                       std::pow(50., 2.)),
+              kVeryExact);
 
-  // // Case 2: Tests ArcLane::ToLanePosition() with a closest point that lies
-  // // outside of the lane bounds, verifying that the result saturates.
-  // const api::GeoPosition point_outside_lane{
-  //   center(0) + 200., center(1) - 20., 20.};  // θ ~= 1.9π.
-  // const double expected_r_outside = -kHalfWidth;
-  // EXPECT_TRUE(api::test::IsLanePositionClose(
-  //     l2->ToLanePosition(point_outside_lane, &nearest_position, &distance),
-  //     api::LanePosition(l2->length(), expected_r_outside, kMaxHeight),
-  //     kVeryExact));
-  // EXPECT_TRUE(api::test::IsGeoPositionClose(
-  //     nearest_position,
-  //     api::GeoPosition(
-  //         (radius + kHalfWidth) * std::cos(theta0 + d_theta) + center(0),
-  //         (radius + kHalfWidth) * std::sin(theta0 + d_theta) + center(1),
-  //         kMaxHeight),
-  //     kVeryExact));
-  // EXPECT_DOUBLE_EQ(distance,
-  //                  (nearest_position.xyz() - point_outside_lane.xyz()).norm());
+  // Case 2: Tests ArcLane::ToLanePosition() with a closest point that lies
+  // outside of the lane bounds, verifying that the result saturates.
+  const api::GeoPosition point_outside_lane{
+    center(0) + 200., center(1) - 20., 20.};  // θ ~= 1.9π.
+  const double expected_r_outside = -kHalfWidth;
+  EXPECT_TRUE(api::test::IsLanePositionClose(
+      l2->ToLanePosition(point_outside_lane, &nearest_position, &distance),
+      api::LanePosition(l2->length(), expected_r_outside, kMaxHeight),
+      kVeryExact));
+  EXPECT_TRUE(api::test::IsGeoPositionClose(
+      nearest_position,
+      api::GeoPosition::FromXyz(geo_center +
+          Vector3<double>(
+              (offset_radius + kHalfWidth) * std::cos(theta0 + d_theta),
+              (offset_radius + kHalfWidth) * std::sin(theta0 + d_theta),
+              kMaxHeight)),
+      kVeryExact));
+  EXPECT_DOUBLE_EQ(distance,
+                   (nearest_position.xyz() - point_outside_lane.xyz()).norm());
 
-  // // Case 3: Tests ArcLane::ToLanePosition() at a non-zero but flat elevation.
-  // const double elevation = 10.;
-  // std::unique_ptr<RoadCurve> road_curve_2 = std::make_unique<ArcRoadCurve>(
-  //     center, radius, theta0, d_theta,
-  //     CubicPolynomial(elevation / radius / d_theta, 0.0, 0.0, 0.0), zp);
-  // Segment* s2 =
-  //     rg.NewJunction(api::JunctionId{"j2"})
-  //     ->NewSegment(api::SegmentId{"s2"}, std::move(road_curve_2));
-  // Lane* l2_with_z = s2->NewLane(api::LaneId{"l2_with_z"}, {-5., 5.},
-  //                               {-kHalfWidth, kHalfWidth}, {0., kMaxHeight},
-  //                               kR0);
-  // EXPECT_TRUE(api::test::IsLanePositionClose(
-  //     l2_with_z->ToLanePosition(point_outside_lane, &nearest_position,
-  //                               &distance),
-  //     api::LanePosition(l2_with_z->length(), expected_r_outside, kMaxHeight),
-  //     kVeryExact));
-  // EXPECT_TRUE(api::test::IsGeoPositionClose(
-  //     nearest_position,
-  //     api::GeoPosition(
-  //         (radius + kHalfWidth) * std::cos(theta0 + d_theta) + center(0),
-  //         (radius + kHalfWidth) * std::sin(theta0 + d_theta) + center(1),
-  //         kMaxHeight + elevation),
-  //     kVeryExact));
-  // EXPECT_DOUBLE_EQ(distance,
-  //                  (nearest_position.xyz() - point_outside_lane.xyz()).norm());
+  // Case 3: Tests ArcLane::ToLanePosition() at a non-zero but flat elevation.
+  const double elevation = 10.;
+  std::unique_ptr<RoadCurve> road_curve_2 = std::make_unique<ArcRoadCurve>(
+      center, radius, theta0, d_theta,
+      CubicPolynomial(elevation / radius / d_theta, 0.0, 0.0, 0.0), zp);
+  Segment* s2 =
+      rg.NewJunction(api::JunctionId{"j2"})
+      ->NewSegment(api::SegmentId{"s2"}, std::move(road_curve_2));
+  Lane* l2_with_z = s2->NewLane(api::LaneId{"l2_with_z"}, {-5., 5.},
+                                {-kHalfWidth, kHalfWidth}, {0., kMaxHeight},
+                                kR0);
+  EXPECT_TRUE(api::test::IsLanePositionClose(
+      l2_with_z->ToLanePosition(point_outside_lane, &nearest_position,
+                                &distance),
+      api::LanePosition(l2_with_z->length(), expected_r_outside, kMaxHeight),
+      kVeryExact));
+  EXPECT_TRUE(api::test::IsGeoPositionClose(
+      nearest_position,
+      api::GeoPosition::FromXyz(geo_center +
+          Vector3<double>(
+              (offset_radius + kHalfWidth) * std::cos(theta0 + d_theta),
+              (offset_radius + kHalfWidth) * std::sin(theta0 + d_theta),
+              kMaxHeight + elevation)),
+      kVeryExact));
+  EXPECT_DOUBLE_EQ(distance,
+                   (nearest_position.xyz() - point_outside_lane.xyz()).norm());
 
-  // // Case 4: Tests ArcLane::ToLanePosition() with a lane that overlaps itself.
-  // // The result should be identical to Case 1.
-  // const double d_theta_overlap = 3 * M_PI;
-  // std::unique_ptr<RoadCurve> road_curve_3 = std::make_unique<ArcRoadCurve>(
-  //     center, radius, theta0, d_theta_overlap, zp, zp);
-  // Segment* s3 =
-  //     rg.NewJunction(api::JunctionId{"j3"})
-  //     ->NewSegment(api::SegmentId{"s3"}, std::move(road_curve_3));
-  // Lane* l2_overlapping =
-  //     s3->NewLane(api::LaneId{"l2_overlapping"},
-  //                 {-5., 5.}, {-kHalfWidth, kHalfWidth},
-  //                 {0., kMaxHeight}, kR0);
-  // EXPECT_TRUE(api::test::IsLanePositionClose(
-  //     l2_overlapping->ToLanePosition(point_within_lane, &nearest_position,
-  //                                    &distance),
-  //     api::LanePosition(expected_s, expected_r, 0.), kVeryExact));
-  // EXPECT_TRUE(api::test::IsGeoPositionClose(
-  //     nearest_position,
-  //     api::GeoPosition(
-  //         (radius - kHalfWidth) * std::cos(0.5 * M_PI + theta0) + center(0),
-  //         (radius - kHalfWidth) * std::sin(0.5 * M_PI + theta0) + center(1),
-  //         0.),
-  //     kVeryExact));
+  // Case 4: Tests ArcLane::ToLanePosition() with a lane that overlaps itself.
+  // The result should be identical to Case 1.
+  const double d_theta_overlap = 3 * M_PI;
+  std::unique_ptr<RoadCurve> road_curve_3 = std::make_unique<ArcRoadCurve>(
+      center, radius, theta0, d_theta_overlap, zp, zp);
+  Segment* s3 =
+      rg.NewJunction(api::JunctionId{"j3"})
+      ->NewSegment(api::SegmentId{"s3"}, std::move(road_curve_3));
+  Lane* l2_overlapping =
+      s3->NewLane(api::LaneId{"l2_overlapping"},
+                  {-5., 5.}, {-kHalfWidth, kHalfWidth},
+                  {0., kMaxHeight}, kR0);
+  EXPECT_TRUE(api::test::IsLanePositionClose(
+      l2_overlapping->ToLanePosition(point_within_lane, &nearest_position,
+                                     &distance),
+      api::LanePosition(expected_s, expected_r, 0.), kVeryExact));
+  EXPECT_TRUE(api::test::IsGeoPositionClose(
+      nearest_position,
+      api::GeoPosition::FromXyz(geo_center +
+          Vector3<double>(
+              (offset_radius - kHalfWidth) * std::cos(0.5 * M_PI + theta0),
+              (offset_radius - kHalfWidth) * std::sin(0.5 * M_PI + theta0),
+              0.)),
+      kVeryExact));
 
-  // EXPECT_NEAR(distance, (radius - kHalfWidth) -
-  //                           std::sqrt(std::pow(50., 2.) + std::pow(50., 2.)),
-  //             kVeryExact);
+  EXPECT_NEAR(distance, (offset_radius - kHalfWidth) -
+                            std::sqrt(std::pow(50., 2.) + std::pow(50., 2.)),
+              kVeryExact);
 
-  // // Case 5: Tests ArcLane::ToLanePosition() with a lane that starts in the
-  // // third quadrant and ends in the second quadrant; i.e. d_theta is negative
-  // // and crosses the ±π wrap-around value using a point that is within the lane
-  // // in the third quadrant.
-  // const double theta0_wrap = 1.2 * M_PI;
-  // const double d_theta_wrap = -0.4 * M_PI;
-  // std::unique_ptr<RoadCurve> road_curve_4 = std::make_unique<ArcRoadCurve>(
-  //     center, radius, theta0_wrap, d_theta_wrap, zp, zp);
-  // Segment* s4 =
-  //     rg.NewJunction(api::JunctionId{"j4"})
-  //     ->NewSegment(api::SegmentId{"s4"}, std::move(road_curve_4));
-  // Lane* l2_wrap = s4->NewLane(api::LaneId{"l2_wrap"},
-  //                             {-5., 5.}, {-kHalfWidth, kHalfWidth},
-  //                             {0., kMaxHeight}, kR0);
-  // const api::GeoPosition point_in_third_quadrant{
-  //   center(0) - 90., center(1) - 25., 0.};  // θ ~= -0.9π.
-  // const double expected_s_wrap =
-  //     (std::atan2(25, -90) - 0.8 * M_PI) / d_theta * l2->length();  // ~0.28L
-  // const double expected_r_wrap =
-  //     std::sqrt(std::pow(90, 2.) + std::pow(25, 2.)) - radius;
-  // EXPECT_TRUE(api::test::IsLanePositionClose(
-  //     l2_wrap->ToLanePosition(point_in_third_quadrant, &nearest_position,
-  //                             &distance),
-  //     api::LanePosition(expected_s_wrap, expected_r_wrap, 0.), kVeryExact));
-  // EXPECT_TRUE(api::test::IsGeoPositionClose(
-  //     nearest_position, api::GeoPosition(-90 + center(0), -25 + center(1), 0.),
-  //     kVeryExact));
+  // Case 5: Tests ArcLane::ToLanePosition() with a lane that starts in the
+  // third quadrant and ends in the second quadrant; i.e. d_theta is negative
+  // and crosses the ±π wrap-around value using a point that is within the lane
+  // in the third quadrant.
+  const double theta0_wrap = 1.2 * M_PI;
+  const double d_theta_wrap = -0.4 * M_PI;
+  std::unique_ptr<RoadCurve> road_curve_4 = std::make_unique<ArcRoadCurve>(
+      center, radius, theta0_wrap, d_theta_wrap, zp, zp);
+  Segment* s4 =
+      rg.NewJunction(api::JunctionId{"j4"})
+      ->NewSegment(api::SegmentId{"s4"}, std::move(road_curve_4));
+  Lane* l2_wrap = s4->NewLane(api::LaneId{"l2_wrap"},
+                              {-5., 5.}, {-kHalfWidth, kHalfWidth},
+                              {0., kMaxHeight}, kR0);
+  const double offset_radius_wrap = radius + kR0;
+  const api::GeoPosition point_in_third_quadrant{
+    center(0) - offset_radius_wrap, center(1), 0.};  // θ ~= -0.9π.
+  const double expected_s_wrap =
+      std::abs((M_PI - theta0_wrap) / d_theta_wrap) * l2_wrap->length();
+  const double expected_r_wrap = 0.0;
+  EXPECT_TRUE(api::test::IsLanePositionClose(
+      l2_wrap->ToLanePosition(point_in_third_quadrant, &nearest_position,
+                              &distance),
+      api::LanePosition(expected_s_wrap, expected_r_wrap, 0.), kVeryExact));
+  EXPECT_TRUE(api::test::IsGeoPositionClose(nearest_position,
+      api::GeoPosition(-offset_radius_wrap + center(0), center(1), 0.),
+      kVeryExact));
 
-  // EXPECT_NEAR(distance, 0. /* within lane */, kVeryExact);
+  EXPECT_NEAR(distance, 0. /* within lane */, kVeryExact);
 
-  // // Tests the integrity of ArcLaneWithConstantSuperelevation::ToLanePosition()
-  // // with various null argument combinations.
-  // EXPECT_NO_THROW(l2->ToLanePosition(point_within_lane, &nearest_position,
-  //                                    nullptr));
-  // EXPECT_NO_THROW(l2->ToLanePosition(point_within_lane, nullptr, &distance));
-  // EXPECT_NO_THROW(l2->ToLanePosition(point_within_lane, nullptr, nullptr));
+  // Tests the integrity of ArcLaneWithConstantSuperelevation::ToLanePosition()
+  // with various null argument combinations.
+  EXPECT_NO_THROW(l2->ToLanePosition(point_within_lane, &nearest_position,
+                                     nullptr));
+  EXPECT_NO_THROW(l2->ToLanePosition(point_within_lane, nullptr, &distance));
+  EXPECT_NO_THROW(l2->ToLanePosition(point_within_lane, nullptr, nullptr));
 
-  // // Verifies the output of ArcLane::GetOrientation().
-  // EXPECT_TRUE(api::test::IsRotationClose(
-  //     l2->GetOrientation({0., 0., 0.}),
-  //     api::Rotation::FromRpy(0., 0., (0.25 + 0.5) * M_PI), kVeryExact));
+  // Verifies the output of ArcLane::GetOrientation().
+  EXPECT_TRUE(api::test::IsRotationClose(
+      l2->GetOrientation({0., 0., 0.}),
+      api::Rotation::FromRpy(0., 0., (0.25 + 0.5) * M_PI), kVeryExact));
 
-  // EXPECT_TRUE(api::test::IsRotationClose(
-  //     l2->GetOrientation({0., 1., 0.}),
-  //     api::Rotation::FromRpy(0., 0., (0.25 + 0.5) * M_PI), kVeryExact));
+  EXPECT_TRUE(api::test::IsRotationClose(
+      l2->GetOrientation({0., 1., 0.}),
+      api::Rotation::FromRpy(0., 0., (0.25 + 0.5) * M_PI), kVeryExact));
 
-  // EXPECT_TRUE(api::test::IsRotationClose(
-  //     l2->GetOrientation({l2->length(), 0., 0.}),
-  //     api::Rotation::FromRpy(0., 0, 0.25 * M_PI),
-  //     kVeryExact));  // 0.25 + 1.5 + 0.5
+  EXPECT_TRUE(api::test::IsRotationClose(
+      l2->GetOrientation({l2->length(), 0., 0.}),
+      api::Rotation::FromRpy(0., 0, 0.25 * M_PI),
+      kVeryExact));  // 0.25 + 1.5 + 0.5
 
-  // // For r=0, derivative map should be identity.
-  // EXPECT_TRUE(api::test::IsLanePositionClose(
-  //     l2->EvalMotionDerivatives({0., 0., 0.}, {0., 0., 0.}),
-  //     api::LanePosition(0., 0., 0.), kVeryExact));
+  // For r=0, derivative map should be identity.
+  EXPECT_TRUE(api::test::IsLanePositionClose(
+      l2->EvalMotionDerivatives({0., 0., 0.}, {0., 0., 0.}),
+      api::LanePosition(0., 0., 0.), kVeryExact));
 
-  // EXPECT_TRUE(api::test::IsLanePositionClose(
-  //     l2->EvalMotionDerivatives({0., 0., 0.}, {1., 0., 0.}),
-  //     api::LanePosition(1., 0., 0.), kVeryExact));
+  EXPECT_TRUE(api::test::IsLanePositionClose(
+      l2->EvalMotionDerivatives({0., 0., 0.}, {1., 0., 0.}),
+      api::LanePosition(1., 0., 0.), kVeryExact));
 
-  // EXPECT_TRUE(api::test::IsLanePositionClose(
-  //     l2->EvalMotionDerivatives({0., 0., 0.}, {0., 1., 0.}),
-  //     api::LanePosition(0., 1., 0.), kVeryExact));
+  EXPECT_TRUE(api::test::IsLanePositionClose(
+      l2->EvalMotionDerivatives({0., 0., 0.}, {0., 1., 0.}),
+      api::LanePosition(0., 1., 0.), kVeryExact));
 
-  // EXPECT_TRUE(api::test::IsLanePositionClose(
-  //     l2->EvalMotionDerivatives({0., 0., 0.}, {0., 0., 1.}),
-  //     api::LanePosition(0., 0., 1.), kVeryExact));
+  EXPECT_TRUE(api::test::IsLanePositionClose(
+      l2->EvalMotionDerivatives({0., 0., 0.}, {0., 0., 1.}),
+      api::LanePosition(0., 0., 1.), kVeryExact));
 
-  // EXPECT_TRUE(api::test::IsLanePositionClose(
-  //     l2->EvalMotionDerivatives({l2->length(), 0., 0.}, {1., 1., 1.}),
-  //     api::LanePosition(1., 1., 1.), kVeryExact));
-  // // For a left-turning curve, r = +10 will decrease the radius of the path
-  // // from the original 100 down to 90.
-  // EXPECT_TRUE(api::test::IsLanePositionClose(
-  //     l2->EvalMotionDerivatives({0., 10., 0.}, {1., 1., 1.}),
-  //     api::LanePosition((100. / 90.) * 1., 1., 1.), kVeryExact));
-  // // Likewise, r = -10 will increase the radius of the path from the
-  // // original 100 up to 110.
-  // EXPECT_TRUE(api::test::IsLanePositionClose(
-  //     l2->EvalMotionDerivatives({0., -10., 0.}, {1., 1., 1.}),
-  //     api::LanePosition((100. / 110.) * 1., 1., 1.), kVeryExact));
-  // // ...and only r should matter for an otherwise flat arc.
-  // EXPECT_TRUE(api::test::IsLanePositionClose(
-  //     l2->EvalMotionDerivatives({l2->length(), -10., 100.}, {1., 1., 1.}),
-  //     api::LanePosition((100. / 110.) * 1., 1., 1.), kVeryExact));
+  EXPECT_TRUE(api::test::IsLanePositionClose(
+      l2->EvalMotionDerivatives({l2->length(), 0., 0.}, {1., 1., 1.}),
+      api::LanePosition(1., 1., 1.), kVeryExact));
+  // For a left-turning curve, r = +10 will decrease the radius of the path
+  // from the original radius down to radius - 10.
+  EXPECT_TRUE(api::test::IsLanePositionClose(
+      l2->EvalMotionDerivatives({0., 10., 0.}, {1., 1., 1.}),
+      api::LanePosition((offset_radius / (offset_radius - 10.0)) * 1., 1., 1.),
+      kVeryExact));
+  // Likewise, r = -10 will increase the radius of the path from the
+  // original radius up to radius + 10.
+  EXPECT_TRUE(api::test::IsLanePositionClose(
+      l2->EvalMotionDerivatives({0., -10., 0.}, {1., 1., 1.}),
+      api::LanePosition(offset_radius / (offset_radius + 10.) * 1., 1., 1.),
+      kVeryExact));
+  // ...and only r should matter for an otherwise flat arc.
+  EXPECT_TRUE(api::test::IsLanePositionClose(
+      l2->EvalMotionDerivatives({l2->length(), -10., 100.}, {1., 1., 1.}),
+      api::LanePosition(offset_radius / (offset_radius + 10.), 1., 1.),
+      kVeryExact));
 }
 
 }  // namespace multilane

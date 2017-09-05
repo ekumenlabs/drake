@@ -47,8 +47,7 @@ class LineRoadCurve : public RoadCurve {
   }
 
   double p_from_s(double s, double r) const override {
-    return elevation().p_s(
-        s / p_scale() * p_scale_offset_factor(r));
+    return elevation().p_s(s / (p_scale() / p_scale_offset_factor(r)));
   }
 
   double p_scale_offset_factor(double r) const override {

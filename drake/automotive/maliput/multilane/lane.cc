@@ -197,7 +197,8 @@ api::LanePosition Lane::DoEvalMotionDerivatives(
   // Similarly, path-length s along the road at r = 0 is related to the
   // elevation by ds = p_scale * sqrt(1 + g'^2) dp. Chaining yields
   // ds/dσ:
-  const double ds_dsigma = road_curve_->p_scale() *
+  const double ds_dsigma = road_curve_->p_scale() /
+                           road_curve_->p_scale_offset_factor(r0_) *
                            std::sqrt(1 + (g_prime * g_prime)) / W_prime.norm();
 
   return api::LanePosition(ds_dsigma * velocity.sigma_v,
