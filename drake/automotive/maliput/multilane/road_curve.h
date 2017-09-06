@@ -32,12 +32,31 @@ class RoadCurve {
   const CubicPolynomial& superelevation() const { return superelevation_; }
 
   /// Computes the composed curve path integral in the interval of p = [0; 1].
+  ///
+  /// It does not have support yet for the superelevation effect when computing
+  /// the path length integral.
+  /// @param r Lateral offset of the reference curve over the z=0 plane. It
+  /// makes the reference curve be scaled to go over it.
   /// @return The path length integral of the curve composed with the elevation
   /// polynomial.
   virtual double trajectory_length(double r) const = 0;
 
+  /// Computes the parametric position p along an offset of the reference curve
+  /// at `r` distance corresponding to longitudinal position `s` along the road
+  /// curve.
+  ///
+  /// It scales p_scale() based on `r` lateral offset distance from the
+  /// reference curve.
+  /// @param s Longitudinal position over the road curve.
+  /// @param r Lateral distance from the reference curve.
+  /// @return The parametric position p along an offset of the reference curve.
   virtual double p_from_s(double s, double r) const = 0;
 
+  /// Computes the scale factor between the path length integral of the
+  /// reference curve with respect to an offset of it at `r` lateral distance.
+  /// @param r Lateral distance from the reference curve.
+  /// @return The scale factor between p_scale() and the path length integral of
+  /// the curve at offset distance `r`.
   virtual double p_scale_offset_factor(double r) const = 0;
 
   /// Computes the reference curve.

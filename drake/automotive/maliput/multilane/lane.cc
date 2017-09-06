@@ -47,11 +47,6 @@ Rot3 Lane::Rabg_of_p(const double p) const {
 }
 
 
-double Lane::p_from_s(const double s) const {
-  return road_curve_->p_from_s(s, r0_);
-}
-
-
 V3 Lane::W_prime_of_prh(const double p, const double r, const double h,
                         const Rot3& Rabg) const {
   const V2 G_prime = road_curve_->xy_dot_of_p(p);
@@ -125,7 +120,7 @@ V3 Lane::r_hat_of_Rabg(const Rot3& Rabg) const {
 api::GeoPosition Lane::DoToGeoPosition(
     const api::LanePosition& lane_pos) const {
   // Recover parameter p from arc-length position s.
-  const double p = p_from_s(lane_pos.s());
+  const double p = road_curve_->p_from_s(lane_pos.s(), r0_);
   // Calculate z (elevation) of (s,0,0);
   const double z = road_curve_->elevation().f_p(p) * road_curve_->p_scale();
   // Calculate x,y of (s,0,0).
@@ -144,7 +139,7 @@ api::GeoPosition Lane::DoToGeoPosition(
 
 api::Rotation Lane::DoGetOrientation(const api::LanePosition& lane_pos) const {
   // Recover linear parameter p from arc-length position s.
-  const double p = p_from_s(lane_pos.s());
+  const double p = road_curve_->p_from_s(lane_pos.s(), r0_);
   const double r = lane_pos.r() + r0_;
   const double h = lane_pos.h();
   // Calculate orientation of (s,r,h) basis at (s,0,0).
@@ -182,7 +177,7 @@ api::LanePosition Lane::DoEvalMotionDerivatives(
     const api::LanePosition& position,
     const api::IsoLaneVelocity& velocity) const {
 
-  const double p = p_from_s(position.s());
+  const double p = road_curve_->p_from_s(position.s(), r0_);
   const double r = position.r() + r0_;
   const double h = position.h();
 
@@ -195,8 +190,8 @@ api::LanePosition Lane::DoEvalMotionDerivatives(
 
   // The definition of path-length of a path along σ yields dσ = |∂W/∂p| dp.
   // Similarly, path-length s along the road at r = 0 is related to the
-  // elevation by ds = p_scale * sqrt(1 + g'^2) dp. Chaining yields
-  // ds/dσ:
+  // elevation by ds = p_scale * sqrt(1 + g'^2) dp. Note that p_scale should be
+  // scaled because of Lane's offset distance, r0_. Chaining yields ds/dσ:
   const double ds_dsigma = road_curve_->p_scale() /
                            road_curve_->p_scale_offset_factor(r0_) *
                            std::sqrt(1 + (g_prime * g_prime)) / W_prime.norm();
@@ -210,10 +205,16 @@ api::LanePosition Lane::DoToLanePosition(
       const api::GeoPosition& geo_position,
       api::GeoPosition* nearest_position,
       double* distance) const {
-  const api::RBounds segment_bounds(driveable_bounds_.min() + r0_,
+  // Computes the lateral extents of the surface in terms of the definition of
+  // the reference curve. It implies a translation of the driveable bounds of
+  // the lane by r0 distance.
+  const api::RBounds surface_bounds(driveable_bounds_.min() + r0_,
                                     driveable_bounds_.max() + r0_);
+  // The position is over the segment's road curve, so a change of frame is
+  // needed. That implies rescaling the s coordinate and translating the r
+  // coordinate because of the offset.
   const V3 lane_position_in_segment_curve_frame = road_curve_->ToCurveFrame(
-      geo_position.xyz(), segment_bounds, elevation_bounds_);
+      geo_position.xyz(), surface_bounds, elevation_bounds_);
   const api::LanePosition lane_position = api::LanePosition(
       lane_position_in_segment_curve_frame.x() /
       road_curve_->p_scale_offset_factor(r0_),

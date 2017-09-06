@@ -55,8 +55,18 @@ class ArcRoadCurve : public RoadCurve {
     return elevation().p_s(s / (p_scale() / p_scale_offset_factor(r)));
   }
 
+  /// Computes the scale factor to be applied to p_scale() result so as to get
+  /// the path length of the reference curve at an offset distance `r` from the
+  /// reference curve.
+  /// @param r The lateral distance from the reference curve.
+  /// @throws std::runtime_error When the effective radius of the arc is
+  /// negative.
   double p_scale_offset_factor(double r) const override {
-    return radius_ / (radius_ - std::copysign(1.0, d_theta_) * r);
+    // TODO() We should take care of the superelevation() scale that will modify
+    // curve's path length.
+    const double effective_radius = radius_ - std::copysign(1.0, d_theta_) * r;
+    DRAKE_THROW_UNLESS(effective_radius > 0.0);
+    return radius_ / effective_radius;
   }
 
   Vector2<double> xy_of_p(double p) const override {

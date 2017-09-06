@@ -65,6 +65,8 @@ class Lane : public api::Lane {
   ///        entire driveable surface
   /// @param road_curve The trajectory of the Lane over parent @p segment's
   ///        surface.
+  /// @param r0 The lateral displacement with respect to the @p road_curve's
+  /// reference curve.
   ///
   /// N.B. The override Lane::ToLanePosition() is currently restricted to lanes
   /// in which superelevation and elevation change are both zero.
@@ -189,10 +191,6 @@ class Lane : public api::Lane {
   // Note that xy_of_p(), xy_dot_of_p(), heading_of_p() and heading_dot_of_p(),
   // as well as the reference to the elevation and superelevation objects live
   // on the RoadCurve object.
-
-  // Returns the parametric position p along the reference curve corresponding
-  // to longitudinal position @p s along the lane.
-  double p_from_s(const double s) const;
 
   // Returns the rotation R_αβγ, evaluated at @p p along the reference curve.
   Rot3 Rabg_of_p(const double p) const;

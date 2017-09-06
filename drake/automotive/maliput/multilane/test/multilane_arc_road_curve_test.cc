@@ -172,19 +172,27 @@ TEST_F(MultilaneArcRoadCurveTest, ToCurveFrameTest) {
       kVeryExact));
 }
 
+// Checks that p_scale(), trajectory_length() and p_scale_offset_factor() with
+// constant superelevation polynomial behave properly.
 TEST_F(MultilaneArcRoadCurveTest, OffsetTest) {
   const ArcRoadCurve dut(kCenter, kRadius, kTheta0, kDTheta, zp, zp);
   const std::vector<double> r_vector{-0.5 * kRadius, 0.0, 0.5 * kRadius};
-  // Checks that the scale factor for any offset is one (it does not take into
-  // account superelevation effect).
+  const std::vector<double> p_vector{0., 0.1, 0.2, 0.5, 0.7, 1.0};
+
+  // Checks that it throws when non positive radius are obtained because of the
+  // lateral offset.
+  EXPECT_THROW(dut.p_scale_offset_factor(kRadius), std::runtime_error);
+  EXPECT_THROW(dut.p_scale_offset_factor(2.0 * kRadius), std::runtime_error);
+  // Checks that the scale factor for any offset is based on the relation
+  // between resulting radius and reference radius.
   for (double r : r_vector) {
     EXPECT_DOUBLE_EQ(dut.p_scale_offset_factor(r), kRadius / (kRadius - r));
   }
   // Evaluates inverse function for different path length and offset values.
   for (double r : r_vector) {
-    EXPECT_DOUBLE_EQ(dut.p_from_s(0.0 * (kRadius - r) * kDTheta, r), 0.0);
-    EXPECT_DOUBLE_EQ(dut.p_from_s(0.5 * (kRadius - r) * kDTheta, r), 0.5);
-    EXPECT_DOUBLE_EQ(dut.p_from_s(1.0 * (kRadius - r) * kDTheta, r), 1.0);
+    for (double p : p_vector) {
+      EXPECT_DOUBLE_EQ(dut.p_from_s(p * (kRadius - r) * kDTheta, r), p);
+    }
   }
   // Evaluates the path length integral for different offset values.
   for (double r : r_vector) {

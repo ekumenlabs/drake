@@ -52,7 +52,7 @@ class LineRoadCurve : public RoadCurve {
 
   double p_scale_offset_factor(double r) const override {
     // TODO() We should take care of the superelevation() scale that will modify
-    // curve path length.
+    // curve's path length.
     unused(r);
     return 1.0;
   }

@@ -899,10 +899,11 @@ GTEST_TEST(MultilaneLanesTest, FlatArcLaneWithOffset) {
       api::LanePosition(expected_s, expected_r, 0.), kVeryExact));
   EXPECT_TRUE(api::test::IsGeoPositionClose(
       nearest_position,
-      api::GeoPosition(
-          (offset_radius - kHalfWidth) * std::cos(0.5 * M_PI + theta0) + center(0),
-          (offset_radius - kHalfWidth) * std::sin(0.5 * M_PI + theta0) + center(1),
-          0.),
+      api::GeoPosition::FromXyz(geo_center +
+          Vector3<double>(
+              (offset_radius - kHalfWidth) * std::cos(0.5 * M_PI + theta0),
+              (offset_radius - kHalfWidth) * std::sin(0.5 * M_PI + theta0),
+              0.)),
       kVeryExact));
   EXPECT_NEAR(distance,
               (offset_radius - kHalfWidth) - std::sqrt(std::pow(50., 2.) +
