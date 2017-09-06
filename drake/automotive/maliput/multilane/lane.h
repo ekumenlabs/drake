@@ -66,7 +66,7 @@ class Lane : public api::Lane {
   /// @param road_curve The trajectory of the Lane over parent @p segment's
   ///        surface.
   /// @param r0 The lateral displacement with respect to the @p road_curve's
-  /// reference curve.
+  ///        reference curve.
   ///
   /// N.B. The override Lane::ToLanePosition() is currently restricted to lanes
   /// in which superelevation and elevation change are both zero.

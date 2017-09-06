@@ -215,11 +215,11 @@ api::LanePosition Lane::DoToLanePosition(
   // coordinate because of the offset.
   const V3 lane_position_in_segment_curve_frame = road_curve_->ToCurveFrame(
       geo_position.xyz(), surface_bounds, elevation_bounds_);
-  const api::LanePosition lane_position = api::LanePosition(
-      lane_position_in_segment_curve_frame.x() /
-      road_curve_->p_scale_offset_factor(r0_),
-      lane_position_in_segment_curve_frame.y() - r0_,
-      lane_position_in_segment_curve_frame.z());
+  const api::LanePosition lane_position =
+      api::LanePosition(lane_position_in_segment_curve_frame.x() /
+                            road_curve_->p_scale_offset_factor(r0_),
+                        lane_position_in_segment_curve_frame.y() - r0_,
+                        lane_position_in_segment_curve_frame.z());
 
   const api::GeoPosition nearest = ToGeoPosition(lane_position);
   if (nearest_position != nullptr) {
