@@ -38,6 +38,16 @@ drake_cc_binary(
     ],
 )
 
+drake_cc_binary(
+    name = "multilane_to_obj",
+    srcs = ["multilane_to_obj.cc"],
+    deps = [
+        ":utility",
+        "//drake/automotive/maliput/multilane",
+        "//drake/common:text_logging_gflags",
+    ],
+)
+
 # === test/ ===
 
 filegroup(

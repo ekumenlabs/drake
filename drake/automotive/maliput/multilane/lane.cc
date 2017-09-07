@@ -1,5 +1,7 @@
 #include "drake/automotive/maliput/multilane/lane.h"
 
+#include <iostream>
+
 #include "drake/automotive/maliput/multilane/arc_road_curve.h"
 #include "drake/automotive/maliput/multilane/branch_point.h"
 #include "drake/common/drake_assert.h"
@@ -133,6 +135,9 @@ api::GeoPosition Lane::DoToGeoPosition(
   const V3 lane_offset(0, r0_, 0);
   const V3 xyz = ypr.apply(lane_position_over_reference_curve + lane_offset) +
                  V3(xy.x(), xy.y(), z);
+  // std::cout << "[x,y,z]: " << xyz.x() << "," << xyz.y() << "," << xyz.z() <<
+  //              " | [s,r,h]: "  << lane_pos.s() << "," << lane_pos.r() <<
+  //              "," << lane_pos.h() << " | " << id().string() << std::endl;
   return {xyz.x(), xyz.y(), xyz.z()};
 }
 

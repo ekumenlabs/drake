@@ -184,7 +184,7 @@ void Builder::AttachBranchPoint(
   }
 }
 
-
+static double r_offset = 0.0;
 Lane* Builder::BuildConnection(
     const Connection* const conn,
     Junction* const junction,
@@ -245,7 +245,8 @@ Lane* Builder::BuildConnection(
       api::SegmentId{std::string("s:") + conn->id()},
       std::move(road_curve));
   Lane* lane = segment->NewLane(lane_id, lane_bounds_, driveable_bounds_,
-                                elevation_bounds_, 0.0);
+                                elevation_bounds_, r_offset);
+  r_offset += 15.0;
   AttachBranchPoint(
       conn->start(), lane, api::LaneEnd::kStart, road_geometry, bp_map);
   AttachBranchPoint(
