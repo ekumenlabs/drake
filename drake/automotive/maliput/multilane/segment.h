@@ -35,9 +35,17 @@ class Segment : public api::Segment {
   /// road_curve's reference curve.
   Segment(const api::SegmentId& id,
           api::Junction* junction,
-          std::unique_ptr<RoadCurve> road_curve)
-      : id_(id), junction_(junction), road_curve_(std::move(road_curve)) {
+          std::unique_ptr<RoadCurve> road_curve,
+          int num_lanes,
+          double r0, double r_spacing, double width,
+          const api::HBounds& elevation_bounds)
+      : id_(id), junction_(junction), road_curve_(std::move(road_curve)),
+      num_lanes_(num_lanes), r0_(r0), r_spacing_(r_spacing), width_(width),
+      lane_width_(width / static_cast<double>(num_lanes)),
+      elevation_bounds_(elevation_bounds) {
     DRAKE_DEMAND(road_curve_.get() != nullptr);
+    DRAKE_DEMAND(num_lanes_ > 0);
+    DRAKE_DEMAND(width_ > 0);
   }
 
   /// Creates a new Lane object.
@@ -52,11 +60,7 @@ class Segment : public api::Segment {
   /// @param r0 Lateral displacement of the Lane with respect to segment
   /// RoadCurve's reference curve.
   /// @return A Lane object.
-  Lane* NewLane(api::LaneId id,
-                const api::RBounds& lane_bounds,
-                const api::RBounds& driveable_bounds,
-                const api::HBounds& elevation_bounds,
-                double r0);
+  Lane* NewLane(const api::LaneId& id);
 
   ~Segment() override = default;
 
@@ -65,7 +69,7 @@ class Segment : public api::Segment {
 
   const api::Junction* do_junction() const override;
 
-  int do_num_lanes() const override { return 1; }
+  int do_num_lanes() const override { return lanes_.size(); }
 
   const api::Lane* do_lane(int index) const override;
 
@@ -73,10 +77,24 @@ class Segment : public api::Segment {
   api::SegmentId id_;
   // Parent junction.
   api::Junction* junction_{};
-  // Child Lane pointer.
-  std::unique_ptr<Lane> lane_;
+  // Child Lanes vectors.
+  std::vector<std::unique_ptr<Lane>> lanes_;
   // Reference trajectory over the Segment's surface.
   std::unique_ptr<RoadCurve> road_curve_;
+
+  const int num_lanes_{};
+
+  const double r0_{};
+
+  const double r_spacing_{};
+
+  const double width_;
+
+  const double lane_width_;
+
+  const api::RBounds driveable_bounds_;
+
+  const api::HBounds elevation_bounds_;
 };
 
 }  // namespace multilane

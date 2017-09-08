@@ -136,6 +136,16 @@ drake_cc_googletest(
     ],
 )
 
+drake_cc_googletest(
+    name = "multilane_segment_test",
+    size = "small",
+    srcs = ["test/multilane_segment_test.cc"],
+    deps = [
+        ":lanes",
+        "//drake/automotive/maliput/api:maliput_types_compare",
+    ],
+)
+
 drake_cc_binary(
     name = "yaml_load",
     testonly = 1,

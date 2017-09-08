@@ -32,7 +32,10 @@ class Junction : public api::Junction {
   /// @param road_curve Reference trajectory over the Segment's surface.
   /// @return A Segment object.
   Segment* NewSegment(api::SegmentId id,
-                      std::unique_ptr<RoadCurve> road_curve);
+                      std::unique_ptr<RoadCurve> road_curve,
+                      int num_lanes,
+                      double r0, double r_spacing, double width,
+                      const api::HBounds& elevation_bounds);
 
   ~Junction() override = default;
 
