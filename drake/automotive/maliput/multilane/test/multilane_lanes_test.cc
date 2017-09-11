@@ -40,18 +40,19 @@ GTEST_TEST(MultilaneLanesTest, FlatLineLane) {
   CubicPolynomial zp {0., 0., 0., 0.};
   const double kHalfWidth = 10.;
   const double kMaxHeight = 5.;
-  const double kR0 = 0.0;
+  const int kNumLanes = 1;
+  const double kR0 = 0.;
+  const double kRSpacing = 0.;
+
   RoadGeometry rg(api::RoadGeometryId{"apple"},
                   kLinearTolerance, kAngularTolerance);
   std::unique_ptr<RoadCurve> road_curve_1 = std::make_unique<LineRoadCurve>(
       Vector2<double>(100., -75.), Vector2<double>(100., 50.), zp, zp);
   Segment* s1 =
       rg.NewJunction(api::JunctionId{"j1"})
-      ->NewSegment(api::SegmentId{"s1"}, std::move(road_curve_1));
-  Lane* l1 =
-      s1->NewLane(api::LaneId{"l1"},
-                  // lane/driveable/elevation bounds
-                  {-5., 5.}, {-kHalfWidth, kHalfWidth}, {0., kMaxHeight}, kR0);
+      ->NewSegment(api::SegmentId{"s1"}, std::move(road_curve_1), kNumLanes,
+                   kR0, kRSpacing, 2.0 * kHalfWidth, {0., kMaxHeight});
+  Lane* l1 = s1->NewLane(api::LaneId{"l1"});
 
   EXPECT_EQ(rg.CheckInvariants(), std::vector<std::string>());
 
