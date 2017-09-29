@@ -204,8 +204,15 @@ class Connection {
 
   /// Constructs a line-segment connection joining @p start to @p end.
   Connection(const std::string& id,
-             const Endpoint& start, const Endpoint& end)
-      : type_(kLine), id_(id), start_(start), end_(end) {}
+             const Endpoint& start, const Endpoint& end, int num_lanes,
+             double r0, double left_shoulder, double right_shoulder)
+      : type_(kLine), id_(id), start_(start), end_(end), num_lanes_(num_lanes),
+        r0_(r0), left_shoulder_(left_shoulder),
+        right_shoulder_(right_shoulder) {
+    DRAKE_DEMAND(num_lanes_ > 0);
+    DRAKE_DEMAND(left_shoulder_ >= 0);
+    DRAKE_DEMAND(right_shoulder_ >= 0);
+  }
 
   /// Constructs an arc-segment connection joining @p start to @p end.
   ///
@@ -215,9 +222,11 @@ class Connection {
   /// @p radius must be non-negative.  @p d_theta > 0 indicates a
   /// counterclockwise arc from start to end.
   Connection(const std::string& id,
-             const Endpoint& start, const Endpoint& end,
+             const Endpoint& start, const Endpoint& end, int num_lanes,
+             double r0, double left_shoulder, double right_shoulder,
              double cx, double cy, double radius, double d_theta)
-      : type_(kArc), id_(id), start_(start), end_(end),
+      : type_(kArc), id_(id), start_(start), end_(end), num_lanes_(num_lanes),
+        r0_(r0), left_shoulder_(left_shoulder), right_shoulder_(right_shoulder),
         cx_(cx), cy_(cy), radius_(radius), d_theta_(d_theta) {}
 
   /// Returns the geometric type of the path.
@@ -256,11 +265,23 @@ class Connection {
     return d_theta_;
   }
 
+  int num_lanes() const { return num_lanes_; }
+
+  double r0() const { return r0_; }
+
+  double left_shoulder() const { return left_shoulder_; }
+
+  double right_shoulder() const { return right_shoulder_; }
+
  private:
   Type type_{};
   std::string id_;
   Endpoint start_;
   Endpoint end_;
+  const int num_lanes_{};
+  const double r0_{};
+  const double left_shoulder_{};
+  const double right_shoulder_{};
 
   // Bits specific to type_ == kArc:
   double cx_{};
@@ -325,30 +346,26 @@ class Builder {
   /// @p lane_bounds must be a subset of @p driveable_bounds.
   /// @p linear_tolerance and @p angular_tolerance specify the respective
   /// tolerances for the resulting RoadGeometry.
-  Builder(const api::RBounds& lane_bounds,
-          const api::RBounds& driveable_bounds,
-          const api::HBounds& elevation_bounds,
-          const double linear_tolerance,
-          const double angular_tolerance);
+  Builder(double r_spacing, /* double left_shoulder, double right_shoulder, */
+          const api::HBounds& elevation_bounds, double linear_tolerance,
+          double angular_tolerance);
 
   /// Connects @p start to an end-point linearly displaced from @p start.
   /// @p length specifies the length of displacement (in the direction of the
   /// heading of @p start).  @p z_end specifies the elevation characteristics
   /// at the end-point.
-  const Connection* Connect(
-      const std::string& id,
-      const Endpoint& start,
-      const double length,
-      const EndpointZ& z_end);
+  const Connection* Connect(const std::string& id, int num_lanes, double r0,
+                            double left_shoulder, double right_shoulder,
+                            const Endpoint& start, double length,
+                            const EndpointZ& z_end);
 
   /// Connects @p start to an end-point displaced from @p start via an arc.
   /// @p arc specifies the shape of the arc.  @p z_end specifies the
   /// elevation characteristics at the end-point.
-  const Connection* Connect(
-      const std::string& id,
-      const Endpoint& start,
-      const ArcOffset& arc,
-      const EndpointZ& z_end);
+  const Connection* Connect(const std::string& id, int num_lanes, double r0,
+                            double left_shoulder, double right_shoulder,
+                            const Endpoint& start, const ArcOffset& arc,
+                            const EndpointZ& z_end);
 
   /// Sets the default branch for one end of a connection.
   ///
@@ -358,8 +375,9 @@ class Builder {
   /// those ends must be coincident and (anti)parallel within the tolerances
   /// for the Builder).
   void SetDefaultBranch(
-      const Connection* in, const api::LaneEnd::Which in_end,
-      const Connection* out, const api::LaneEnd::Which out_end);
+      const Connection* in, int in_lane_index, const api::LaneEnd::Which in_end,
+      const Connection* out, int out_lane_index,
+      const api::LaneEnd::Which out_end);
 
   /// Creates a new empty connection group with ID string @p id.
   Group* MakeGroup(const std::string& id);
@@ -430,17 +448,21 @@ class Builder {
     DefaultBranch() = default;
 
     DefaultBranch(
-        const Connection* ain, const api::LaneEnd::Which ain_end,
-        const Connection* aout, const api::LaneEnd::Which aout_end)
-        : in(ain), in_end(ain_end), out(aout), out_end(aout_end) {}
+        const Connection* ain, int ain_lane_index,
+        const api::LaneEnd::Which ain_end, const Connection* aout,
+        int aout_lane_index, const api::LaneEnd::Which aout_end)
+        : in(ain), in_lane_index(ain_lane_index), in_end(ain_end), out(aout),
+          out_lane_index(aout_lane_index), out_end(aout_end) {}
 
     const Connection* in{};
+    const int in_lane_index{};
     api::LaneEnd::Which in_end{};
     const Connection* out{};
+    const int out_lane_index{};
     api::LaneEnd::Which out_end{};
   };
 
-  Lane* BuildConnection(
+  std::vector<Lane*> BuildConnection(
       const Connection* const cnx,
       Junction* const junction,
       RoadGeometry* const rg,
@@ -456,11 +478,12 @@ class Builder {
       RoadGeometry* rg,
       std::map<Endpoint, BranchPoint*, EndpointFuzzyOrder>* bp_map) const;
 
-  api::RBounds lane_bounds_;
-  api::RBounds driveable_bounds_;
-  api::HBounds elevation_bounds_;
-  double linear_tolerance_{};
-  double angular_tolerance_{};
+  const double r_spacing_{};
+  // const double left_shoulder_{};
+  // const double right_shoulder_{};
+  const api::HBounds elevation_bounds_;
+  const double linear_tolerance_{};
+  const double angular_tolerance_{};
   std::vector<std::unique_ptr<Connection>> connections_;
   std::vector<DefaultBranch> default_branches_;
   std::vector<std::unique_ptr<Group>> groups_;

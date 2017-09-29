@@ -1,6 +1,7 @@
 #include "drake/automotive/maliput/multilane/builder.h"
 
 #include <cmath>
+#include <iostream>
 #include <utility>
 
 #include "drake/automotive/maliput/multilane/arc_road_curve.h"
@@ -16,42 +17,38 @@ namespace drake {
 namespace maliput {
 namespace multilane {
 
-Builder::Builder(const api::RBounds& lane_bounds,
-                 const api::RBounds& driveable_bounds,
-                 const api::HBounds& elevation_bounds,
-                 const double linear_tolerance,
-                 const double angular_tolerance)
-    : lane_bounds_(lane_bounds),
-      driveable_bounds_(driveable_bounds),
-      elevation_bounds_(elevation_bounds),
+Builder::Builder(double r_spacing, const api::HBounds& elevation_bounds,
+                 double linear_tolerance, double angular_tolerance)
+    : r_spacing_(r_spacing), elevation_bounds_(elevation_bounds),
       linear_tolerance_(linear_tolerance),
       angular_tolerance_(angular_tolerance) {
-  DRAKE_DEMAND(lane_bounds_.min() >= driveable_bounds_.min());
-  DRAKE_DEMAND(lane_bounds_.max() <= driveable_bounds_.max());
+  DRAKE_DEMAND(elevation_bounds.min() <= elevation_bounds.max());
+  DRAKE_DEMAND(linear_tolerance_ >= 0.);
+  DRAKE_DEMAND(angular_tolerance_ >= 0.);
 }
 
 
-const Connection* Builder::Connect(
-    const std::string& id,
-    const Endpoint& start,
-    const double length,
-    const EndpointZ& z_end) {
-
+const Connection* Builder::Connect(const std::string& id, int num_lanes,
+                                   double r0, double left_shoulder,
+                                   double right_shoulder, const Endpoint& start,
+                                   double length, const EndpointZ& z_end) {
   const Endpoint end(
       EndpointXy(start.xy().x() + (length * std::cos(start.xy().heading())),
                  start.xy().y() + (length * std::sin(start.xy().heading())),
                  start.xy().heading()),
       z_end);
-  connections_.push_back(std::make_unique<Connection>(id, start, end));
+  connections_.push_back(
+      std::make_unique<Connection>(id, start, end, num_lanes, r0, left_shoulder,
+                                   right_shoulder));
   return connections_.back().get();
 }
 
 
-const Connection* Builder::Connect(
-    const std::string& id,
-    const Endpoint& start,
-    const ArcOffset& arc,
-    const EndpointZ& z_end) {
+const Connection* Builder::Connect(const std::string& id, int num_lanes,
+                                   double r0, double left_shoulder,
+                                   double right_shoulder, const Endpoint& start,
+                                   const ArcOffset& arc,
+                                   const EndpointZ& z_end) {
   const double alpha = start.xy().heading();
   const double theta0 = alpha - std::copysign(M_PI / 2., arc.d_theta());
   const double theta1 = theta0 + arc.d_theta();
@@ -64,16 +61,19 @@ const Connection* Builder::Connect(
                                 alpha + arc.d_theta()),
                      z_end);
 
-  connections_.push_back(std::make_unique<Connection>(
-      id, start, end, cx, cy, arc.radius(), arc.d_theta()));
+  connections_.push_back(
+      std::make_unique<Connection>(id, start, end, num_lanes, r0, left_shoulder,
+          right_shoulder, cx, cy, arc.radius(), arc.d_theta()));
   return connections_.back().get();
 }
 
 
 void Builder::SetDefaultBranch(
-    const Connection* in, const api::LaneEnd::Which in_end,
-    const Connection* out, const api::LaneEnd::Which out_end) {
-  default_branches_.push_back({in, in_end, out, out_end});
+    const Connection* in, int in_lane_index, const api::LaneEnd::Which in_end,
+    const Connection* out, int out_lane_index,
+    const api::LaneEnd::Which out_end) {
+  default_branches_.push_back(
+    {in, in_lane_index, in_end, out, out_lane_index, out_end});
 }
 
 
@@ -185,7 +185,7 @@ void Builder::AttachBranchPoint(
 }
 
 
-Lane* Builder::BuildConnection(
+std::vector<Lane*> Builder::BuildConnection(
     const Connection* const conn,
     Junction* const junction,
     RoadGeometry* const road_geometry,
@@ -240,17 +240,30 @@ Lane* Builder::BuildConnection(
       DRAKE_ABORT();
     }
   }
+  const double r_min = conn->r0() - r_spacing_ / 2. - conn->right_shoulder();
+  const double r_max = conn->r0() +
+                       r_spacing_ * (static_cast<double>(conn->num_lanes()) +
+                                     0.5) +
+                       conn->left_shoulder();
   Segment* segment = junction->NewSegment(
-      api::SegmentId{std::string("s:") + conn->id()}, std::move(road_curve), 1,
-      0., 0., driveable_bounds_.min(), driveable_bounds_.max(),
-      elevation_bounds_);
-  Lane* lane = segment->NewLane(api::LaneId{std::string("l:") + conn->id()},
-                                lane_bounds_);
-  AttachBranchPoint(
-      conn->start(), lane, api::LaneEnd::kStart, road_geometry, bp_map);
-  AttachBranchPoint(
-      conn->end(), lane, api::LaneEnd::kFinish, road_geometry, bp_map);
-  return lane;
+      api::SegmentId{std::string("s:") + conn->id()}, std::move(road_curve),
+      r_min, r_max, elevation_bounds_);
+  std::vector<Lane*> lanes;
+  for (int i = 0; i < conn->num_lanes(); i++) {
+    Lane* lane = segment->NewLane(api::LaneId{std::string("l:") + conn->id() +
+                                              std::string("_") +
+                                              std::to_string(i)},
+                                  conn->r0() +
+                                      r_spacing_ * static_cast<double>(i),
+                                  {-r_spacing_ / 2., r_spacing_ / 2.});
+    AttachBranchPoint(
+        conn->start(), lane, api::LaneEnd::kStart, road_geometry, bp_map);
+    AttachBranchPoint(
+        conn->end(), lane, api::LaneEnd::kFinish, road_geometry, bp_map);
+    lanes.push_back(lane);
+  }
+
+  return lanes;
 }
 
 
@@ -260,7 +273,7 @@ std::unique_ptr<const api::RoadGeometry> Builder::Build(
       id, linear_tolerance_, angular_tolerance_);
   std::map<Endpoint, BranchPoint*, EndpointFuzzyOrder> bp_map(
       (EndpointFuzzyOrder(linear_tolerance_)));
-  std::map<const Connection*, Lane*> lane_map;
+  std::map<const Connection*, std::vector<Lane*>> lane_map;
   std::map<const Connection*, bool> connection_was_built;
 
   for (const std::unique_ptr<Connection>& connection : connections_) {
@@ -296,8 +309,8 @@ std::unique_ptr<const api::RoadGeometry> Builder::Build(
   }
 
   for (const DefaultBranch& def : default_branches_) {
-    Lane* in_lane = lane_map[def.in];
-    Lane* out_lane = lane_map[def.out];
+    Lane* in_lane = lane_map[def.in][def.in_lane_index];
+    Lane* out_lane = lane_map[def.out][def.out_lane_index];
     DRAKE_DEMAND((def.in_end == api::LaneEnd::kStart) ||
                  (def.in_end == api::LaneEnd::kFinish));
     ((def.in_end == api::LaneEnd::kStart) ?

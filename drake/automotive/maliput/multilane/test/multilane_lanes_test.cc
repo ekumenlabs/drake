@@ -75,9 +75,10 @@ TEST_P(MultilaneLanesParamTest, FlatLineLane) {
   const Vector3<double> r_offset_vector = r0 * r_vector;
   Segment* s1 = rg.NewJunction(api::JunctionId{"j1"})
                     ->NewSegment(api::SegmentId{"s1"}, std::move(road_curve_1),
-                                 kNumLanes, r0, kRSpacing, -kHalfWidth + r0,
-                                 kHalfWidth + r0, {0., kMaxHeight});
-  Lane* l1 = s1->NewLane(api::LaneId{"l1"}, {-kHalfLaneWidth, kHalfLaneWidth});
+                                 -kHalfWidth + r0, kHalfWidth + r0,
+                                 {0., kMaxHeight});
+  Lane* l1 =
+      s1->NewLane(api::LaneId{"l1"}, r0, {-kHalfLaneWidth, kHalfLaneWidth});
 
   EXPECT_EQ(rg.CheckInvariants(), std::vector<std::string>());
 
@@ -168,10 +169,10 @@ TEST_P(MultilaneLanesParamTest, FlatLineLane) {
       CubicPolynomial(elevation / length, 0.0, 0.0, 0.0), zp);
   Segment* s2 = rg.NewJunction(api::JunctionId{"j2"})
                     ->NewSegment(api::SegmentId{"s2"}, std::move(road_curve_2),
-                                 kNumLanes, r0, kRSpacing, -kHalfWidth + r0,
-                                 kHalfWidth + r0, {0., kMaxHeight});
-  Lane* l1_with_z =
-      s2->NewLane(api::LaneId{"l1_with_z"}, {-kHalfLaneWidth, kHalfLaneWidth});
+                                 -kHalfWidth + r0, kHalfWidth + r0,
+                                 {0., kMaxHeight});
+  Lane* l1_with_z = s2->NewLane(api::LaneId{"l1_with_z"}, r0,
+                                {-kHalfLaneWidth, kHalfLaneWidth});
   EXPECT_TRUE(api::test::IsLanePositionClose(
       l1_with_z->ToLanePosition(point_outside_lane, &nearest_position,
                                 &distance),
@@ -249,9 +250,10 @@ TEST_P(MultilaneLanesParamTest, FlatArcLane) {
       std::make_unique<ArcRoadCurve>(center, radius, theta0, d_theta, zp, zp);
   Segment* s1 = rg.NewJunction(api::JunctionId{"j1"})
                     ->NewSegment(api::SegmentId{"s1"}, std::move(road_curve_1),
-                                 kNumLanes, r0, kRSpacing, -kHalfWidth + r0,
-                                 kHalfWidth + r0, {0., kMaxHeight});
-  Lane* l2 = s1->NewLane(api::LaneId{"l2"}, {-kHalfLaneWidth, kHalfLaneWidth});
+                                 -kHalfWidth + r0, kHalfWidth + r0,
+                                 {0., kMaxHeight});
+  Lane* l2 =
+      s1->NewLane(api::LaneId{"l2"}, r0, {-kHalfLaneWidth, kHalfLaneWidth});
 
   EXPECT_EQ(rg.CheckInvariants(), std::vector<std::string>());
 
@@ -360,10 +362,10 @@ TEST_P(MultilaneLanesParamTest, FlatArcLane) {
       CubicPolynomial(elevation / radius / d_theta, 0.0, 0.0, 0.0), zp);
   Segment* s2 = rg.NewJunction(api::JunctionId{"j2"})
                     ->NewSegment(api::SegmentId{"s2"}, std::move(road_curve_2),
-                                 kNumLanes, r0, kRSpacing, -kHalfWidth + r0,
-                                 kHalfWidth + r0, {0., kMaxHeight});
-  Lane* l2_with_z =
-      s2->NewLane(api::LaneId{"l2_with_z"}, {-kHalfLaneWidth, kHalfLaneWidth});
+                                 -kHalfWidth + r0, kHalfWidth + r0,
+                                 {0., kMaxHeight});
+  Lane* l2_with_z = s2->NewLane(api::LaneId{"l2_with_z"}, r0,
+                                {-kHalfLaneWidth, kHalfLaneWidth});
   EXPECT_TRUE(api::test::IsLanePositionClose(
       l2_with_z->ToLanePosition(point_outside_lane, &nearest_position,
                                 &distance),
@@ -388,9 +390,9 @@ TEST_P(MultilaneLanesParamTest, FlatArcLane) {
       center, radius, theta0, d_theta_overlap, zp, zp);
   Segment* s3 = rg.NewJunction(api::JunctionId{"j3"})
                     ->NewSegment(api::SegmentId{"s3"}, std::move(road_curve_3),
-                                 kNumLanes, r0, kRSpacing, -kHalfWidth + r0,
-                                 kHalfWidth + r0, {0., kMaxHeight});
-  Lane* l2_overlapping = s3->NewLane(api::LaneId{"l2_overlapping"},
+                                 -kHalfWidth + r0, kHalfWidth + r0,
+                                 {0., kMaxHeight});
+  Lane* l2_overlapping = s3->NewLane(api::LaneId{"l2_overlapping"}, r0,
                                      {-kHalfLaneWidth, kHalfLaneWidth});
   EXPECT_TRUE(api::test::IsLanePositionClose(
       l2_overlapping->ToLanePosition(point_within_lane, &nearest_position,
@@ -420,10 +422,10 @@ TEST_P(MultilaneLanesParamTest, FlatArcLane) {
       center, radius, theta0_wrap, d_theta_wrap, zp, zp);
   Segment* s4 = rg.NewJunction(api::JunctionId{"j4"})
                     ->NewSegment(api::SegmentId{"s4"}, std::move(road_curve_4),
-                                 kNumLanes, r0, kRSpacing, -kHalfWidth + r0,
-                                 kHalfWidth + r0, {0., kMaxHeight});
-  Lane* l2_wrap =
-      s4->NewLane(api::LaneId{"l2_wrap"}, {-kHalfLaneWidth, kHalfLaneWidth});
+                                 -kHalfWidth + r0, kHalfWidth + r0,
+                                 {0., kMaxHeight});
+  Lane* l2_wrap = s4->NewLane(api::LaneId{"l2_wrap"}, r0,
+                              {-kHalfLaneWidth, kHalfLaneWidth});
   const double offset_radius_wrap = radius + r0 + 2.;
   const api::GeoPosition point_in_third_quadrant{  // θ ~= -0.9π.
       center(0) + offset_radius_wrap * std::cos(-0.9 * M_PI),
@@ -540,9 +542,10 @@ TEST_P(MultilaneLanesParamTest, HillIntegration) {
                                      theta0, d_theta, kHillPolynomial, zp);
   Segment* s1 = rg.NewJunction(api::JunctionId{"j1"})
                     ->NewSegment(api::SegmentId{"s1"}, std::move(road_curve_1),
-                                 kNumLanes, r0, kRSpacing, -kHalfWidth + r0,
-                                 kHalfWidth + r0, {0., kMaxHeight});
-  Lane* l1 = s1->NewLane(api::LaneId{"l2"}, {-kHalfLaneWidth, kHalfLaneWidth});
+                                 -kHalfWidth + r0, kHalfWidth + r0,
+                                 {0., kMaxHeight});
+  Lane* l1 = s1->NewLane(api::LaneId{"l2"}, r0,
+                         {-kHalfLaneWidth, kHalfLaneWidth});
 
   EXPECT_EQ(rg.CheckInvariants(), std::vector<std::string>());
 
@@ -595,8 +598,6 @@ GTEST_TEST(MultilaneLanesTest, ArcLaneWithConstantSuperelevation) {
   CubicPolynomial zp{0., 0., 0., 0.};
   const double kTheta = 0.10 * M_PI;  // superelevation
   const double kR0 = 0.;
-  const int kNumLanes = 1;
-  const double kRSpacing = 0.;
   const double kHalfWidth = 10.;
   const double kHalfLaneWidth = 5.;
   const double kMaxHeight = 5.;
