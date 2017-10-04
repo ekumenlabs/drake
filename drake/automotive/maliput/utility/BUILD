@@ -29,6 +29,16 @@ drake_cc_library(
 )
 
 drake_cc_binary(
+    name = "multilane_to_obj",
+    srcs = ["multilane_to_obj.cc"],
+    deps = [
+        ":utility",
+        "//drake/automotive/maliput/multilane",
+        "//drake/common:text_logging_gflags",
+    ],
+)
+
+drake_cc_binary(
     name = "yaml_to_obj",
     srcs = ["yaml_to_obj.cc"],
     deps = [
