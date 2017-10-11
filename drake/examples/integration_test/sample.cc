@@ -26,13 +26,11 @@ class RoadCurveSystem<double> : public systems::LeafSystem<double> {
   /// A constructor that initializes the system.
   RoadCurveSystem(const RoadCurve* rc, double r, double h) :
       rc_(rc), r_(r), h_(h) {
-    // A 1D input vector for acceleration.
-    this->DeclareInputPort(drake::systems::kVectorValued, 1);
     // Adding one generalized position and one generalized velocity.
     this->DeclareContinuousState(1, 1, 0);
-    // A 2D output vector for position and velocity.
+    // A 1D output vector for position and velocity.
     this->DeclareVectorOutputPort(drake::systems::BasicVector<double>(1),
-                                &RoadCurveSystem::CopyStateOut);
+                                  &RoadCurveSystem::CopyStateOut);
   }
 
   std::unique_ptr<drake::systems::Context<double>>
@@ -62,8 +60,9 @@ class RoadCurveSystem<double> : public systems::LeafSystem<double> {
         derivatives->get_mutable_vector();
 
     const double p = context.get_time();
-    const double s_dot =
-        rc_->W_prime_of_prh(p, r_, h_, rc_->Rabg_of_p(p), rc_->elevation().f_dot_p(p)).norm();
+    const double s_dot = rc_->W_prime_of_prh(p, r_, h_, rc_->Rabg_of_p(p),
+    	                                     rc_->elevation().f_dot_p(p))
+                              .norm();
     derivatives_vector->SetAtIndex(0, s_dot);
   }
 
@@ -78,6 +77,7 @@ enum GeometryType{
   LINEAR_ELEVATION_LINE,
   QUADRATIC_ELEVATION_LINE,
   CUBIC_ELEVATION_LINE,
+  CUBIC_ELEV_LINEAR_SUPER_LINE,
 };
 
 double GetOutput(const drake::systems::Simulator<double>* simulator) {
@@ -103,6 +103,34 @@ std::unique_ptr<RoadCurve> CreateLinearElevationLine() {
                                          kSuperelevation);
 }
 
+std::unique_ptr<RoadCurve> CreateQuadraticElevationLine() {
+  const Vector2<double> kOrigin{0., 0.};
+  const Vector2<double> kDirection{10., 0.};
+  const CubicPolynomial kElevation{1., 1., 1., 0.};
+  const CubicPolynomial kSuperelevation{0., 0., 0., 0.};
+  return std::make_unique<LineRoadCurve>(kOrigin, kDirection, kElevation,
+                                         kSuperelevation);
+}
+
+std::unique_ptr<RoadCurve> CreateCubicElevationLine() {
+  const Vector2<double> kOrigin{0., 0.};
+  const Vector2<double> kDirection{10., 0.};
+  const CubicPolynomial kElevation{0., -1., 1., 1.};
+  const CubicPolynomial kSuperelevation{0., 0., 0., 0.};
+  return std::make_unique<LineRoadCurve>(kOrigin, kDirection, kElevation,
+                                         kSuperelevation);
+}
+
+std::unique_ptr<RoadCurve> CreateCubicElevLinearSuperLine() {
+  const Vector2<double> kOrigin{0., 0.};
+  const Vector2<double> kDirection{10., 0.};
+  const CubicPolynomial kElevation{0., -1., 1., 1.};
+  const CubicPolynomial kSuperelevation{
+      0., M_PI / 2. / kDirection.norm(), 0., 0.};
+  return std::make_unique<LineRoadCurve>(kOrigin, kDirection, kElevation,
+                                         kSuperelevation);
+}
+
 double Integrate(double p0, double step, int steps, const RoadCurve* const rc,
                  double r, double h) {
   double l{0.};
@@ -119,12 +147,11 @@ double Integrate(double p0, double step, int steps, const RoadCurve* const rc,
 
 
 void TestIntegration(const GeometryType& geo_type) {
-  const double kR0{0.};
+  const double kR0{5.};
   const double kH0{0.};
   const double kS0{0.};
   const double kPEnd{1.};
   const double kTargetFrameRate{1.};
-
 
   std::unique_ptr<RoadCurve> rc;
   switch(geo_type) {
@@ -133,6 +160,15 @@ void TestIntegration(const GeometryType& geo_type) {
       break;
     case GeometryType::LINEAR_ELEVATION_LINE:
       rc = CreateLinearElevationLine();
+      break;
+    case GeometryType::QUADRATIC_ELEVATION_LINE:
+      rc = CreateQuadraticElevationLine();
+      break;
+    case GeometryType::CUBIC_ELEVATION_LINE:
+      rc = CreateCubicElevationLine();
+      break;
+    case GeometryType::CUBIC_ELEV_LINEAR_SUPER_LINE:
+      rc = CreateCubicElevLinearSuperLine();
       break;
     default:
       std::cerr << "geo_type is not recognized." << std::endl;
@@ -152,7 +188,7 @@ void TestIntegration(const GeometryType& geo_type) {
   simulator->StepTo(kPEnd);
 
   // Computes a manual integration.
-  const int kSteps = 1000;
+  const int kSteps = 10000;
   const double kP0{0.};
   const double kStep{(kPEnd - kP0) / static_cast<double>(kSteps)};
   const double manual_integration =
@@ -162,19 +198,31 @@ void TestIntegration(const GeometryType& geo_type) {
                 GetOutput(simulator.get()) << std::endl;
   std::cout << "Manual integration output: " <<
                 manual_integration << std::endl;
-  std::cout << "Computed trajectory length output: " <<
-                rc->s_from_p(kPEnd, kR0) << std::endl;
 }
 
 }
 }
 }
-
-using drake::maliput::multilane::GeometryType;
 
 int main(int argc, char *argv[]) {
+  using drake::maliput::multilane::GeometryType;
+  std::cout << "FLAT_LINE" << std::endl;
   drake::maliput::multilane::TestIntegration(GeometryType::FLAT_LINE);
+  std::cout << "---------------------" << std::endl;
+  std::cout << "LINEAR_ELEVATION_LINE" << std::endl;
   drake::maliput::multilane::TestIntegration(
-  	  GeometryType::LINEAR_ELEVATION_LINE);
+      GeometryType::LINEAR_ELEVATION_LINE);
+  std::cout << "---------------------" << std::endl;
+  std::cout << "QUADRATIC_ELEVATION_LINE" << std::endl;
+  drake::maliput::multilane::TestIntegration(
+      GeometryType::QUADRATIC_ELEVATION_LINE);
+  std::cout << "---------------------" << std::endl;
+  std::cout << "CUBIC_ELEVATION_LINE" << std::endl;
+  drake::maliput::multilane::TestIntegration(
+      GeometryType::CUBIC_ELEVATION_LINE);
+  std::cout << "---------------------" << std::endl;
+  std::cout << "CUBIC_ELEV_LINEAR_SUPER_LINE" << std::endl;
+  drake::maliput::multilane::TestIntegration(
+      GeometryType::CUBIC_ELEV_LINEAR_SUPER_LINE);
   return 0;
 }
