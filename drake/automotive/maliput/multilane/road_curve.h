@@ -183,6 +183,9 @@ class RoadCurve {
   /// Returns the rotation R_αβγ, evaluated at @p p along the reference curve.
   Rot3 Rabg_of_p(const double p) const;
 
+  /// Returns W, the world function evaluated at @p p, @p r, @p h.
+  Vector3<double> W_of_prh(double p, double r, double h) const;
+
   /// Returns W' = ∂W/∂p, the partial differential of W with respect to p,
   /// evaluated at @p p, @p r, @p h.
   ///
@@ -192,6 +195,9 @@ class RoadCurve {
   /// here to avoid recomputing it.)
   Vector3<double> W_prime_of_prh(double p, double r, double h, const Rot3& Rabg,
                                  double g_prime) const;
+
+  /// Returns the rotation R_αβγ, evaluated at @p p, @p r and @p h.
+  Rot3 Orientation(double p, double r, double h) const;
 
   /// Returns the s-axis unit-vector, expressed in the world frame,
   /// of the (s,r,h) `Lane`-frame (with respect to the world frame).
