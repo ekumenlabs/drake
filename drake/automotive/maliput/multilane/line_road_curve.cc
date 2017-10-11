@@ -11,9 +11,11 @@ const double LineRoadCurve::kMinimumNorm = 1e-12;
 double LineRoadCurve::p_from_s(double s, double r) const {
   // TODO(@maddog-tri) We should take care of the superelevation() scale that
   //                   will modify curve's path length.
+  /*
   DRAKE_DEMAND(r == 0. || (superelevation().a() == 0. &&
                superelevation().b() == 0. && superelevation().c() == 0. &&
                superelevation().d() == 0.));
+  */
   unused(r);
   return elevation().p_s(s / p_scale());
 }

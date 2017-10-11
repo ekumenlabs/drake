@@ -16,6 +16,7 @@ drake_cc_binary(
     ],
     deps = [
         "//drake/automotive/maliput/multilane:multilane",
+        "//drake/automotive/maliput/utility:utility",
         "//drake/systems/analysis",
         "//drake/systems/framework:leaf_system",
         "//drake/systems/primitives:matrix_gain",

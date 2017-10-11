@@ -2,9 +2,15 @@
 #include <memory>
 #include <utility>
 
+#include "drake/automotive/maliput/api/lane_data.h"
 #include "drake/automotive/maliput/multilane/cubic_polynomial.h"
+#include "drake/automotive/maliput/multilane/lane.h"
 #include "drake/automotive/maliput/multilane/line_road_curve.h"
+#include "drake/automotive/maliput/multilane/junction.h"
+#include "drake/automotive/maliput/multilane/road_geometry.h"
+#include "drake/automotive/maliput/multilane/segment.h"
 #include "drake/automotive/maliput/multilane/road_curve.h"
+#include "drake/automotive/maliput/utility/generate_obj.h"
 #include "drake/common/drake_copyable.h"
 #include "drake/common/eigen_types.h"
 #include "drake/systems/analysis/simulator.h"
@@ -61,7 +67,7 @@ class RoadCurveSystem<double> : public systems::LeafSystem<double> {
 
     const double p = context.get_time();
     const double s_dot = rc_->W_prime_of_prh(p, r_, h_, rc_->Rabg_of_p(p),
-    	                                     rc_->elevation().f_dot_p(p))
+                                             rc_->elevation().f_dot_p(p))
                               .norm();
     derivatives_vector->SetAtIndex(0, s_dot);
   }
@@ -87,7 +93,7 @@ double GetOutput(const drake::systems::Simulator<double>* simulator) {
 
 std::unique_ptr<RoadCurve> CreateFlatLine() {
   const Vector2<double> kOrigin{0., 0.};
-  const Vector2<double> kDirection{10., 0.};
+  const Vector2<double> kDirection{100., 0.};
   const CubicPolynomial kElevation{0., 0., 0., 0.};
   const CubicPolynomial kSuperelevation{0., 0., 0., 0.};
   return std::make_unique<LineRoadCurve>(kOrigin, kDirection, kElevation,
@@ -96,7 +102,7 @@ std::unique_ptr<RoadCurve> CreateFlatLine() {
 
 std::unique_ptr<RoadCurve> CreateLinearElevationLine() {
   const Vector2<double> kOrigin{0., 0.};
-  const Vector2<double> kDirection{10., 0.};
+  const Vector2<double> kDirection{100., 0.};
   const CubicPolynomial kElevation{0., 1., 0., 0.};
   const CubicPolynomial kSuperelevation{0., 0., 0., 0.};
   return std::make_unique<LineRoadCurve>(kOrigin, kDirection, kElevation,
@@ -105,7 +111,7 @@ std::unique_ptr<RoadCurve> CreateLinearElevationLine() {
 
 std::unique_ptr<RoadCurve> CreateQuadraticElevationLine() {
   const Vector2<double> kOrigin{0., 0.};
-  const Vector2<double> kDirection{10., 0.};
+  const Vector2<double> kDirection{100., 0.};
   const CubicPolynomial kElevation{1., 1., 1., 0.};
   const CubicPolynomial kSuperelevation{0., 0., 0., 0.};
   return std::make_unique<LineRoadCurve>(kOrigin, kDirection, kElevation,
@@ -114,7 +120,7 @@ std::unique_ptr<RoadCurve> CreateQuadraticElevationLine() {
 
 std::unique_ptr<RoadCurve> CreateCubicElevationLine() {
   const Vector2<double> kOrigin{0., 0.};
-  const Vector2<double> kDirection{10., 0.};
+  const Vector2<double> kDirection{100., 0.};
   const CubicPolynomial kElevation{0., -1., 1., 1.};
   const CubicPolynomial kSuperelevation{0., 0., 0., 0.};
   return std::make_unique<LineRoadCurve>(kOrigin, kDirection, kElevation,
@@ -123,7 +129,7 @@ std::unique_ptr<RoadCurve> CreateCubicElevationLine() {
 
 std::unique_ptr<RoadCurve> CreateCubicElevLinearSuperLine() {
   const Vector2<double> kOrigin{0., 0.};
-  const Vector2<double> kDirection{10., 0.};
+  const Vector2<double> kDirection{100., 0.};
   const CubicPolynomial kElevation{0., -1., 1., 1.};
   const CubicPolynomial kSuperelevation{
       0., M_PI / 2. / kDirection.norm(), 0., 0.};
@@ -143,6 +149,50 @@ double Integrate(double p0, double step, int steps, const RoadCurve* const rc,
     l += (ds_dsigma * step);
   }
   return l;
+}
+
+void CreateMesh(const std::string& mesh_path, const std::string& mesh_name,
+                const GeometryType& geo_type) {
+  std::unique_ptr<RoadCurve> rc;
+  switch(geo_type) {
+    case GeometryType::FLAT_LINE:
+      rc = CreateFlatLine();
+      break;
+    case GeometryType::LINEAR_ELEVATION_LINE:
+      rc = CreateLinearElevationLine();
+      break;
+    case GeometryType::QUADRATIC_ELEVATION_LINE:
+      rc = CreateQuadraticElevationLine();
+      break;
+    case GeometryType::CUBIC_ELEVATION_LINE:
+      rc = CreateCubicElevationLine();
+      break;
+    case GeometryType::CUBIC_ELEV_LINEAR_SUPER_LINE:
+      rc = CreateCubicElevLinearSuperLine();
+      break;
+    default:
+      std::cerr << "geo_type is not recognized." << std::endl;
+      return;
+  }
+
+  const double kLinearTolerance = 1e-6;
+  const double kAngularTolerance = 1e-6;
+  const double kHalfWidth{10.};
+  const double kMaxHeight{20.};
+  const double kHalfLaneWidth{5.};
+  const double kR0{5.};
+  RoadGeometry rg(api::RoadGeometryId{"apple"},
+                  kLinearTolerance, kAngularTolerance);
+  Segment* s1 = rg.NewJunction(api::JunctionId{"j1"})
+                    ->NewSegment(api::SegmentId{"s1"}, std::move(rc),
+                                 -kHalfWidth + kR0, kHalfWidth + kR0,
+                                 {0., kMaxHeight});
+  s1->NewLane(api::LaneId{"l1"}, kR0, {-kHalfLaneWidth, kHalfLaneWidth});
+
+  utility::ObjFeatures features;
+  features.max_grid_unit = utility::ObjFeatures().max_grid_unit;
+  features.min_grid_resolution =  utility::ObjFeatures().min_grid_resolution;
+  utility::GenerateObjFile(&rg, mesh_path, mesh_name, features);
 }
 
 
@@ -224,5 +274,17 @@ int main(int argc, char *argv[]) {
   std::cout << "CUBIC_ELEV_LINEAR_SUPER_LINE" << std::endl;
   drake::maliput::multilane::TestIntegration(
       GeometryType::CUBIC_ELEV_LINEAR_SUPER_LINE);
+
+  const std::string kMeshPath = "/tmp";
+  drake::maliput::multilane::CreateMesh(kMeshPath, "FLAT_LINE",
+                                        GeometryType::FLAT_LINE);
+  drake::maliput::multilane::CreateMesh(kMeshPath, "LINEAR_ELEVATION_LINE",
+                                        GeometryType::LINEAR_ELEVATION_LINE);
+  drake::maliput::multilane::CreateMesh(kMeshPath, "QUADRATIC_ELEVATION_LINE",
+                                        GeometryType::QUADRATIC_ELEVATION_LINE);
+  drake::maliput::multilane::CreateMesh(kMeshPath, "CUBIC_ELEVATION_LINE",
+                                        GeometryType::CUBIC_ELEVATION_LINE);
+  drake::maliput::multilane::CreateMesh(kMeshPath, "CUBIC_ELEV_LINEAR_SUPER_LINE",
+                                        GeometryType::CUBIC_ELEV_LINEAR_SUPER_LINE);
   return 0;
 }
