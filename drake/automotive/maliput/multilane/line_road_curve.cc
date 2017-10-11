@@ -21,9 +21,11 @@ double LineRoadCurve::p_from_s(double s, double r) const {
 double LineRoadCurve::s_from_p(double p, double r) const {
   // TODO(@maddog-tri) We should take care of the superelevation() scale that
   //                   will modify curve's path length.
+  /*
   DRAKE_DEMAND(r == 0. || (superelevation().a() == 0. &&
                superelevation().b() == 0. && superelevation().c() == 0. &&
                superelevation().d() == 0.));
+  */
   unused(r);
   return p_scale() * elevation().s_p(p);
 }
