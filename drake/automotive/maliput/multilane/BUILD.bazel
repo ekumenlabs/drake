@@ -110,6 +110,16 @@ drake_cc_googletest(
 )
 
 drake_cc_googletest(
+    name = "multilane_connection_test",
+    size = "small",
+    srcs = ["test/multilane_connection_test.cc"],
+    deps = [
+        ":builder",
+        "//drake/automotive/maliput/multilane/test_utilities",
+    ],
+)
+
+drake_cc_googletest(
     name = "multilane_lanes_test",
     size = "small",
     srcs = ["test/multilane_lanes_test.cc"],

@@ -37,7 +37,8 @@ const Connection* Builder::Connect(const std::string& id, int num_lanes,
                  start.xy().heading()),
       z_end);
   connections_.push_back(std::make_unique<Connection>(
-      id, start, end, num_lanes, r0, left_shoulder, right_shoulder));
+      id, start, end, num_lanes, r0, lane_width_, left_shoulder,
+      right_shoulder));
   return connections_.back().get();
 }
 
@@ -59,8 +60,8 @@ const Connection* Builder::Connect(const std::string& id, int num_lanes,
                      z_end);
 
   connections_.push_back(std::make_unique<Connection>(
-      id, start, end, num_lanes, r0, left_shoulder, right_shoulder, cx, cy,
-      arc.radius(), arc.d_theta()));
+      id, start, end, num_lanes, r0, lane_width_, left_shoulder, right_shoulder,
+      cx, cy, arc.radius(), arc.d_theta()));
   return connections_.back().get();
 }
 
@@ -116,34 +117,6 @@ double HeadingIntoLane(const api::Lane* const lane,
     }
     default: { DRAKE_ABORT(); }
   }
-}
-
-// Computes the location and heading of a `lane` at given `end` creating an
-// Endpoint with that information. `road_curve` is used to compute z
-// derivative with respect to p at the start or end of the `lane` respectively.
-Endpoint ComputeEndpointForLane(const RoadCurve& road_curve, const Lane* lane,
-                                const api::LaneEnd::Which end,
-                                const EndpointZ& zpoint) {
-  double p{}, length{};
-  switch (end) {
-    case api::LaneEnd::kStart:
-      p = 0.;
-      length = 0.;
-      break;
-    case api::LaneEnd::kFinish:
-      p = 1.;
-      length = lane->length();
-      break;
-    default: { DRAKE_ABORT(); }
-  }
-  const api::GeoPosition position = lane->ToGeoPosition({length, 0., 0.});
-  const api::Rotation rotation = lane->GetOrientation({length, 0., 0.});
-  const Vector3<double> w_prime =
-      road_curve.W_prime_of_prh(p, lane->r0(), 0., road_curve.Rabg_of_p(p),
-                                road_curve.elevation().f_dot_p(p));
-  return Endpoint(
-      EndpointXy(position.x(), position.y(), rotation.yaw()),
-      EndpointZ(position.z(), w_prime.z(), zpoint.theta(), zpoint.theta_dot()));
 }
 }  // namespace
 
@@ -262,32 +235,20 @@ std::vector<Lane*> Builder::BuildConnection(
       DRAKE_ABORT();
     }
   }
-  // Computes segment lateral extent.
-  const double r_min = conn->r0() - lane_width_ / 2. - conn->right_shoulder();
-  const double r_max =
-      conn->r0() +
-      lane_width_ * (static_cast<double>(conn->num_lanes() - 1) + 0.5) +
-      conn->left_shoulder();
   const RoadCurve& road_curve = *p_road_curve;
   Segment* segment = junction->NewSegment(
       api::SegmentId{std::string("s:") + conn->id()}, std::move(p_road_curve),
-      r_min, r_max, elevation_bounds_);
+      conn->r_min(), conn->r_max(), elevation_bounds_);
   std::vector<Lane*> lanes;
   for (int i = 0; i < conn->num_lanes(); i++) {
     Lane* lane =
         segment->NewLane(api::LaneId{std::string("l:") + conn->id() +
                                      std::string("_") + std::to_string(i)},
-                         conn->r0() + lane_width_ * static_cast<double>(i),
-                         {-lane_width_ / 2., lane_width_ / 2.});
-    // Creates endpoints for the extents of the lane since they may not be
-    // over the reference curve.
-    const Endpoint start_endpoint = ComputeEndpointForLane(
-        road_curve, lane, api::LaneEnd::kStart, conn->start().z());
-    const Endpoint finish_endpoint = ComputeEndpointForLane(
-        road_curve, lane, api::LaneEnd::kFinish, conn->end().z());
-    AttachBranchPoint(start_endpoint, lane, api::LaneEnd::kStart, road_geometry,
-                      bp_map);
-    AttachBranchPoint(finish_endpoint, lane, api::LaneEnd::kFinish,
+                         conn->lane_offset(i),
+                         {-conn->lane_width() / 2., conn->lane_width() / 2.});
+    AttachBranchPoint(conn->LaneStart(i, road_curve), lane,
+                      api::LaneEnd::kStart, road_geometry, bp_map);
+    AttachBranchPoint(conn->LaneEnd(i, road_curve), lane, api::LaneEnd::kFinish,
                       road_geometry, bp_map);
     lanes.push_back(lane);
   }

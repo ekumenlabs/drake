@@ -233,11 +233,15 @@ class Connection {
         r0_(r0),
         lane_width_(lane_width),
         left_shoulder_(left_shoulder),
-        right_shoulder_(right_shoulder) {
+        right_shoulder_(right_shoulder),
+        r_min_(r0 - lane_width / 2. - right_shoulder),
+        r_max_(r0 + lane_width * (static_cast<double>(num_lanes - 1) + 0.5) +
+                    left_shoulder) {
     DRAKE_DEMAND(num_lanes_ > 0);
     DRAKE_DEMAND(lane_width_ >= 0);
     DRAKE_DEMAND(left_shoulder_ >= 0);
     DRAKE_DEMAND(right_shoulder_ >= 0);
+    DRAKE_DEMAND(r_max_ >= r_min_);
   }
 
   /// Constructs an arc-segment connection joining `start` to `end`.
@@ -268,6 +272,9 @@ class Connection {
         lane_width_(lane_width),
         left_shoulder_(left_shoulder),
         right_shoulder_(right_shoulder),
+        r_min_(r0 - lane_width / 2. - right_shoulder),
+        r_max_(r0 + lane_width * (static_cast<double>(num_lanes - 1) + 0.5) +
+               left_shoulder),
         cx_(cx),
         cy_(cy),
         radius_(radius),
@@ -276,6 +283,7 @@ class Connection {
     DRAKE_DEMAND(lane_width_ >= 0);
     DRAKE_DEMAND(left_shoulder_ >= 0);
     DRAKE_DEMAND(right_shoulder_ >= 0);
+    DRAKE_DEMAND(r_max_ >= r_min_);
     DRAKE_DEMAND(radius_ > 0);
   }
 
@@ -331,6 +339,57 @@ class Connection {
   /// Returns the right shoulder distance of the segment.
   double right_shoulder() const { return right_shoulder_; }
 
+  /// Returns `lane_index` lane lateral distance to the reference curve.
+  ///
+  /// `lane_index` must be non-negative and smaller than the number of lanes of
+  /// this connection.
+  double lane_offset(int lane_index) const {
+    DRAKE_DEMAND(lane_index >= 0 && lane_index < num_lanes_);
+    return r0_ + lane_width_ * static_cast<double>(lane_index);
+  }
+
+  /// Returns the distance from the reference curve to the right extent of the
+  /// Segment.
+  double r_min() const { return r_min_; }
+
+  /// Returns the distance from the reference curve to the left extent of the
+  /// Segment.
+  double r_max() const { return r_max_; }
+
+  /// Computes the location and heading of a `lane_index` Lane at its beginning
+  /// creating an Endpoint with that information. `road_curve` is used to
+  /// compute z derivative with respect to p at the start of the Lane.
+  Endpoint LaneStart(int lane_index, const RoadCurve& road_curve) const {
+    DRAKE_DEMAND(lane_index >= 0 && lane_index < num_lanes_);
+    const double r = lane_offset(lane_index);
+    const Vector3<double> position = road_curve.W_of_prh(0., r, 0.);
+    const Rot3 rotation = road_curve.Orientation(0., r, 0.);
+    const Vector3<double> w_prime =
+        road_curve.W_prime_of_prh(0., r, 0., road_curve.Rabg_of_p(0.),
+                                  road_curve.elevation().f_dot_p(0.));
+    return Endpoint(
+        EndpointXy(position[0], position[1], rotation.yaw()),
+        EndpointZ(position[2], w_prime.z(), start_.z().theta(),
+                  start_.z().theta_dot()));
+  }
+
+  /// Computes the location and heading of a `lane_index` Lane at its end
+  /// creating an Endpoint with that information. `road_curve` is used to
+  /// compute z derivative with respect to p at the end of the Lane.
+  Endpoint LaneEnd(int lane_index, const RoadCurve& road_curve) const {
+    DRAKE_DEMAND(lane_index >= 0 && lane_index < num_lanes_);
+    const double r = lane_offset(lane_index);
+    const Vector3<double> position = road_curve.W_of_prh(1., r, 0.);
+    const Rot3 rotation = road_curve.Orientation(1., r, 0.);
+    const Vector3<double> w_prime =
+        road_curve.W_prime_of_prh(1., r, 0., road_curve.Rabg_of_p(1.),
+                                  road_curve.elevation().f_dot_p(1.));
+    return Endpoint(
+        EndpointXy(position[0], position[1], rotation.yaw()),
+        EndpointZ(position[2], w_prime.z(), start_.z().theta(),
+                  start_.z().theta_dot()));
+  }
+
  private:
   Type type_{};
   std::string id_;
@@ -341,6 +400,8 @@ class Connection {
   const double lane_width_{};
   const double left_shoulder_{};
   const double right_shoulder_{};
+  const double r_min_{};
+  const double r_max_{};
 
   // Bits specific to type_ == kArc:
   double cx_{};
