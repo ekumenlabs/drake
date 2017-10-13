@@ -223,7 +223,7 @@ class Connection {
   /// and left side of the first and last lanes of the Segment. They will be
   /// added to Segment's bounds and must be greater or equal to zero.
   Connection(const std::string& id, const Endpoint& start, const Endpoint& end,
-             int num_lanes, double r0, double left_shoulder,
+             int num_lanes, double r0, double lane_width, double left_shoulder,
              double right_shoulder)
       : type_(kLine),
         id_(id),
@@ -231,9 +231,11 @@ class Connection {
         end_(end),
         num_lanes_(num_lanes),
         r0_(r0),
+        lane_width_(lane_width),
         left_shoulder_(left_shoulder),
         right_shoulder_(right_shoulder) {
     DRAKE_DEMAND(num_lanes_ > 0);
+    DRAKE_DEMAND(lane_width_ >= 0);
     DRAKE_DEMAND(left_shoulder_ >= 0);
     DRAKE_DEMAND(right_shoulder_ >= 0);
   }
@@ -254,7 +256,7 @@ class Connection {
   /// and left side of the first and last lanes of the Segment. They will be
   /// added to Segment's bounds and must be greater or equal to zero.
   Connection(const std::string& id, const Endpoint& start, const Endpoint& end,
-             int num_lanes, double r0, double left_shoulder,
+             int num_lanes, double r0, double lane_width, double left_shoulder,
              double right_shoulder, double cx, double cy, double radius,
              double d_theta)
       : type_(kArc),
@@ -263,6 +265,7 @@ class Connection {
         end_(end),
         num_lanes_(num_lanes),
         r0_(r0),
+        lane_width_(lane_width),
         left_shoulder_(left_shoulder),
         right_shoulder_(right_shoulder),
         cx_(cx),
@@ -270,6 +273,7 @@ class Connection {
         radius_(radius),
         d_theta_(d_theta) {
     DRAKE_DEMAND(num_lanes_ > 0);
+    DRAKE_DEMAND(lane_width_ >= 0);
     DRAKE_DEMAND(left_shoulder_ >= 0);
     DRAKE_DEMAND(right_shoulder_ >= 0);
     DRAKE_DEMAND(radius_ > 0);
@@ -318,6 +322,9 @@ class Connection {
   /// centerline.
   double r0() const { return r0_; }
 
+  /// Returns lanes' width.
+  double lane_width() const { return lane_width_; }
+
   /// Returns the left shoulder distance of the segment.
   double left_shoulder() const { return left_shoulder_; }
 
@@ -331,6 +338,7 @@ class Connection {
   Endpoint end_;
   const int num_lanes_{};
   const double r0_{};
+  const double lane_width_{};
   const double left_shoulder_{};
   const double right_shoulder_{};
 
