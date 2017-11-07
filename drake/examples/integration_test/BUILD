@@ -20,5 +20,6 @@ drake_cc_binary(
         "//drake/systems/analysis",
         "//drake/systems/framework:leaf_system",
         "//drake/systems/primitives:matrix_gain",
+        "@gsl"
     ],
 )

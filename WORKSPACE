@@ -380,6 +380,11 @@ pkg_config_package(
 )
 
 pkg_config_package(
+    name = "gsl",
+    modname = "gsl",
+)
+
+pkg_config_package(
     name = "liblz4",
     modname = "liblz4",
 )
