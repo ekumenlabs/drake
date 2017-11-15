@@ -42,10 +42,6 @@ class LineRoadCurve : public RoadCurve {
 
   ~LineRoadCurve() override = default;
 
-  double p_from_s(double s, double r) const override;
-
-  double s_from_p(double p, double r) const override;
-
   Vector2<double> xy_of_p(double p) const override { return p0_ + p * dp_; }
 
   Vector2<double> xy_dot_of_p(double p) const override {

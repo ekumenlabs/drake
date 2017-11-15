@@ -4,6 +4,59 @@ namespace drake {
 namespace maliput {
 namespace multilane {
 
+RoadCurve::RoadCurve(const CubicPolynomial& elevation,
+                     const CubicPolynomial& superelevation)
+    : elevation_(elevation), superelevation_(superelevation)
+{
+  IntegralFunction<double>::IntegrandFunction ds_dp =
+      [this](const double p, const double s,
+             const VectorX<double>& params) {
+    DRAKE_DEMAND(params.size() == 2);
+    
+    unused(s);
+    const double r = params(0);
+    const double h = params(1);
+    return this->W_prime_of_prh(
+        p, r, h, this->Rabg_of_p(p),
+        this->elevation().f_dot_p(p)).norm();
+  };
+
+  p_to_s_ = std::make_unique<IntegralFunction<double>>(
+      ds_dp, 0.0, VectorX<double>::Zero(2));
+
+  IntegralFunction<double>::IntegrandFunction dp_ds =
+      [this](const double s, const double p,
+             const VectorX<double>& params) {
+    DRAKE_DEMAND(params.size() == 2);
+
+    unused(s);
+    const double r = params(0);
+    const double h = params(1);
+    return 1.0 / this->W_prime_of_prh(
+        p, r, h, this->Rabg_of_p(p),
+        this->elevation().f_dot_p(p)).norm();
+  };
+
+  s_to_p_ = std::make_unique<IntegralFunction<double>>(
+      dp_ds, 0.0, VectorX<double>::Zero(2));
+}
+
+double RoadCurve::s_from_p(double p, double r) const {
+  VectorX<double> parameters(2);
+  // Populates parameter vector with
+  // r-coordinate value, h-coordinate value.
+  parameters << r, 0.0;
+  return (*p_to_s_)(p, parameters);
+}
+
+double RoadCurve::p_from_s(double s, double r) const {
+  VectorX<double> parameters(2);
+  // Populates parameter vector with
+  // r-coordinate value, h-coordinate value.
+  parameters << r, 0.0;
+  return (*s_to_p_)(s, parameters);
+}
+
 Vector3<double> RoadCurve::W_of_prh(double p, double r, double h) const {
   // Calculates z (elevation) of (p,0,0).
   const double z = elevation().f_p(p) * p_scale();
@@ -14,7 +67,6 @@ Vector3<double> RoadCurve::W_of_prh(double p, double r, double h) const {
   // Rotates (0,r,h) and sums with mapped (p,0,0).
   return ypr.apply({0., r, h}) + Vector3<double>(xy.x(), xy.y(), z);
 }
-
 
 Vector3<double> RoadCurve::W_prime_of_prh(double p, double r, double h,
                                           const Rot3& Rabg,

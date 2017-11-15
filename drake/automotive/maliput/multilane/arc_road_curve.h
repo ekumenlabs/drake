@@ -47,14 +47,6 @@ class ArcRoadCurve : public RoadCurve {
 
   ~ArcRoadCurve() override = default;
 
-  /// @throws std::runtime_error When `r` makes the effective radius to be
-  /// negative or zero.
-  double p_from_s(double s, double r) const override;
-
-  /// @throws std::runtime_error When `r` makes the effective radius to be
-  /// negative or zero.
-  double s_from_p(double p, double r) const override;
-
   Vector2<double> xy_of_p(double p) const override {
     // The result will be computed with the following function:
     //      [x;y] = center + [radius * cos(θ); radius * sin(θ)]
