@@ -262,10 +262,10 @@ class RoadCurve {
   CubicPolynomial superelevation_;
   // The inverse arc length integral function, or the arc length s as function
   // of the parameter p.
-  std::unique_ptr<IntegralFunction<double>> s_to_p_;
+  IntegralFunction<double> s_to_p_;
   // The arc length integral function, or the arc length s as function of the
   // parameter p.
-  std::unique_ptr<IntegralFunction<double>> p_to_s_;
+  IntegralFunction<double> p_to_s_;
 };
 
 }  // namespace multilane

@@ -4,49 +4,80 @@ namespace drake {
 namespace maliput {
 namespace multilane {
 
+namespace {
+
+// Arc length integrand functor for numerical integration of the s(p) function.
+struct RoadCurveArcLengthIntegrand {
+  // Constructs the arc length integrand for the given @p road_curve.
+  explicit RoadCurveArcLengthIntegrand(const RoadCurve* road_curve)
+      : road_curve_(road_curve) {}
+
+  // Evaluates the RoadCurve arc length derivative (for integration).
+  //
+  // @param p The parameter used as integration variable.
+  // @param s The arc length integrated so far.
+  // @param params The r and h offsets for the curve, given as a vector.
+  // @return The RoadCurve arc length derivative at the specified point.
+  // @pre The given @p params vector contains at least the r and h offsets.
+  // @warning This method will abort if preconditions are not met.
+  double operator()(double p, double s, const VectorX<double>& params) const {
+    unused(s);
+    DRAKE_DEMAND(params.size() == 2);
+    return road_curve_->W_prime_of_prh(
+        p, params(0), params(1), road_curve_->Rabg_of_p(p),
+        road_curve_->elevation().f_dot_p(p)).norm();
+  }
+
+ private:
+  // RoadCurve to compute with.
+  const RoadCurve* road_curve_;
+};
+
+// Inverse arc length integrand functor for numerical integration of the p(s)
+// function.
+struct RoadCurveInverseArcLengthIntegrand {
+  // Constructs the arc length integrand for the given @p road_curve.
+  explicit RoadCurveInverseArcLengthIntegrand(const RoadCurve* road_curve)
+      : road_curve_(road_curve) {}
+
+  // Evaluates the RoadCurve inverse arc length derivative (for integration).
+  //
+  // @param s The arc length used as integration variable.
+  // @param p The parameter integrated so far.
+  // @param params The r and h offsets for the curve, given as a vector.
+  // @return The RoadCurve inverse arc length derivative at the specified point.
+  // @pre The given @p params vector contains at least the r and h offsets.
+  // @warning This method will abort if preconditions are not met.
+  double operator()(double s, double p, const VectorX<double>& params) {
+    unused(s);
+    DRAKE_DEMAND(params.size() == 2);
+    return 1.0 / road_curve_->W_prime_of_prh(
+        p, params(0), params(1), road_curve_->Rabg_of_p(p),
+        road_curve_->elevation().f_dot_p(p)).norm();
+  }
+
+ private:
+  // Road curve to compute with.
+  const RoadCurve* road_curve_;
+};
+
+
+}  // namespace
+
 RoadCurve::RoadCurve(const CubicPolynomial& elevation,
                      const CubicPolynomial& superelevation)
-    : elevation_(elevation), superelevation_(superelevation)
-{
-  IntegralFunction<double>::IntegrandFunction ds_dp =
-      [this](const double p, const double s,
-             const VectorX<double>& params) {
-    DRAKE_DEMAND(params.size() == 2);
-    
-    unused(s);
-    const double r = params(0);
-    const double h = params(1);
-    return this->W_prime_of_prh(
-        p, r, h, this->Rabg_of_p(p),
-        this->elevation().f_dot_p(p)).norm();
-  };
-
-  p_to_s_ = std::make_unique<IntegralFunction<double>>(
-      ds_dp, 0.0, VectorX<double>::Zero(2));
-
-  IntegralFunction<double>::IntegrandFunction dp_ds =
-      [this](const double s, const double p,
-             const VectorX<double>& params) {
-    DRAKE_DEMAND(params.size() == 2);
-
-    unused(s);
-    const double r = params(0);
-    const double h = params(1);
-    return 1.0 / this->W_prime_of_prh(
-        p, r, h, this->Rabg_of_p(p),
-        this->elevation().f_dot_p(p)).norm();
-  };
-
-  s_to_p_ = std::make_unique<IntegralFunction<double>>(
-      dp_ds, 0.0, VectorX<double>::Zero(2));
-}
+    : elevation_(elevation), superelevation_(superelevation),
+      s_to_p_(RoadCurveInverseArcLengthIntegrand(this),
+              0.0, VectorX<double>::Zero(2)),
+      p_to_s_(RoadCurveArcLengthIntegrand(this),
+              0.0, VectorX<double>::Zero(2)) {}
 
 double RoadCurve::s_from_p(double p, double r) const {
   VectorX<double> parameters(2);
   // Populates parameter vector with
   // r-coordinate value, h-coordinate value.
   parameters << r, 0.0;
-  return (*p_to_s_)(p, parameters);
+  return p_to_s_(p, parameters);
 }
 
 double RoadCurve::p_from_s(double s, double r) const {
@@ -54,7 +85,7 @@ double RoadCurve::p_from_s(double s, double r) const {
   // Populates parameter vector with
   // r-coordinate value, h-coordinate value.
   parameters << r, 0.0;
-  return (*s_to_p_)(s, parameters);
+  return s_to_p_(s, parameters);
 }
 
 Vector3<double> RoadCurve::W_of_prh(double p, double r, double h) const {

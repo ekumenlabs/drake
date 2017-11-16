@@ -1,62 +1,75 @@
 #pragma once
 
+#include <memory>
+#include <utility>
+
 #include "drake/automotive/maliput/multilane/integral_function.h"
-#include "drake/systems/analysis/runge_kutta3_integrator.h"
 #include "drake/systems/analysis/runge_kutta3_integrator-inl.h"
+#include "drake/systems/analysis/runge_kutta3_integrator.h"
 
 namespace drake {
 namespace maliput {
 namespace multilane {
 
-namespace {
-
-/// A helper class used to describe general ODE systems i.e. ∂𝘆/∂x = F(x, 𝘆),
-/// with F : 𝕊ⁿ⁺¹ → 𝕊ⁿ , x ∈  𝕊 , 𝘆 ∈  𝕊ⁿ.
+/// A helper class used to describe general ODE systems i.e. ∂𝘆/∂x = F(x, 𝘆, 𝐩)
+/// with F : 𝕊ⁿ⁺¹ → 𝕊ⁿ , x ∈  𝕊 , 𝘆 ∈  𝕊ⁿ, 𝐩 ∈ 𝕊ⁱ.
 ///
 /// @tparam T The vector element type, which must be a valid Eigen scalar.
-template<typename T>
+template <typename T>
 class AnySystem : public systems::LeafSystem<T> {
  public:
   DRAKE_NO_COPY_NO_MOVE_NO_ASSIGN(AnySystem);
 
-  // Transition function F type in a general ODE system
-  // 
-  //
-  // @param 
-  typedef std::function<void(
-      const T x, const systems::VectorBase<T>& y,
-      const systems::VectorBase<T>& p,
-      systems::VectorBase<T>* dydx)> TransitionFunction;
+  /// Transition function type in a general ODE system.
+  ///
+  /// @param x The independent variable scalar x ∈  𝕊.
+  /// @param y The dependent variable vector 𝘆 ∈  𝕊ⁿ.
+  /// @param p The parameter vector 𝐩 ∈ 𝕊ⁱ.
+  /// @param dydx The derivative vector ∂𝘆/∂x.
+  typedef std::function<void(const T x, const systems::VectorBase<T>& y,
+                             const systems::VectorBase<T>& p,
+                             systems::VectorBase<T>* dydx)> TransitionFunction;
 
+  /// Constructs a system that will use the @p transition_function,
+  /// parameterized as described by the @p param_vector_model, to compute the
+  /// derivatives and advance the @p state_vector_model.
+  ///
+  /// @param transition_function The transition function F.
+  /// @param state_vector_model The state model vector 𝘆₀ , with initial values.
+  /// @param param_vector_model The parameter model vector 𝐩₀, with default
+  /// values.
   AnySystem(const TransitionFunction& transition_function,
             const systems::BasicVector<T>& state_vector_model,
             const systems::BasicVector<T>& param_vector_model);
 
  protected:
-  /// Computes the 
-  virtual void DoCalcTimeDerivatives(
+  /// Calculates the time derivatives for this system.
+  /// @remarks This is due to System semantics. In the context of this
+  /// particular subclass, time is actually x.
+  /// @param context The current Context under integration.
+  /// @param derivatives The derivatives vector.
+  void DoCalcTimeDerivatives(
       const systems::Context<T>& context,
       systems::ContinuousState<T>* derivatives) const override;
 
  private:
-  /// Transition function ẋ = f(t, x)
+  /// Transition function F in ∂𝘆/∂x = F(x, 𝘆, 𝐩).
   const TransitionFunction transition_function_;
 };
 
-template<typename T>
+template <typename T>
 AnySystem<T>::AnySystem(
     const typename AnySystem<T>::TransitionFunction& transition_function,
     const systems::BasicVector<T>& state_vector,
     const systems::BasicVector<T>& param_vector)
-    : transition_function_(transition_function)
-{
+    : transition_function_(transition_function) {
   // Uses the given state vector as a model.
   this->DeclareContinuousState(state_vector);
   // Uses the given param vector as a model.
   this->DeclareNumericParameter(param_vector);
 }
 
-template<typename T>
+template <typename T>
 void AnySystem<T>::DoCalcTimeDerivatives(
     const systems::Context<T>& context,
     systems::ContinuousState<T>* derivatives) const {
@@ -71,15 +84,12 @@ void AnySystem<T>::DoCalcTimeDerivatives(
       context.get_numeric_parameter(0);
   // Computes the derivatives at the current time and state,
   // param
-  transition_function_(
-      context.get_time(), continuous_state_vector,
-      numeric_parameter_vector, &derivatives_vector);
+  transition_function_(context.get_time(), continuous_state_vector,
+                       numeric_parameter_vector, &derivatives_vector);
 }
 
-}  // namespace
-
-template<typename T>
-ScalarIntegralFunction<T>::IntegralFunction(
+template <typename T>
+IntegralFunction<T>::IntegralFunction(
     const typename IntegralFunction<T>::IntegrandFunction& integrand_function,
     const T constant_of_integration, const VectorX<T>& parameters) {
   // Instantiates a single element state vector model using the given constant.
@@ -92,8 +102,10 @@ ScalarIntegralFunction<T>::IntegralFunction(
       [integrand_function](const T var, const systems::VectorBase<T>& state,
                            const systems::VectorBase<T>& params,
                            systems::VectorBase<T>* derivatives) {
-    derivatives->SetAtIndex(0, integrand_function(
-        var, state.GetAtIndex(0), params.CopyToVector()));
+    // TODO(hidmic): Find a better way to pass the parameters' vector, with
+    // less copy overhead.
+    derivatives->SetAtIndex(0, integrand_function(var, state.GetAtIndex(0),
+                                                  params.CopyToVector()));
   };
   // Instantiates the generic system.
   system_ = std::make_unique<AnySystem<T>>(
@@ -103,9 +115,8 @@ ScalarIntegralFunction<T>::IntegralFunction(
   integrator_ = std::make_unique<systems::RungeKutta3Integrator<T>>(*system_);
 }
 
-template<typename T>
-T IntegralFunction<T>::operator()(
-    T a, T b, const VectorX<T>& params) const {
+template <typename T>
+T IntegralFunction<T>::operator()(T a, T b, const VectorX<T>& params) const {
   // Step size and accuracy defaults that should in general be reasonable.
   const double default_accuracy = 1e-4;
   const double max_step_size = 0.1;

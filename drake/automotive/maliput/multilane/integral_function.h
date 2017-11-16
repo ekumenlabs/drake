@@ -1,13 +1,12 @@
 #pragma once
 
 #include <memory>
-#include <utility>
 
 #include "drake/common/drake_copyable.h"
 #include "drake/systems/analysis/integrator_base.h"
-#include "drake/systems/framework/continuous_state.h"
-#include "drake/systems/framework/context.h"
 #include "drake/systems/framework/basic_vector.h"
+#include "drake/systems/framework/context.h"
+#include "drake/systems/framework/continuous_state.h"
 #include "drake/systems/framework/leaf_system.h"
 #include "drake/systems/framework/vector_base.h"
 
@@ -18,7 +17,7 @@ namespace multilane {
 // A parameterizable integral function.
 //
 // @tparam T The vector element type, which must be a valid Eigen scalar.
-template<typename T>
+template <typename T>
 class IntegralFunction {
  public:
   DRAKE_NO_COPY_NO_MOVE_NO_ASSIGN(IntegralFunction);
@@ -28,9 +27,9 @@ class IntegralFunction {
   /// @param x The variable of integration.
   /// @param y The integral result up to @p x.
   /// @param p The vector of parameters.
-  /// @return The integrand image at @p x, @p y, parameterized with @p p.
-  typedef std::function<T(
-      const T x, const T y, const VectorX<T>& p)> IntegrandFunction;
+  /// @return The integrand at @p x, @p y, parameterized with @p p.
+  typedef std::function<T(const T x, const T y, const VectorX<T>& p)>
+      IntegrandFunction;
 
   /// Constructs a scalar integral function.
   ///
@@ -74,11 +73,11 @@ class IntegralFunction {
 
   const systems::IntegratorBase<T>* get_integrator() const {
     return integrator_.get();
-  };
+  }
 
   systems::IntegratorBase<T>* get_mutable_integrator() {
     return integrator_.get();
-  };
+  }
 
  private:
   /// ODE system representation used for function evaluation.

@@ -30,7 +30,6 @@ drake_cc_library(
     srcs = [
         "arc_road_curve.cc",
         "branch_point.cc",
-        "integral_function.cc",
         "junction.cc",
         "lane.cc",
         "line_road_curve.cc",
@@ -41,9 +40,6 @@ drake_cc_library(
     hdrs = [
         "arc_road_curve.h",
         "branch_point.h",
-        "cubic_polynomial.h",
-        "integral_function.h",
-        "integral_function-inl.h",
         "junction.h",
         "lane.h",
         "line_road_curve.h",
@@ -52,16 +48,12 @@ drake_cc_library(
         "segment.h",
     ],
     deps = [
+        ":lanes_math",
         "//drake/automotive/maliput/api",
         "//drake/common:essential",
         "//drake/common:unused",
         "//drake/math:geometric_transform",
         "//drake/math:saturate",
-        "//drake/systems/analysis:runge_kutta3_integrator",
-        "//drake/systems/framework:context",
-        "//drake/systems/framework:continuous_state",
-        "//drake/systems/framework:leaf_system",
-        "//drake/systems/framework:vector",
     ],
 )
 
@@ -91,6 +83,27 @@ drake_cc_library(
     deps = [
         ":builder",
         "@yaml_cpp",
+    ],
+)
+
+drake_cc_library(
+    name = "lanes_math",
+    srcs = [
+        "integral_function.cc",
+    ],
+    hdrs = [
+        "cubic_polynomial.h",
+        "integral_function.h",
+        "integral_function-inl.h",
+    ],
+    deps = [
+        "//drake/common:essential",
+        "//drake/common:unused",
+        "//drake/systems/analysis:runge_kutta3_integrator",
+        "//drake/systems/framework:context",
+        "//drake/systems/framework:continuous_state",
+        "//drake/systems/framework:leaf_system",
+        "//drake/systems/framework:vector",
     ],
 )
 
