@@ -329,7 +329,7 @@ Vector3<T> CorkScrew<T>::orientation_at_srh(const T& s, const T& r,
   //
   // Matrix3<T> rotmat;
   // rotmat << s_hat, r_hat, s_hat.cross(r_hat);
-  // return rotmat;
+  // return math::rotmat2rpy(rotmat);
   //
   // Code below is a verbatim partial transcription of the
   // RoadCurve::Orientation() method implementation that, somehow, gives a

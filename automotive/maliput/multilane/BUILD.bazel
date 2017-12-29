@@ -137,6 +137,19 @@ drake_cc_googletest(
     ],
 )
 
+drake_cc_binary(
+    name = "multilane_lanes_benchmark",
+    srcs = ["test/multilane_lanes_benchmark.cc"],
+    deps = [
+        ":lanes",
+        "//drake/automotive/maliput/api",
+        "@benchmark//:benchmark",
+        "@gtest//:without_main",
+    ],
+    testonly = 1,
+)
+
+
 drake_cc_googletest(
     name = "multilane_line_road_curve_test",
     size = "small",
