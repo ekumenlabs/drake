@@ -164,7 +164,7 @@ VectorX<T> InitialValueProblem<T>::Solve(const T& tf,
   }
   // Performs cache invalidation and re-initializes both
   // integrator and integration context if necessary.
-  if (t0 != current_values_.t0 ||
+  if (true || t0 != current_values_.t0 ||
       x0 != current_values_.x0 ||
       k != current_values_.k ||
       tf < context_->get_time()) {

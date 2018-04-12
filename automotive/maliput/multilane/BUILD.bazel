@@ -142,7 +142,7 @@ drake_cc_binary(
     srcs = ["test/multilane_lanes_benchmark.cc"],
     deps = [
         ":lanes",
-        "//drake/automotive/maliput/api",
+        "//automotive/maliput/api",
         "@benchmark//:benchmark",
         "@gtest//:without_main",
     ],

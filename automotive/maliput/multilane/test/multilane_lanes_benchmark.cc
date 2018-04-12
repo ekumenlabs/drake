@@ -240,19 +240,19 @@ int main(int argc, char** argv) {
                + "_" + lane->id().string()
                + "_EvalMotionDerivatives_Benchmark").c_str(),
               LaneEvalMotionDerivativesBenchmark,
-              lane, kStepsInS, kStepsInR, kStepsInH)->Iterations(1);
+              lane, kStepsInS, kStepsInR, kStepsInH)->Iterations(30);
           RegisterLaneBenchmark(
               (road_geometry->id().string()
                + "_" + lane->id().string()
                + "_ToGeoPosition_Benchmark").c_str(),
               LaneToGeoPositionBenchmark,
-              lane, kStepsInS, kStepsInR, kStepsInH)->Iterations(1);
+              lane, kStepsInS, kStepsInR, kStepsInH)->Iterations(30);
           RegisterLaneBenchmark(
               (road_geometry->id().string()
                + "_" + lane->id().string()
                + "_GetOrientation_Benchmark").c_str(),
               LaneGetOrientationBenchmark,
-              lane, kStepsInS, kStepsInR, kStepsInH)->Iterations(1);
+              lane, kStepsInS, kStepsInR, kStepsInH)->Iterations(30);
           road_lanes.push_back(lane);
         }
       }
