@@ -17,6 +17,8 @@ drake_cc_package_library(
         ":continuous_extension",
         ":stepwise_continuous_extension",
         ":hermitian_continuous_extension",
+        ":scalar_continuous_extension",
+        ":scalar_view_continuous_extension",
         ":explicit_euler_integrator",
         ":implicit_euler_integrator",
         ":initial_value_problem",
@@ -60,9 +62,29 @@ drake_cc_library(
 )
 
 drake_cc_library(
+    name = "scalar_continuous_extension",
+    hdrs = ["scalar_continuous_extension.h"],
+    deps = [
+        "//common:essential",
+    ],
+)
+
+drake_cc_library(
+    name = "scalar_view_continuous_extension",
+    hdrs = ["scalar_view_continuous_extension.h"],
+    deps = [
+        ":continuous_extension",
+        ":scalar_continuous_extension",
+        "//common:essential",
+    ],
+)
+
+drake_cc_library(
     name = "integrator_base",
     hdrs = ["integrator_base.h"],
     deps = [
+        ":continuous_extension",
+        ":hermitian_continuous_extension",
         "//systems/framework:context",
         "//systems/framework:system",
     ],
@@ -146,6 +168,7 @@ drake_cc_library(
         "initial_value_problem-inl.h",
     ],
     deps = [
+        ":continuous_extension",
         ":integrator_base",
         ":runge_kutta3_integrator",
         "//systems/framework:context",
@@ -163,8 +186,11 @@ drake_cc_library(
     ],
     hdrs = [
         "scalar_initial_value_problem.h",
+        "scalar_initial_value_problem-inl.h",
     ],
     deps = [
+        ":scalar_continuous_extension",
+        ":scalar_view_continuous_extension",
         ":initial_value_problem",
         "//common:essential",
         "//common:unused",
@@ -178,8 +204,10 @@ drake_cc_library(
     ],
     hdrs = [
         "antiderivative_function.h",
+        "antiderivative_function-inl.h",
     ],
     deps = [
+        ":scalar_continuous_extension",
         ":scalar_initial_value_problem",
         "//common:essential",
         "//common:unused",
@@ -307,6 +335,16 @@ drake_cc_googletest(
         "//common:essential",
         "//common/test_utilities:eigen_matrix_compare",
         "//common/trajectories:piecewise_polynomial",
+    ],
+)
+
+drake_cc_googletest(
+    name = "scalar_view_continuous_extension_test",
+    deps = [
+        ":hermitian_continuous_extension",
+        ":scalar_view_continuous_extension",
+        "//common:autodiff",
+        "//common:essential",
     ],
 )
 
