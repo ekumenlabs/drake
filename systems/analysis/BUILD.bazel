@@ -14,6 +14,9 @@ drake_cc_package_library(
     name = "analysis",
     deps = [
         ":antiderivative_function",
+        ":continuous_extension",
+        ":stepwise_continuous_extension",
+        ":hermitian_continuous_extension",
         ":explicit_euler_integrator",
         ":implicit_euler_integrator",
         ":initial_value_problem",
@@ -24,6 +27,35 @@ drake_cc_package_library(
         ":scalar_initial_value_problem",
         ":semi_explicit_euler_integrator",
         ":simulator",
+    ],
+)
+
+drake_cc_library(
+    name = "continuous_extension",
+    hdrs = ["continuous_extension.h"],
+    deps = [
+        "//common:essential",
+    ],
+)
+
+drake_cc_library(
+    name = "stepwise_continuous_extension",
+    hdrs = ["stepwise_continuous_extension.h"],
+    deps = [
+        ":continuous_extension",
+        "//common:essential",
+    ],
+)
+
+drake_cc_library(
+    name = "hermitian_continuous_extension",
+    hdrs = ["hermitian_continuous_extension.h"],
+    deps = [
+        ":stepwise_continuous_extension",
+        "//common:autodiff",
+        "//common:essential",
+        "//common/trajectories:piecewise_polynomial",
+        "//systems/framework:vector",
     ],
 )
 
@@ -114,8 +146,8 @@ drake_cc_library(
         "initial_value_problem-inl.h",
     ],
     deps = [
+        ":integrator_base",
         ":runge_kutta3_integrator",
-        "//common:essential",
         "//systems/framework:context",
         "//systems/framework:continuous_state",
         "//systems/framework:leaf_system",
@@ -212,6 +244,7 @@ drake_cc_googletest(
     name = "runge_kutta2_integrator_test",
     deps = [
         ":runge_kutta2_integrator",
+        "//common/test_utilities:eigen_matrix_compare",
         "//systems/analysis/test_utilities",
     ],
 )
@@ -222,6 +255,7 @@ drake_cc_googletest(
     timeout = "moderate",
     deps = [
         ":runge_kutta3_integrator",
+        "//common/test_utilities:eigen_matrix_compare",
         "//math:geometric_transform",
         "//multibody/parsers",
         "//multibody/rigid_body_plant",
@@ -253,6 +287,7 @@ drake_cc_googletest(
     name = "scalar_initial_value_problem_test",
     deps = [
         ":scalar_initial_value_problem",
+        ":runge_kutta2_integrator",
     ],
 )
 
@@ -260,6 +295,18 @@ drake_cc_googletest(
     name = "antiderivative_function_test",
     deps = [
         ":antiderivative_function",
+        ":runge_kutta2_integrator",
+    ],
+)
+
+drake_cc_googletest(
+    name = "hermitian_continuous_extension_test",
+    deps = [
+        ":hermitian_continuous_extension",
+        "//common:autodiff",
+        "//common:essential",
+        "//common/test_utilities:eigen_matrix_compare",
+        "//common/trajectories:piecewise_polynomial",
     ],
 )
 
