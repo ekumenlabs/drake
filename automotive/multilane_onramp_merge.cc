@@ -69,7 +69,7 @@ MultilaneOnrampMerge::BuildOnramp() const {
   const double& kPostLinearLength = 100.;
   const int pre_num_lanes = rc_.lane_number / 2 + 1;
   const multi::LaneLayout kPreLaneLayout(rc_.left_shoulder, rc_.right_shoulder,
-      pre_num_lanes, kRefLane, kRefR0);
+                                         pre_num_lanes, kRefLane, kRefR0);
   const auto& pre0 = rb->Connect(
       "pre0", kPreLaneLayout,
       multi::StartReference().at(*post0, LaneEnd::kFinish,
@@ -86,7 +86,8 @@ MultilaneOnrampMerge::BuildOnramp() const {
   const multi::LaneLayout kOnRampLaneLayout(
       rc_.left_shoulder, rc_.right_shoulder, onramp_num_lanes, kRefLane,
       kRefR0 +
-        static_cast<double>(rc_.lane_number - onramp_num_lanes) * rc_.lane_width);
+          static_cast<double>(rc_.lane_number - onramp_num_lanes) *
+              rc_.lane_width);
   const auto& onramp1 = rb->Connect(
       "onramp1", kOnRampLaneLayout,
       multi::StartReference().at(*post0, LaneEnd::kFinish,
@@ -101,13 +102,12 @@ MultilaneOnrampMerge::BuildOnramp() const {
       multi::EndReference().z_at(kFlatZ, multi::Direction::kForward));
 
   // Manually specify the default branches for all junctions in the road.
-  auto set_default_branches =
-      [&](const multi::Connection* in, int in_first_lane,
-          const multi::Connection* out, int out_first_lane,
-          int num_lanes) {
+  auto set_default_branches = [&](
+      const multi::Connection* in, int in_first_lane,
+      const multi::Connection* out, int out_first_lane, int num_lanes) {
     for (int i = 0; i < num_lanes; ++i) {
-      rb->SetDefaultBranch(in, i + in_first_lane, LaneEnd::kStart,
-                           out, i + out_first_lane, LaneEnd::kFinish);
+      rb->SetDefaultBranch(in, i + in_first_lane, LaneEnd::kStart, out,
+                           i + out_first_lane, LaneEnd::kFinish);
     }
   };
   set_default_branches(pre0, 0, post0, 0, pre_num_lanes);
@@ -116,10 +116,9 @@ MultilaneOnrampMerge::BuildOnramp() const {
   set_default_branches(post2, 0, post3, 0, rc_.lane_number);
   set_default_branches(post3, 0, post4, 0, rc_.lane_number);
   set_default_branches(post4, 0, post5, 0, rc_.lane_number);
-  set_default_branches(
-      onramp1, 0, post0,
-      rc_.lane_number / 2  - (rc_.lane_number % 2 == 0 ? 1 : 0),
-      onramp_num_lanes);
+  set_default_branches(onramp1, 0, post0,
+                       rc_.lane_number / 2 - (rc_.lane_number % 2 == 0 ? 1 : 0),
+                       onramp_num_lanes);
   set_default_branches(onramp0, 0, onramp1, 0, onramp_num_lanes);
 
   return rb->Build(maliput::api::RoadGeometryId{"multilane-merge-example"});

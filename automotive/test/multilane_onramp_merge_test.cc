@@ -162,9 +162,9 @@ GTEST_TEST(MultilaneOnrampMergeTest, TestNonDefaultAttributes) {
     EXPECT_EQ(1, rg->junction(i)->num_segments());
     if (rg->id().string().find("j:post") != std::string::npos) {
       EXPECT_EQ(kLaneNumber, rg->junction(i)->segment(0)->num_lanes());
-    } else if(rg->id().string().find("j:pre") != std::string::npos) {
+    } else if (rg->id().string().find("j:pre") != std::string::npos) {
       EXPECT_EQ(kLaneNumber / 2 + 1, rg->junction(i)->segment(0)->num_lanes());
-    } else if(rg->id().string().find("j:onramp") != std::string::npos) {
+    } else if (rg->id().string().find("j:onramp") != std::string::npos) {
       EXPECT_EQ(kLaneNumber / 2 + 1, rg->junction(i)->segment(0)->num_lanes());
     }
   }
@@ -172,8 +172,7 @@ GTEST_TEST(MultilaneOnrampMergeTest, TestNonDefaultAttributes) {
 
 // A test fixture to analyze the output RoadGeometry with different lane numbers
 // for the generator.
-class MultilaneOnrampVariableLaneTest
-    : public ::testing::TestWithParam<int> {
+class MultilaneOnrampVariableLaneTest : public ::testing::TestWithParam<int> {
  protected:
   const double kLaneWidth = 3.;
   const double kShoulder = 1.2;
@@ -196,9 +195,9 @@ TEST_P(MultilaneOnrampVariableLaneTest, TestLaneNumberAssigment) {
     EXPECT_EQ(1, rg->junction(i)->num_segments());
     if (rg->id().string().find("j:post") != std::string::npos) {
       EXPECT_EQ(lane_number, rg->junction(i)->segment(0)->num_lanes());
-    } else if(rg->id().string().find("j:pre") != std::string::npos) {
+    } else if (rg->id().string().find("j:pre") != std::string::npos) {
       EXPECT_EQ(lane_number / 2 + 1, rg->junction(i)->segment(0)->num_lanes());
-    } else if(rg->id().string().find("j:onramp") != std::string::npos) {
+    } else if (rg->id().string().find("j:onramp") != std::string::npos) {
       EXPECT_EQ(lane_number / 2 + 1, rg->junction(i)->segment(0)->num_lanes());
     }
   }
@@ -234,17 +233,17 @@ TEST_P(MultilaneOnrampVariableLaneTest, TestDefaultBranchAssigment) {
         lane_onramp1->GetOngoingBranches(api::LaneEnd::kStart);
     EXPECT_EQ(1, lanes_beyond_onramp1->size());
     const api::Lane* lane_beyond_onramp1 = lanes_beyond_onramp1->get(0).lane;
-    EXPECT_EQ(api::LaneId(lane_name("post0",
-                                    lane_number - kOnRampLaneNumber + i)),
-              lane_beyond_onramp1->id());
+    EXPECT_EQ(
+        api::LaneId(lane_name("post0", lane_number - kOnRampLaneNumber + i)),
+        lane_beyond_onramp1->id());
 
     // Verify that the default branch of `onramp1_X` is `post0_Y`.
     optional<api::LaneEnd> onramp1_default_lane_end =
         lane_onramp1->GetDefaultBranch(api::LaneEnd::kStart);
     EXPECT_TRUE(onramp1_default_lane_end);
-    EXPECT_EQ(api::LaneId(lane_name("post0",
-                                    lane_number - kOnRampLaneNumber + i)),
-              onramp1_default_lane_end->lane->id());
+    EXPECT_EQ(
+        api::LaneId(lane_name("post0", lane_number - kOnRampLaneNumber + i)),
+        onramp1_default_lane_end->lane->id());
   }
 
   const int kPreLaneNumber = lane_number / 2 + 1;
@@ -269,8 +268,7 @@ TEST_P(MultilaneOnrampVariableLaneTest, TestDefaultBranchAssigment) {
 }
 
 INSTANTIATE_TEST_CASE_P(MultilaneOnrampMergeLaneNumber,
-                        MultilaneOnrampVariableLaneTest,
-                        testing::Range(1, 6));
+                        MultilaneOnrampVariableLaneTest, testing::Range(1, 6));
 
 }  // namespace
 }  // namespace automotive

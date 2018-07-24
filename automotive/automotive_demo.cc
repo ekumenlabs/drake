@@ -374,10 +374,9 @@ const maliput::api::RoadGeometry* AddOnramp(
 // Adds a multilane-based onramp road network to the provided `simulator`.
 const maliput::api::RoadGeometry* AddMultilaneOnramp(
     AutomotiveSimulator<double>* simulator) {
-  const MultilaneRoadCharacteristics rc(FLAGS_multilane_lane_width,
-                                        FLAGS_multilane_shoulder_width,
-                                        FLAGS_multilane_shoulder_width,
-                                        FLAGS_multilane_num_lanes);
+  const MultilaneRoadCharacteristics rc(
+      FLAGS_multilane_lane_width, FLAGS_multilane_shoulder_width,
+      FLAGS_multilane_shoulder_width, FLAGS_multilane_num_lanes);
   auto onramp_generator = std::make_unique<MultilaneOnrampMerge>(rc);
   return simulator->SetRoadGeometry(onramp_generator->BuildOnramp());
 }
