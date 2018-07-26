@@ -52,12 +52,13 @@ DEFINE_double(target_realtime_rate, 1.0,
 DEFINE_double(simulation_sec, std::numeric_limits<double>::infinity(),
               "Number of seconds to simulate.");
 
-DEFINE_int32(num_dragway_lanes, 0,
-             "The number of lanes on the dragway. The number of lanes is by "
-             "default zero to disable the dragway. A dragway road network is "
-             "only enabled when the user specifies a number of lanes greater "
-             "than zero. Only one road network can be enabled. Thus if this "
-             "option is enabled, no other road network can be enabled.");
+DEFINE_int32(num_lanes, 1,
+             "The number of lanes of the dragway or the multilane_onramp. The "
+             "number of lanes is by default one.");
+
+DEFINE_bool(with_dragway, false, "Loads the dragway road network. Only one "
+            "road network can be enabled. Thus, if this option is enabled, no "
+            "other road network can be enabled.");
 DEFINE_double(dragway_length, 100, "The length of the dragway.");
 DEFINE_double(dragway_lane_width, 3.7, "The dragway lane width.");
 DEFINE_double(dragway_shoulder_width, 3.0, "The dragway's shoulder width.");
@@ -83,10 +84,6 @@ DEFINE_bool(with_multilane_onramp, false,
             "Loads the onramp road network. Only one road "
             "network can be enabled. Thus, if this option is enabled, no other "
             "road network can be enabled.");
-DEFINE_int32(multilane_num_lanes, 1,
-             "The number of lanes on the multilane. The number of lanes is by "
-             "default one. A multilane road network is only enabled when the "
-             "user specifies <with_multilane_onramp> flag.");
 DEFINE_double(multilane_lane_width, 3.7, "The multilane lane width.");
 DEFINE_double(multilane_shoulder_width, 3.0, "The multilane's shoulder width.");
 DEFINE_double(onramp_base_speed, 25, "The speed of the vehicles added to the "
@@ -126,7 +123,89 @@ std::string MakeChannelName(const std::string& name) {
   return default_prefix + "_" + name;
 }
 
-// Adds a MaliputRailcar to the simulation involving a dragway. It throws a
+const maliput::api::Junction* FindJunctionById(
+    const maliput::api::RoadGeometry* road_geometry,
+    const maliput::api::JunctionId& junction_id) {
+  for (int i = 0; i < road_geometry->num_junctions(); ++i) {
+    if (road_geometry->junction(i)->id() == junction_id) {
+      return road_geometry->junction(i);
+    }
+  }
+  return nullptr;
+}
+
+// Computes the s-offset distance at which a car will be positioned within
+// @p lane.
+//
+// @param car_index The index of the car to insert into @p lane. Cars
+double ComputeSOffset(int car_index, int num_lanes, double initial_s_offset,
+                      bool with_s, const maliput::api::Lane* lane) {
+  double s_offset{};
+  if (with_s) {
+    const int row = car_index / num_lanes;
+    s_offset = initial_s_offset + kRailcarRowSpacing * row;
+    if (s_offset > lane->length()) {
+      throw std::runtime_error(
+          "Ran out of lane length to add a MaliputRailcar.");
+    }
+  } else {
+    s_offset = lane->length();
+  }
+  return s_offset;
+}
+
+// Computes the speed for a car at @p lane_index.
+//
+// @param lane_index The lane index within the segment in which a car will be
+// added.
+//
+// @param base_speed The base speed that this function will return (when
+// @p lane_index is zero).
+//
+// @param speed_step The step in speed magnitude that will vary from lane to
+// lane.
+//
+// @return The speed of the car at @p lane_index.
+double ComputeSpeed(int lane_index, double base_speed, double speed_step) {
+  return base_speed + lane_index * speed_step;
+}
+
+// Creates a vector of JunctionIds from where Lanes can be selected to put cars
+// in.
+//
+// @param road_network_type A valid type of road network.
+//
+// @return A std::vector<maliput::api::JunctionId> with JunctionIds. When
+// @p road_network_type is `flat`, an empty vector is returned. When
+// @p road_network_type is `onramp` or `multilane_onramp`, `onramp_swap_start`
+// CLI flag will affect the return order inside the vector.
+std::vector<maliput::api::JunctionId> GetJunctionIds(
+    RoadNetworkType road_network_type) {
+  std::vector<maliput::api::JunctionId> junction_ids{};
+  switch(road_network_type) {
+    case RoadNetworkType::dragway:
+      junction_ids.push_back(maliput::api::JunctionId("Dragway Junction"));
+      break;
+    case RoadNetworkType::onramp:
+    case RoadNetworkType::multilane_onramp:
+      if (FLAGS_onramp_swap_start) {
+        junction_ids.push_back(maliput::api::JunctionId("j:onramp0"));
+        junction_ids.push_back(maliput::api::JunctionId("j:pre0"));
+      } else {
+        junction_ids.push_back(maliput::api::JunctionId("j:pre0"));
+        junction_ids.push_back(maliput::api::JunctionId("j:onramp0"));
+      }
+      break;
+    case RoadNetworkType::flat:
+      break;
+    default:
+      DRAKE_ABORT();
+      break;
+  }
+  return junction_ids;
+}
+
+// Adds a MaliputRailcar to the simulation involving a RoadGeometry. It throws a
 // std::runtime_error if there is insufficient lane length for adding the
 // vehicle.
 //
@@ -135,41 +214,68 @@ std::string MakeChannelName(const std::string& name) {
 // @param idm_controlled Whether the vehicle should be IDM-controlled.
 //
 // @param initial_s_offset The initial s-offset against which all vehicles are
-// added. The vehicles are added in each lane of the dragway starting at this
-// s-offset. Each row of vehicles is in front of the previous row (increasing
-// s).
+// added. The vehicles are added in each lane of the @p junction_ids of the
+// @p road_geometry starting at this s-offset. Each row of vehicles is in front
+// of the previous row (increasing s). When @p with_s is false, this parameter
+// is not taken into account and cars will be added at lane's length.
 //
-// @param dragway_road_geometry The road on which to add the railcars.
+// @param base_speed Cars are assigned with a speed equals to @p base_speed plus
+// discrete @p speed_step steps for each new car added.
+//
+// @param speed_step The step speed that each new added car will have with
+// respect to the previous one.
+//
+// @param road_geometry The road on which to add the railcars.
+//
+// @param junction_ids A vector holding the reference to junctions from where
+// lanes are taken of to put cars in.
 //
 // @param simulator The simulator to modify.
-void AddMaliputRailcar(int num_cars, bool idm_controlled, int initial_s_offset,
-    const maliput::dragway::RoadGeometry* dragway_road_geometry,
+void AddMaliputRailcar(
+    int num_cars,
+    bool idm_controlled,
+    int initial_s_offset,
+    bool with_s,
+    double base_speed,
+    double speed_step,
+    const maliput::api::RoadGeometry* road_geometry,
+    const std::vector<maliput::api::JunctionId>& junction_ids,
     AutomotiveSimulator<double>* simulator) {
-  for (int i = 0; i < num_cars; ++i) {
-    const int lane_index = i % FLAGS_num_dragway_lanes;
-    const double speed = FLAGS_dragway_base_speed +
-        lane_index * FLAGS_dragway_lane_speed_delta;
-    const MaliputRailcarParams<double> params;
-    const Lane* lane =
-        dragway_road_geometry->junction(0)->segment(0)->lane(lane_index);
-    MaliputRailcarState<double> state;
-    const int row = i / FLAGS_num_dragway_lanes;
-    const double s_offset = initial_s_offset + kRailcarRowSpacing * row;
-    if (s_offset >= lane->length()) {
-      throw std::runtime_error(
-          "Ran out of lane length to add a MaliputRailcar.");
+  for (int i = 0, lane_counter = 0, junction_index = 0; i < num_cars; ++i) {
+    // TODO(agalbachicar):  Once all the maliput backends implement
+    // maliput::api::BasicIdIndex, remove this method and use the indexer.
+    const maliput::api::Junction* junction =
+        FindJunctionById(road_geometry, junction_ids[junction_index]);
+    DRAKE_DEMAND(junction != nullptr);
+
+    // Retrieves all the indexes and constants from the road_geometry.
+    const int num_lanes = junction->segment(0)->num_lanes();
+    const int lane_index = lane_counter % num_lanes;
+    const maliput::api::Lane* lane = junction->segment(0)->lane(lane_index);
+    // Increases lane and junction indexes.
+    lane_counter++;
+    lane_counter %= num_lanes;
+    if (lane_counter == 0) {
+      junction_index++;
+      junction_index %= junction_ids.size();
     }
-    state.set_s(s_offset);
-    state.set_speed(speed);
+    // Computes the car state.
+    MaliputRailcarState<double> state;
+    state.set_s(ComputeSOffset(i, num_lanes, initial_s_offset, with_s, lane));
+    state.set_speed(ComputeSpeed(lane_index, base_speed, speed_step));
+
+    const MaliputRailcarParams<double> params;
+
     if (idm_controlled) {
       simulator->AddIdmControlledPriusMaliputRailcar(
           "IdmControlledMaliputRailcar" + std::to_string(i),
-          LaneDirection(lane), ScanStrategy::kPath,
+          LaneDirection(lane, with_s), ScanStrategy::kPath,
           RoadPositionStrategy::kExhaustiveSearch,
           0. /* time period (unused) */, params, state);
     } else {
       simulator->AddPriusMaliputRailcar("MaliputRailcar" + std::to_string(i),
-                                        LaneDirection(lane), params, state);
+                                        LaneDirection(lane, with_s), params,
+                                        state);
     }
   }
 }
@@ -209,14 +315,48 @@ void AddSimpleCars(AutomotiveSimulator<double>* simulator) {
   }
 }
 
+// void AddMaliputRailcars(RoadNetworkType road_network_type,
+//                         const maliput::api::RoadGeometry* road_geometry,
+//                         AutomotiveSimulator<double>* simulator) {
+//   auto lane_name_selector = [road_network_type](int index) {
+//     if (road_network_type == RoadNetworkType::onramp) {
+//       return (index % 2 == 0) ? "l:onramp0" : "l:pre0";
+//     } else if (road_network_type == RoadNetworkType::multilane_onramp) {
+//       return (index % 2 == 0) ? "l:onramp0_0" : "l:pre0_0";
+//     } else {
+//       DRAKE_ABORT();
+//     }
+//   };
+
+//   for (int i = 0; i < FLAGS_num_maliput_railcar; ++i) {
+//     // Alternate starting the MaliputRailcar vehicles between the two possible
+//     // starting locations.
+//     const int n = FLAGS_onramp_swap_start ? (i + 1) : i;
+//     const std::string lane_name = lane_name_selector(n);
+//     const bool with_s = false;
+
+//     LaneDirection lane_direction(simulator->FindLane(lane_name), with_s);
+//     MaliputRailcarParams<double> params;
+//     params.set_r(0);
+//     params.set_h(0);
+//     MaliputRailcarState<double> state;
+//     state.set_s(with_s ? 0 : lane_direction.lane->length());
+//     state.set_speed(FLAGS_onramp_base_speed);
+//     simulator->AddPriusMaliputRailcar("MaliputRailcar" + std::to_string(i),
+//                                       lane_direction, params, state);
+//   }
+// }
+
 // Initializes the provided `simulator` with user-specified numbers of
 // `SimpleCar` vehicles and `TrajectoryCar` vehicles. If parameter
-// `road_network_type` equals `RoadNetworkType::dragway`, the provided
-// `road_geometry` parameter must not be `nullptr`.
+// `road_network_type` equals is other than `RoadNetworkType::flat`, the
+// provided `road_geometry` parameter must not be `nullptr`.
 void AddVehicles(RoadNetworkType road_network_type,
     const maliput::api::RoadGeometry* road_geometry,
     AutomotiveSimulator<double>* simulator) {
   AddSimpleCars(simulator);
+  const std::vector<maliput::api::JunctionId> junction_ids =
+      GetJunctionIds(road_network_type);
 
   if (road_network_type == RoadNetworkType::dragway) {
     DRAKE_DEMAND(road_geometry != nullptr);
@@ -224,10 +364,10 @@ void AddVehicles(RoadNetworkType road_network_type,
         dynamic_cast<const maliput::dragway::RoadGeometry*>(road_geometry);
     DRAKE_DEMAND(dragway_road_geometry != nullptr);
     for (int i = 0; i < FLAGS_num_trajectory_car; ++i) {
-      const int lane_index = i % FLAGS_num_dragway_lanes;
+      const int lane_index = i % FLAGS_num_lanes;
       const double speed = FLAGS_dragway_base_speed +
           lane_index * FLAGS_dragway_lane_speed_delta;
-      const double start_position = i / FLAGS_num_dragway_lanes *
+      const double start_position = i / FLAGS_num_lanes *
            FLAGS_dragway_vehicle_spacing;
       const auto& params = CreateTrajectoryParamsForDragway(
           *dragway_road_geometry, lane_index, speed, start_position);
@@ -238,10 +378,10 @@ void AddVehicles(RoadNetworkType road_network_type,
     }
 
     for (int i = 0; i < FLAGS_num_mobil_car; ++i) {
-      const int lane_index = i % FLAGS_num_dragway_lanes;
+      const int lane_index = i % FLAGS_num_lanes;
       const std::string name = "MOBIL" + std::to_string(i);
       SimpleCarState<double> state;
-      const int row = i / FLAGS_num_dragway_lanes;
+      const int row = i / FLAGS_num_lanes;
       const double x_offset = kControlledCarRowSpacing * row;
       const Lane* lane =
           dragway_road_geometry->junction(0)->segment(0)->lane(lane_index);
@@ -258,19 +398,32 @@ void AddVehicles(RoadNetworkType road_network_type,
           0. /* time period (unused) */, state);
     }
 
-    AddMaliputRailcar(FLAGS_num_idm_controlled_maliput_railcar,
-        true /* IDM controlled */, 0 /* initial s offset */,
-        dragway_road_geometry, simulator);
+    AddMaliputRailcar(
+        FLAGS_num_idm_controlled_maliput_railcar,
+        true /* IDM controlled */,
+        0 /* initial s offset */,
+        true /* flow with +s direction */,
+        FLAGS_dragway_base_speed,
+        FLAGS_dragway_lane_speed_delta,
+        road_geometry, junction_ids, simulator);
+
     const double initial_s_offset =
         std::ceil(FLAGS_num_idm_controlled_maliput_railcar /
-                  FLAGS_num_dragway_lanes) * kRailcarRowSpacing +
+                  FLAGS_num_lanes) * kRailcarRowSpacing +
         std::ceil(FLAGS_num_mobil_car /
-                  FLAGS_num_dragway_lanes) * kControlledCarRowSpacing;
-    AddMaliputRailcar(FLAGS_num_maliput_railcar, false /* IDM controlled */,
-        initial_s_offset, dragway_road_geometry, simulator);
+                  FLAGS_num_lanes) * kControlledCarRowSpacing;
+    AddMaliputRailcar(
+        FLAGS_num_maliput_railcar,
+        false /* IDM controlled */,
+        initial_s_offset,
+        true /* flow with +s direction */,
+        FLAGS_dragway_base_speed,
+        FLAGS_dragway_lane_speed_delta,
+        road_geometry, junction_ids, simulator);
+
     if (FLAGS_with_stalled_cars) {
       DRAKE_DEMAND(road_geometry != nullptr);
-      for (int i = 0; i < FLAGS_num_dragway_lanes; ++i) {
+      for (int i = 0; i < FLAGS_num_lanes; ++i) {
         const Lane* lane = road_geometry->junction(0)->segment(0)->lane(i);
         DRAKE_DEMAND(lane != nullptr);
         const maliput::api::GeoPosition position = lane->ToGeoPosition(
@@ -285,42 +438,38 @@ void AddVehicles(RoadNetworkType road_network_type,
 
   } else if (road_network_type == RoadNetworkType::onramp) {
     DRAKE_DEMAND(road_geometry != nullptr);
-    for (int i = 0; i < FLAGS_num_maliput_railcar; ++i) {
-      // Alternate starting the MaliputRailcar vehicles between the two possible
-      // starting locations.
-      const int n = FLAGS_onramp_swap_start ? (i + 1) : i;
-      const std::string lane_name = (n % 2 == 0) ? "l:onramp0" : "l:pre0";
-      const bool with_s = false;
-
-      LaneDirection lane_direction(simulator->FindLane(lane_name), with_s);
-      MaliputRailcarParams<double> params;
-      params.set_r(0);
-      params.set_h(0);
-      MaliputRailcarState<double> state;
-      state.set_s(with_s ? 0 : lane_direction.lane->length());
-      state.set_speed(FLAGS_onramp_base_speed);
-      simulator->AddPriusMaliputRailcar("MaliputRailcar" + std::to_string(i),
-          lane_direction, params, state);
-    }
+    AddMaliputRailcar(
+        FLAGS_num_maliput_railcar,
+        false /* IDM controlled */,
+        0 /* initial s offset */,
+        false /* flow with +s direction */,
+        FLAGS_onramp_base_speed,
+        0. /* speed_step*/,
+        road_geometry,
+        junction_ids,
+        simulator);
   } else if (road_network_type == RoadNetworkType::multilane_onramp) {
     DRAKE_DEMAND(road_geometry != nullptr);
-    for (int i = 0; i < FLAGS_num_maliput_railcar; ++i) {
-      // Alternate starting the MaliputRailcar vehicles between the two possible
-      // starting locations.
-      const int n = FLAGS_onramp_swap_start ? (i + 1) : i;
-      const std::string lane_name = (n % 2 == 0) ? "l:onramp0_0" : "l:pre0_0";
-      const bool with_s = false;
-
-      LaneDirection lane_direction(simulator->FindLane(lane_name), with_s);
-      MaliputRailcarParams<double> params;
-      params.set_r(0);
-      params.set_h(0);
-      MaliputRailcarState<double> state;
-      state.set_s(with_s ? 0 : lane_direction.lane->length());
-      state.set_speed(FLAGS_onramp_base_speed);
-      simulator->AddPriusMaliputRailcar("MaliputRailcar" + std::to_string(i),
-                                        lane_direction, params, state);
-    }
+    AddMaliputRailcar(
+        FLAGS_num_idm_controlled_maliput_railcar,
+        true /* IDM controlled */,
+        0 /* initial s offset */,
+        false /* flow with +s direction */,
+        FLAGS_onramp_base_speed,
+        0. /* speed_step */,
+        road_geometry,
+        junction_ids,
+        simulator);
+    AddMaliputRailcar(
+        FLAGS_num_maliput_railcar,
+        false /* IDM controlled */,
+        0 /* initial s offset */,
+        false /* flow with +s direction */,
+        FLAGS_onramp_base_speed,
+        0. /* speed_step*/,
+        road_geometry,
+        junction_ids,
+        simulator);
   } else {
     for (int i = 0; i < FLAGS_num_trajectory_car; ++i) {
       const auto& params = CreateTrajectoryParams(i);
@@ -350,13 +499,14 @@ void AddFlatTerrain(AutomotiveSimulator<double>*) {
 // flags.
 const maliput::api::RoadGeometry* AddDragway(
     AutomotiveSimulator<double>* simulator) {
+  DRAKE_DEMAND(FLAGS_num_lanes > 0);
   const double kMaximumHeight = 5.;  // meters
   const double kLinearTolerance = std::numeric_limits<double>::epsilon();
   const double kAngularTolerance = std::numeric_limits<double>::epsilon();
   std::unique_ptr<const maliput::api::RoadGeometry> road_geometry
       = std::make_unique<const maliput::dragway::RoadGeometry>(
           maliput::api::RoadGeometryId("Automotive Demo Dragway"),
-          FLAGS_num_dragway_lanes,
+          FLAGS_num_lanes,
           FLAGS_dragway_length,
           FLAGS_dragway_lane_width,
           FLAGS_dragway_shoulder_width,
@@ -376,7 +526,7 @@ const maliput::api::RoadGeometry* AddMultilaneOnramp(
     AutomotiveSimulator<double>* simulator) {
   const MultilaneRoadCharacteristics rc(
       FLAGS_multilane_lane_width, FLAGS_multilane_shoulder_width,
-      FLAGS_multilane_shoulder_width, FLAGS_multilane_num_lanes);
+      FLAGS_multilane_shoulder_width, FLAGS_num_lanes);
   auto onramp_generator = std::make_unique<MultilaneOnrampMerge>(rc);
   return simulator->SetRoadGeometry(onramp_generator->BuildOnramp());
 }
@@ -415,13 +565,13 @@ RoadNetworkType DetermineRoadNetworkType() {
   int num_environments_selected{0};
   if (FLAGS_with_onramp) ++num_environments_selected;
   if (FLAGS_with_multilane_onramp) ++num_environments_selected;
-  if (FLAGS_num_dragway_lanes) ++num_environments_selected;
+  if (FLAGS_with_dragway) ++num_environments_selected;
   if (num_environments_selected > 1) {
     throw std::runtime_error("ERROR: More than one road network selected. Only "
         "one road network can be selected at a time.");
   }
 
-  if (FLAGS_num_dragway_lanes > 0) {
+  if (FLAGS_with_dragway) {
     return RoadNetworkType::dragway;
   } else if (FLAGS_with_onramp) {
     return RoadNetworkType::onramp;
