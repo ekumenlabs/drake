@@ -409,7 +409,7 @@ const RoadGeometry* AutomotiveSimulator<T>::SetRoadGeometry(
     std::unique_ptr<const RoadGeometry> road) {
   DRAKE_DEMAND(!has_started());
   road_ = std::move(road);
-  GenerateAndLoadRoadNetworkUrdf();
+  // GenerateAndLoadRoadNetworkUrdf();
   return road_.get();
 }
 
