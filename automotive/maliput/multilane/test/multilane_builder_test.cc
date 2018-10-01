@@ -1310,7 +1310,8 @@ class MultilaneDiscontinuousBuildProcedureTest
 TEST_P(MultilaneDiscontinuousBuildProcedureTest, ThrowingUponBuild) {
   Builder builder(kLaneWidth, kElevationBounds,
                   kLinearTolerance, kAngularTolerance,
-                  kScaleLength, kComputationPolicy);
+                  kScaleLength, kComputationPolicy,
+                  std::make_unique<GroupFactory>());
   ApplyProcedureTo(&builder);
   EXPECT_THROW({
       const std::unique_ptr<const api::RoadGeometry> road_geometry =
@@ -1370,7 +1371,8 @@ class MultilaneContinuousBuildProcedureTest
 TEST_P(MultilaneContinuousBuildProcedureTest, Continuity) {
   Builder builder(kLaneWidth, kElevationBounds,
                   kLinearTolerance, kAngularTolerance,
-                  kScaleLength, kComputationPolicy);
+                  kScaleLength, kComputationPolicy,
+                  std::make_unique<GroupFactory>());
   ApplyProcedureTo(&builder);
   const std::unique_ptr<const api::RoadGeometry> road_geometry =
       builder.Build(api::RoadGeometryId{"good_road"});
