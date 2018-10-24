@@ -1348,12 +1348,12 @@ ListBadReverseBuildProcedures() {
   // unable to even acknowledge the connection intended during
   // BranchPoint lookup and instead spurious BranchPoints are created,
   // yielding an effectively disconnected road.
-  //
-  // procedures.push_back(
-  //     std::make_unique<TurnUsingRefToRLane>(
-  //         "BankedTurnUsingRefToRLaneWithBadThetaDot",
-  //         kBadStartEndpoint, kStraightConnLength,
-  //         kCurvedConnRadius, kCurvedConnAngularDelta));
+
+  procedures.push_back(
+      std::make_unique<TurnUsingRefToRLane>(
+          "BankedTurnUsingRefToRLaneWithBadThetaDot",
+          kBadStartEndpoint, kStraightConnLength,
+          kCurvedConnRadius, kCurvedConnAngularDelta));
   return procedures;
 }
 
